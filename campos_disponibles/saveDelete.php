@@ -1,7 +1,7 @@
 <?php
 
 require_once 'conexion.php';
-require_once 'functions.php';
+require_once 'functionsGeneralJS.php';
 require_once 'configModule.php';
 
 $dbh = new Conexion();

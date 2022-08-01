@@ -11,15 +11,15 @@ $iconImp="print";
 $iconCopy="file_copy";
 $iconFile="attach_file";
 
-$buttonNormal="btn";
-$buttonCeleste="btn btn-info";
-$buttonMorado="btn btn-primary";
+$buttonNormal="btn btn-outline-secondary m-1 px-5";
+$buttonVerde="btn btn-outline-success m-1 px-5";
+$buttonCeleste="btn btn-outline-info m-1 px-5";
+$buttonMorado="btn btn-outline-primary m-1 px-5";
 
-$buttonEdit="btn btn-success";
-$buttonDelete="btn btn-danger";
-
-$buttonDetailMin="btn btn-info";
-$buttonCancel="btn btn-danger";
+$buttonEdit="btn btn btn-success";
+$buttonDelete="btn btn btn-danger";
+$buttonDetailMin="btn btn btn-info";
+$buttonCancel="btn btn btn-outline-danger m-1 px-5";
 
 $buttonDetail="btn btn-fab btn-info";
 

@@ -8,7 +8,7 @@ $dbh = new Conexion();
 
 //RECIBIMOS LAS VARIABLES
 $codigo=$codigo;
-$stmt = $dbh->prepare("SELECT codigo, nombre, abreviatura FROM $table where codigo=:codigo");
+$stmt = $dbh->prepare("SELECT codigo, nombre, abreviatura, $keyForeignTable FROM $table where codigo=:codigo");
 // Ejecutamos
 $stmt->bindParam(':codigo',$codigo);
 $stmt->execute();
@@ -17,6 +17,8 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 	$codigoX=$row['codigo'];
 	$nombreX=$row['nombre'];
 	$abreviaturaX=$row['abreviatura'];
+	$campoForaneo=$row[$keyForeignTable];
+
 }
 
 ?>
@@ -50,10 +52,34 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 					</div>
 				  </div>
 				</div>
+				<div class="row">
+					  <label class="col-sm-2 col-form-label"><?= $nameForeignField; ?></label>
+					  <div class="col-sm-7">
+						<div class="form-group">
+							<select name="campo_foraneo" id="campo_foraneo" class="single-select" data-style="btn btn-warning" required>
+	                            <option value="" disabled selected="selected">-</option>
+	                            <?php             
+	                              	$sqlForaneo="SELECT codigo,nombre FROM $foreignTable where cod_estado=1";
+	                               	$stmtForaneo=$dbh->prepare($sqlForaneo);
+	                                $stmtForaneo->execute();
+	                                $stmtForaneo->bindColumn('codigo', $codigoF);
+	                                $stmtForaneo->bindColumn('nombre', $nombreF);
+
+	                                while ($rowForaneo = $stmtForaneo->fetch(PDO::FETCH_BOUND)) {         
+	                            ?>
+	                            		<option value="<?= $codigoF; ?>"  <?=($codigoF==$campoForaneo)?"selected":"";?> ><?= $nombreF; ?></option>
+	                            <?php 
+	                                }   
+                                ?>
+	                        </select>					  
+						</div>
+					  </div>
+					</div>
+
 			  </div>
 			  <div class="card-footer ml-auto mr-auto">
-				<button type="submit" class="<?=$buttonNormal;?>">Guardar</button>
-				<a href="<?=$urlList2;?>" class="<?=$buttonCancel;?>">Cancelar</a>
+				<button type="submit" class="<?=$buttonVerde;?>"><i class='bx bxs-save mr-1'></i>Guardar</button>
+				<a href="<?=$urlList2;?>" class="<?=$buttonCancel;?>"><i class='bx bx-undo mr-1'></i>Cancelar</a>
 			  </div>
 			</div>
 		  </form>

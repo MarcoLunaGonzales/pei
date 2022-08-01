@@ -10,7 +10,7 @@ $globalAdmin=$_SESSION["globalAdmin"];
 $dbh = new Conexion();
 
 // Preparamos
-$sqlList="SELECT codigo, nombre, abreviatura, nivel FROM $table where cod_estado=1 order by 2";
+$sqlList="SELECT codigo, nombre, abreviatura FROM $table where cod_estado=1 order by 2";
 $stmt = $dbh->prepare($sqlList);
 //echo $sqlList;
 // Ejecutamos
@@ -19,7 +19,6 @@ $stmt->execute();
 $stmt->bindColumn('codigo', $codigo);
 $stmt->bindColumn('nombre', $nombre);
 $stmt->bindColumn('abreviatura', $abreviatura);
-$stmt->bindColumn('nivel', $nivel);
 
 ?>
 
@@ -40,7 +39,6 @@ $stmt->bindColumn('nivel', $nivel);
                           <th class="text-center">#</th>
                           <th>Nombre</th>
                           <th>Abreviatura</th>
-                          <th>Nivel</th>
                           <th class="text-right">Actions</th>
                         </tr>
                       </thead>
@@ -53,7 +51,6 @@ $stmt->bindColumn('nivel', $nivel);
                           <td align="center"><?=$index;?></td>
                           <td><?=$nombre;?></td>
                           <td><?=$abreviatura;?></td>
-                          <td><?=$nivel;?></td>
                           <td class="td-actions text-right">
                             <?php
                             if($globalAdmin==1){
@@ -82,7 +79,7 @@ $stmt->bindColumn('nivel', $nivel);
               if($globalAdmin==1){
               ?>
       				<div class="card-footer ml-auto mr-auto">
-                    <button class="<?=$buttonNormal;?>" onClick="location.href='<?=$urlRegister;?>'">Registrar</button>
+                    <button class="<?=$buttonVerde;?>" onClick="location.href='<?=$urlRegister;?>'"><i class='bx bxs-file-plus mr-1'></i>Registrar</button>
               </div>
               <?php
               }

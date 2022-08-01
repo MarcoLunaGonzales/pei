@@ -20,11 +20,13 @@
               <div class="menu-title">Datos Generales</div>
             </a>
             <ul>
-              <li> <a href="index.php?opcion=listNivelesPlan"><i class="bx bx-right-arrow-alt"></i>Configuracion de Niveles</a>
+              <li> <a href="index.php?opcion=listEmpresas"><i class="bx bx-right-arrow-alt"></i>Empresas</a>
               </li>
-              <li> <a href="index2.html"><i class="bx bx-right-arrow-alt"></i>Creacion de Campos Personalizados</a>
+              <li> <a href="index.php?opcion=listTiposCampo"><i class="bx bx-right-arrow-alt"></i>Tipos de Campo</a>
               </li>
-              <li> <a href="index2.html"><i class="bx bx-right-arrow-alt"></i>Niveles</a>
+              <li> <a href="index.php?opcion=listCamposPersonalizados"><i class="bx bx-right-arrow-alt"></i>Creacion de Campos Personalizados</a>
+              </li>
+              <li> <a href="index.php?opcion=listNivelesConfiguracion"><i class="bx bx-right-arrow-alt"></i>Configuracion de Niveles</a>
               </li>
             </ul>
           </li>
@@ -32,22 +34,10 @@
             <a href="javascript:;" class="has-arrow">
               <div class="parent-icon icon-color-2"><i class='bx bx-briefcase-alt'></i>
               </div>
-              <div class="menu-title">Transacciones</div>
+              <div class="menu-title">Gestion del PEI</div>
             </a>
             <ul>
-              <li> <a href="emailbox.html"><i class="bx bx-right-arrow-alt"></i>Email</a>
-              </li>
-              <li> <a href="chat-box.html"><i class="bx bx-right-arrow-alt"></i>Chat Box</a>
-              </li>
-              <li> <a href="file-manager.html"><i class="bx bx-right-arrow-alt"></i>File Manager</a>
-              </li>
-              <li> <a href="contact-list.html"><i class="bx bx-right-arrow-alt"></i>Contacts</a>
-              </li>
-              <li> <a href="to-do.html"><i class="bx bx-right-arrow-alt"></i>Todo List</a>
-              </li>
-              <li> <a href="invoice.html"><i class="bx bx-right-arrow-alt"></i>Invoice</a>
-              </li>
-              <li> <a href="fullcalender.html"><i class="bx bx-right-arrow-alt"></i>Calendar</a>
+              <li> <a href="emailbox.html"><i class="bx bx-right-arrow-alt"></i>Niveles del PEI</a>
               </li>
             </ul>
           </li>

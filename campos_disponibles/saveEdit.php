@@ -7,19 +7,19 @@ require_once 'configModule.php';
 
 $dbh = new Conexion();
 
+$codigo=$_POST["codigo"];
 $nombre=$_POST["nombre"];
 $abreviatura=$_POST["abreviatura"];
-$nivel=$_POST["nivel"];
+$campoForaneo=$_POST["campo_foraneo"];
 $codEstado="1";
 
-//echo $nombre." ".$abreviatura." ".$table;
 // Prepare
-$stmt = $dbh->prepare("INSERT INTO $table (nombre, abreviatura, nivel, cod_estado) VALUES (:nombre, :abreviatura, :nivel, :cod_estado)");
+$stmt = $dbh->prepare("UPDATE $table set nombre=:nombre, abreviatura=:abreviatura, $keyForeignTable=:campo_foraneo where codigo=:codigo");
 // Bind
+$stmt->bindParam(':codigo', $codigo);
 $stmt->bindParam(':nombre', $nombre);
 $stmt->bindParam(':abreviatura', $abreviatura);
-$stmt->bindParam(':nivel', $nivel);
-$stmt->bindParam(':cod_estado', $codEstado);
+$stmt->bindParam(':campo_foraneo', $campoForaneo);
 
 $flagSuccess=$stmt->execute();
 showAlertSuccessError($flagSuccess,$urlList);

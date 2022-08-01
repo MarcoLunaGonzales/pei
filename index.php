@@ -13,6 +13,7 @@ if(isset($_SESSION['logueado'])){
 	//echo "entro por logueado";
 }else{
 	//echo "entro sin login";
+	header("location:login.html");	
 }
 
  ?>

@@ -35,18 +35,10 @@ $dbh = new Conexion();
 					</div>
 				  </div>
 				</div>
-				<div class="row">
-				  <label class="col-sm-2 col-form-label">Nivel</label>
-				  <div class="col-sm-7">
-					<div class="form-group">
-					  <input class="form-control" type="number" name="nivel" id="nivel" required="true" onkeyup="javascript:this.value=this.value.toUpperCase();" step="1" />
-					</div>
-				  </div>
-				</div>
 			  </div>
 			  <div class="card-footer ml-auto mr-auto">
-				<button type="submit" class="<?=$buttonNormal;?>">Guardar</button>
-				<a href="<?=$urlList2;?>" class="<?=$buttonCancel;?>">Cancelar</a>
+				<button type="submit" class="<?=$buttonVerde;?>"><i class='bx bxs-save mr-1'></i>Guardar</button>
+				<a href="<?=$urlList2;?>" class="<?=$buttonCancel;?>"><i class='bx bx-undo mr-1'></i>Cancelar</a>
 			  </div>
 			</div>
 		  </form>
