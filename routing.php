@@ -71,6 +71,21 @@
 			require_once('niveles_configuracion/registerCampos.php');
 		}
 		
+		//NIVELES DE PEI
+		if ($_GET['opcion']=='listNivelesPEI') {
+			require_once('t_niveles_pei/list.php');
+		}
+		if ($_GET['opcion']=='ListNivelDetallePEI') {
+			$codigo_nivel_conf=$_GET['codigo_nivel_conf'];
+			$codigo_pei_padre=$_GET['codigo_pei_padre'];			
+			require_once('t_niveles_pei/listDetalle.php');
+		}
+		if ($_GET['opcion']=='registerNivelPEI') {
+			$codigo_nivel_conf=$_GET['codigo_nivel_conf'];
+			$codigo_pei_padre=$_GET['codigo_pei_padre'];			
+			require_once('t_niveles_pei/register.php');
+		}
+
 		if ($_GET['opcion']=='registerOfPOA') {
 			require_once('niveles_configuracion/registerOfPOA.php');
 		}
@@ -82,6 +97,15 @@
 			$codigo=$_GET['codigo'];
 			require_once('niveles_configuracion/registerOfHijo.php');
 		}		
+
+		if ($_GET['opcion']=='listKanbanBoard') {
+			require_once('actividades/kanban_board.php');
+		}		
+		if ($_GET['opcion']=='listTasks') {
+			require_once('actividades/list.php');
+		}		
+		
+
 
 	}else{
 		require_once("principal.php");

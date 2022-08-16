@@ -23,7 +23,9 @@ $nombreNivel = nombreNivelConfiguracion($codNivelConf);
 
 
 // Preparamos
-$sql="SELECT c.codigo, c.nombre, (select t.nombre from tipos_campo t where t.codigo=c.cod_tipocampo)as tipo_campo
+$sql="SELECT c.codigo, c.nombre, (select t.nombre from tipos_campo t where t.codigo=c.cod_tipocampo)as tipo_campo,
+(select count(*) from nivelesconf_camposdisponibles ncc where ncc.cod_campodisponible=c.codigo and ncc.cod_nivelconfiguracion in ($codNivelConf)) as bandera,
+(select ncc.orden from nivelesconf_camposdisponibles ncc where ncc.cod_campodisponible=c.codigo and ncc.cod_nivelconfiguracion in ($codNivelConf)) as ordenguardado
 from campos_disponibles c
 where cod_estado=1 order by 2";
 
@@ -36,6 +38,9 @@ $stmt->execute();
 // bindColumn
 $stmt->bindColumn('codigo', $codigoCampo);
 $stmt->bindColumn('nombre', $nombreCampo);
+$stmt->bindColumn('bandera', $bandera);
+$stmt->bindColumn('ordenguardado', $ordenGuardado);
+
 
 ?>
 
@@ -47,13 +52,13 @@ $stmt->bindColumn('nombre', $nombreCampo);
                 <div class="card-header card-header-primary card-header-icon">
                   <h4 class="card-title"><?=$moduleName?></h4>
                   <h6 class="card-title">Nivel: <?=$nombreNivel;?></h6>
-                  <h3 class="card-title">Por favor active la casilla para registrar el Campo</h3>
+                  <!--h3 class="card-title">Por favor active la casilla para registrar el Campo</h3-->
                 </div>
                 <div class="card-body">
                   
                   <div class="table-responsive">
-                    <form id="lñp" method="post" action="<?=$urlSaveAreas_organizacion;?>">
-                      <input type="hidden" name="codUnidad" value="<?=$codUnidad?>">
+                    <form id="lp" method="post" action="<?=$urlSaveDetail;?>">
+                      <input type="hidden" name="codNivel" id="codNivel" value="<?=$codNivelConf?>">
                       <table class="table" id="data_cuentas" >
                         <thead>
                           <tr>
@@ -69,17 +74,21 @@ $stmt->bindColumn('nombre', $nombreCampo);
                           ?>
                           <tr>
                             <td align="center">
-                              <div class="form-check">
-                                <label class="form-check-label">
-                                  <input  class="form-check-input" type="checkbox" id="areas<?=$index?>" name="areas<?=$index;?>" >
-                                  <span class="form-check-sign">
-                                    <span class="check"></span>
-                                  </span>
-                                </label>
+                              <div class="class="custom-control custom-checkbox mb-3">
+                                  <input  class="custom-control-input" type="checkbox" id="campo<?=$index?>" name="campo<?=$index;?>" value="<?=$codigoCampo;?>"  <?=($bandera>0)?"checked":"";?>  >
+                                  <label class="custom-control-label" for="campo<?=$index?>"><?php= $nombreCampo;?></label>
                               </div>
                             </td>
                             <td><?=$codigoCampo;?></td>
                             <td><?=$nombreCampo;?></td>
+                            <td>
+                            <div class="col-sm-7">
+                              <div class="form-group">
+                                <input class="form-control" type="number" name="orden<?=$index;?>" id="orden<?=$index;?>" value="<?=$ordenGuardado;?>" />
+                              </div>
+                            </div>
+                            </td>
+
                           </tr>
                           <?php
                 							$index++;

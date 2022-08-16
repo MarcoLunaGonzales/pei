@@ -1,3 +1,5 @@
 <?php
-echo "PAGINA PRINCIPAL";
+require_once 'conexion.php';
+$dbh = new Conexion();
+echo "-";
 ?>

@@ -17,6 +17,8 @@ $urlDelete="index.php?opcion=deleteNivelConfiguracion";
 $urlSave="niveles_configuracion/save.php";
 $urlSaveEdit="niveles_configuracion/saveEdit.php";
 $urlSaveDelete="";
+
 $urlDetail="index.php?opcion=NivelesRegisterFields";
+$urlSaveDetail="niveles_configuracion/saveDetailCamposNiveles.php";
 
 ?>

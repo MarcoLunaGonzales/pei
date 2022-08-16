@@ -11,6 +11,7 @@ function number_format(amount, decimals) {
         amount_parts[0] = amount_parts[0].replace(regexp, '$1' + ',' + '$2');
     return amount_parts.join('.');
 }
+
 function nuevoAjax()
 { var xmlhttp=false;
   try {
@@ -26,4 +27,32 @@ function nuevoAjax()
   xmlhttp = new XMLHttpRequest();
   }
   return xmlhttp;
+}
+
+function showModalNewTask(estado){
+  document.getElementById("estado_activo").value=estado;
+  console.log("estado EK: "+estado);
+  $("#modalNewTask").modal("show");  
+}
+
+function saveNewTask(){
+  var nombre, observaciones, fecha_limite, prioridad, estado_kanban;
+  nombre=document.getElementById("nombre").value;
+  observaciones=document.getElementById("observaciones").value;
+  fecha_limite=document.getElementById("fecha_limite").value;
+  prioridad=document.getElementById("prioridad").value;
+  estado_kanban=document.getElementById("estado_activo").value;
+
+  $.ajax({
+    type:"POST",
+    data:"nombre="+nombre+"&observaciones="+observaciones+"&fecha_limite="+fecha_limite+"&prioridad="+prioridad+"&estado_kanban="+estado_kanban,
+    url:"actividades/ajaxSaveNewTask.php",
+    success:function(r){
+      if(r==1){        
+          alerts.showSwal('success-message','kanban_board.php');
+      }else{
+          Swal.fire('ERROR!','El proceso tuvo un problema!. Contacte con el administrador!','error'); 
+        }
+    }
+  });
 }

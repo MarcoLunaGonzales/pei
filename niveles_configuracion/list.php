@@ -4,6 +4,7 @@ require_once 'conexion.php';
 require_once 'configModule.php';
 require_once 'styles.php';
 require_once 'functionsGeneralJS.php';
+require_once 'functionsNames.php';
 
 $globalAdmin=$_SESSION["globalAdmin"];
 
@@ -11,9 +12,11 @@ $globalAdmin=$_SESSION["globalAdmin"];
 $dbh = new Conexion();
 
 // Preparamos
-$sqlList="SELECT codigo, nombre, abreviatura, (select f.nombre from $foreignTable f where f.codigo=$keyForeignTable) as campo_foraneo, nivel FROM $table where cod_estado=1 order by 2";
+$sqlList="SELECT codigo, nombre, abreviatura, (select f.nombre from $foreignTable f where f.codigo=$keyForeignTable) as campo_foraneo, nivel, cod_padre FROM $table where cod_estado=1 order by nivel";
 $stmt = $dbh->prepare($sqlList);
+
 //echo $sqlList;
+
 // Ejecutamos
 $stmt->execute();
 // bindColumn
@@ -22,6 +25,7 @@ $stmt->bindColumn('nombre', $nombre);
 $stmt->bindColumn('abreviatura', $abreviatura);
 $stmt->bindColumn('campo_foraneo', $campoForaneo);
 $stmt->bindColumn('nivel', $nivel);
+$stmt->bindColumn('cod_padre', $codPadre);
 
 
 ?>
@@ -44,6 +48,7 @@ $stmt->bindColumn('nivel', $nivel);
                           <th>Nombre</th>
                           <th>Abreviatura</th>
                           <th>Nivel</th>
+                          <th>Dependencia</th>
                           <th><?= $nameForeignField; ?></th>
                           <th class="text-right">Actions</th>
                         </tr>
@@ -52,12 +57,14 @@ $stmt->bindColumn('nivel', $nivel);
 <?php
 						$index=1;
                       	while ($row = $stmt->fetch(PDO::FETCH_BOUND)) {
+                          $nombrePadre=nombreNivelConfiguracion($codPadre);
 ?>
                         <tr>
                           <td align="center"><?=$index;?></td>
                           <td><?=$nombre;?></td>
                           <td><?=$abreviatura;?></td>
                           <td><?=$nivel;?></td>
+                          <td><?=$nombrePadre;?></td>
                           <td><?=$campoForaneo;?></td>
                           <td class="td-actions text-right">
                             <?php

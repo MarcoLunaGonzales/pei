@@ -37,7 +37,18 @@
               <div class="menu-title">Gestion del PEI</div>
             </a>
             <ul>
-              <li> <a href="emailbox.html"><i class="bx bx-right-arrow-alt"></i>Niveles del PEI</a>
+              <li> <a href="index.php?opcion=listNivelesPEI"><i class="bx bx-right-arrow-alt"></i>Niveles del PEI</a>
+              </li>
+              <li> <a class="has-arrow" href="javascript:;"><i class="bx bx-right-arrow-alt"></i>Tareas/Actividades</a>
+                <ul>
+                  <li> <a href="" target="_blank"><i class="bx bx-right-arrow-alt"></i>Lista de Proyectos</a>
+                </ul>              
+                <ul>
+                  <li> <a href="index.php?opcion=listTasks" target="_blank"><i class="bx bx-right-arrow-alt"></i>Lista de Tareas</a>
+                </ul>              
+                <ul>
+                  <li> <a href="index.php?opcion=listKanbanBoard" target="_blank"><i class="bx bx-right-arrow-alt"></i>Pizarra Kanban</a>
+                </ul>              
               </li>
             </ul>
           </li>
