@@ -65,6 +65,7 @@ $stmt->bindColumn('ordenguardado', $ordenGuardado);
                             <th class="text-center">-</th>
                             <th>Codigo</th>
                             <th>Nombre</th>
+                            <th>Orden</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -84,7 +85,7 @@ $stmt->bindColumn('ordenguardado', $ordenGuardado);
                             <td>
                             <div class="col-sm-7">
                               <div class="form-group">
-                                <input class="form-control" type="number" name="orden<?=$index;?>" id="orden<?=$index;?>" value="<?=$ordenGuardado;?>" />
+                                <input class="form-control" type="number"   name="orden<?=$index;?>" id="orden<?=$index;?>" value="<?=$ordenGuardado;?>" />
                               </div>
                             </div>
                             </td>
