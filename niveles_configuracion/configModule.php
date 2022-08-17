@@ -6,8 +6,11 @@ $moduleNamePlural="Niveles de Configuracion";
 
 $foreignTable="empresas";
 $keyForeignTable="cod_empresa";
-
 $nameForeignField="Empresa";
+
+$foreignTable2="niveles_configuracion";
+$keyForeignTable2="cod_padre";
+$nameForeignField2="Dependencia";
 
 $urlList="../index.php?opcion=listNivelesConfiguracion";
 $urlList2="index.php?opcion=listNivelesConfiguracion";
