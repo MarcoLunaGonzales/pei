@@ -67,6 +67,30 @@ $dbh = new Conexion();
 						</div>
 					  </div>
 					</div>
+					<div class="row">
+					  <label class="col-sm-2 col-form-label"><?= $nameForeignField2; ?></label>
+					  <div class="col-sm-7">
+						<div class="form-group">
+							<select name="campo_foraneo2" id="campo_foraneo2" class="single-select" data-style="btn btn-warning" required>
+	                            <option value="" disabled selected="selected">-</option>
+	                            <?php             
+	                              	$sqlForaneo="SELECT codigo,nombre FROM $foreignTable2 where cod_estado=1";
+	                               	$stmtForaneo=$dbh->prepare($sqlForaneo);
+	                                $stmtForaneo->execute();
+	                                $stmtForaneo->bindColumn('codigo', $codigoF);
+	                                $stmtForaneo->bindColumn('nombre', $nombreF);
+
+	                                while ($rowForaneo = $stmtForaneo->fetch(PDO::FETCH_BOUND)) {         
+	                            ?>
+	                            <option value="<?= $codigoF; ?>" ><?= $nombreF; ?></option>
+	                            <?php 
+	                                }   
+                                ?>
+	                        </select>					  
+						</div>
+					  </div>
+					</div>
+					
 
 			  </div>
 			  <div class="card-footer ml-auto mr-auto">
