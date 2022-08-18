@@ -89,7 +89,7 @@ $nombreNivel=nombreNivelConfiguracion($codigoNivelConf);
 	</div>
 	<div class="card-footer ml-auto mr-auto">
 				<button type="submit" class="<?=$buttonVerde;?>"><i class='bx bxs-save mr-1'></i>Guardar</button>
-				<a href="<?=$urlList2;?>" class="<?=$buttonCancel;?>"><i class='bx bx-undo mr-1'></i>Cancelar</a>
+				<a href="<?=$urlList3;?>&codigo_nivel_conf=<?=$codigoNivelConf;?>&codigo_pei_padre=<?=$codigoPEIPadre;?>" class="<?=$buttonCancel;?>"><i class='bx bx-undo mr-1'></i>Cancelar</a>
   	</div>
 </div>
 

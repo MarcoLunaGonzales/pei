@@ -14,6 +14,7 @@ $nameForeignField="Empresa";
 
 $urlList="../index.php?opcion=listNivelesPEI";
 $urlList2="index.php?opcion=listNivelesPEI";
+$urlList3="index.php?opcion=ListNivelDetallePEI";
 
 $urlRegister="index.php?opcion=registerNivelConfiguracion";
 $urlEdit="index.php?opcion=editNivelConfiguracion";
