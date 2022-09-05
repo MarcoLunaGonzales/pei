@@ -11,11 +11,18 @@ $nombre=$_POST["nombre"];
 $abreviatura=$_POST["abreviatura"];
 $codNivelConf=$_POST["codigo_nivel_conf"];
 $codigoPEIPadre=$_POST["codigo_nivel_padre"];
+$habilitarActividades=$_POST["habilitar_actividades"];
+
+if($habilitarActividades=="on"){
+	$habilitarActividades=1;
+}else{
+	$habilitarActividades=0;
+}
 
 $codEstado="1";
 
-$sqlInsert="INSERT INTO $table2 (nombre, abreviatura, cod_estado, cod_padre, cod_nivelconfiguracion) 
-	VALUES ('$nombre','$abreviatura','$codEstado','$codigoPEIPadre','$codNivelConf')";
+$sqlInsert="INSERT INTO $table2 (nombre, abreviatura, cod_estado, cod_padre, cod_nivelconfiguracion, bandera_actividades) 
+	VALUES ('$nombre','$abreviatura','$codEstado','$codigoPEIPadre','$codNivelConf','$habilitarActividades')";
 $stmt = $dbh->prepare($sqlInsert);
 $flagSuccess=$stmt->execute();
 $codigoInsertadoCabecera = $dbh->lastInsertId();

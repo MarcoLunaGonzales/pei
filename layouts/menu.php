@@ -37,19 +37,10 @@
               <div class="menu-title">Gestion del PEI</div>
             </a>
             <ul>
-              <li> <a href="index.php?opcion=listNivelesPEI"><i class="bx bx-right-arrow-alt"></i>Niveles del PEI</a>
-              </li>
-              <li> <a class="has-arrow" href="javascript:;"><i class="bx bx-right-arrow-alt"></i>Tareas/Actividades</a>
-                <ul>
-                  <li> <a href="" target="_blank"><i class="bx bx-right-arrow-alt"></i>Lista de Proyectos</a>
-                </ul>              
-                <ul>
-                  <li> <a href="index.php?opcion=listTasks" target="_blank"><i class="bx bx-right-arrow-alt"></i>Lista de Tareas</a>
-                </ul>              
-                <ul>
-                  <li> <a href="index.php?opcion=listKanbanBoard" target="_blank"><i class="bx bx-right-arrow-alt"></i>Pizarra Kanban</a>
-                </ul>              
-              </li>
+              <li> <a href="index.php?opcion=listNivelesPEI"><i class="bx bx-right-arrow-alt"></i>Componentes del PEI</a></li>
+              <li> <a href="index.php?opcion=listProjects"><i class="bx bx-right-arrow-alt"></i>Proyectos</a></li>
+              <li> <a href="index.php?opcion=listTasks&cod_proyecto=0"><i class="bx bx-right-arrow-alt"></i>Actividades</a></li>
+              <li> <a href="index.php?opcion=listKanbanBoard"><i class="bx bx-right-arrow-alt"></i>Pizarra Kanban</a></li>
             </ul>
           </li>
           <li>

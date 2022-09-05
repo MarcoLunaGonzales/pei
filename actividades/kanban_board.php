@@ -228,6 +228,7 @@ $dbh = new Conexion();
             </div>
         </div>
     </div>
+    <!--END MODAL-->
 
 
 

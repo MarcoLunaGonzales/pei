@@ -1,9 +1,21 @@
 <?php
 require_once 'conexion.php';
-require_once 'layouts/body_empty.php';
+require_once 'functionsNames.php';
+require_once 'layouts/body_empty2.php';
 
 $dbh = new Conexion();
 
+$globalUnidadX=$_SESSION["globalUO"];
+$globalAreaX=$_SESSION["globalArea"];
+$nombreUnidadCabecera=$_SESSION["globalNameUO"];
+$nombreAreaCabecera=$_SESSION["globalNameArea"]; 
+
+$codProyecto=$_GET["cod_proyecto"];
+
+$nombreProyecto="";
+if($codProyecto!=0){
+    $nombreProyecto=nombreNivelPEI($codProyecto);
+}
 ?>
 
 
@@ -12,7 +24,7 @@ $dbh = new Conexion();
 
     <head>
         <meta charset="utf-8" />
-        <title>Lista de Tareas</title>
+        <title>Lista de Actividades</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta content="A fully featured admin theme which can be used to build CRM, CMS, etc." name="description" />
         <meta content="Coderthemes" name="author" />
@@ -37,15 +49,11 @@ $dbh = new Conexion();
 
     <!-- body start -->
     <body  data-layout-mode="horizontal" data-theme="light">
-
-
         <!-- Begin page -->
         <div id="wrapper">
-
             <!-- ============================================================== -->
             <!-- Start Page Content here -->
             <!-- ============================================================== -->
-
             <div class="content-page" style="padding: 0px; margin-top: 0px;">
                 <div class="content">
 
@@ -63,7 +71,7 @@ $dbh = new Conexion();
                                             <li class="breadcrumb-item active">Tasks List</li>
                                         </ol>
                                     </div-->
-                                    <h4 class="page-title">Lista de Tareas</h4>
+                                    <h4 class="page-title">Lista de Tareas  -  <?=$nombreProyecto;?></h4>
                                 </div>
                             </div>
                         </div>     
@@ -79,7 +87,11 @@ $dbh = new Conexion();
                                                 <!-- cta -->
                                                 <div class="row">
                                                     <div class="col-sm-3">
-                                                        <a href="#" class="btn btn-primary waves-effect waves-light"><i class='fe-plus me-1'></i>Nueva Tarea</a>
+                                                    <!--Este campo es para la creacion de nuevas tareas-->
+                                                    <input type="hidden" id="estado_activo" name="estado_activo" value="0">
+                                                    
+                                                    <button type="button" class="btn btn-primary" onclick="showModalNewTask(1)">
+                                                            <i class='bx bx-plus mr-1'></i>Nueva Tarea</button>
                                                     </div>
                                                     <div class="col-sm-9">
                                                         <div class="float-sm-end mt-3 mt-sm-0">
@@ -119,7 +131,11 @@ $dbh = new Conexion();
                                                                 <div class="card-body pb-0" id="task-list-one">
                                                                     
                                                         <?php
-                                                        $sqlAct="SELECT a.codigo, a.nombre, a.observaciones, DATE_FORMAT(a.fecha_limite,'%b %d, %Y')as fecha_limite, a.cod_prioridad, ap.nombre as nombre_prioridad, ap.color from actividades a, actividades_prioridades ap where a.cod_prioridad=ap.codigo";
+                                                        $sqlAct="SELECT a.codigo, a.nombre, a.observaciones, DATE_FORMAT(a.fecha_limite,'%b %d, %Y')as fecha_limite, a.cod_prioridad, ap.nombre as nombre_prioridad, ap.color,
+                                                            (select np.nombre from niveles_pei np where np.codigo=a.cod_componentepei)as nombrecomponentepei from actividades a, actividades_prioridades ap where a.cod_prioridad=ap.codigo";
+                                                        if($codProyecto!=0){
+                                                            $sqlAct.=" and a.cod_componentepei='$codProyecto' ";
+                                                        }
                                                             $stmtAct= $dbh->prepare($sqlAct);
                                                             $stmtAct->execute();
                                                             while ($rowAct = $stmtAct->fetch(PDO::FETCH_ASSOC)) {
@@ -130,17 +146,17 @@ $dbh = new Conexion();
                                                                 $codPrioridadActividad=$rowAct['cod_prioridad'];
                                                                 $nombrePrioridadActividad=$rowAct['nombre_prioridad'];
                                                                 $colorActividad=$rowAct['color'];
+                                                                $nombreComponentePEI=$rowAct['nombrecomponentepei'];
                                                             
                                                         ?>
-
                                                                     <!-- task -->
                                                                     <div class="row justify-content-sm-between task-item">
                                                                         <div class="col-lg-6 mb-2">
                                                                             <div class="form-check">
                                                                                 <input type="checkbox" class="form-check-input" id="task1" />
-                                                                                <label class="form-check-label" for="task1">
-                                                                                    <?=$nombreActividad;?> - <?=$obsActividad;?>
-                                                                                </label>
+                                                                                <a href="" onclick="javascript:showModallistTaskDetail(<?=$codigoActividad?>)" ><label class="form-check-label" for="task1">
+                                                                                    <?=$nombreComponentePEI;?> - <?=$nombreActividad;?> - <?=$obsActividad;?>
+                                                                                </label></a>
                                                                             </div>
                                                                             <!-- end checkbox -->
                                                                         </div>
@@ -458,30 +474,124 @@ $dbh = new Conexion();
             <!-- ============================================================== -->
             <!-- End Page content -->
             <!-- ============================================================== -->
-
-
         </div>
         <!-- END wrapper -->
 
+
+    <!-- Modal -->
+    <div class="modal fade" id="modalNewTask" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Adicionar Tarea</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                      <label class="col-sm-3 col-form-label">Proyecto / Componente PEI</label>
+                      <div class="col-sm-8">
+                        <div class="form-group">
+                            <select name="componente_pei" id="componente_pei" class="single-select" data-style="btn btn-warning" required>
+                                <option value="" disabled selected="selected">-</option>
+                                <?php             
+                                    $sqlProj="SELECT np.codigo, np.nombre, np.abreviatura from niveles_pei np, nivelespei_unidadesareas npua where np.codigo=npua.cod_nivelpei and npua.cod_area='$globalAreaX' and npua.cod_unidadorganizacional='$globalUnidadX'";
+                                    $stmtProj=$dbh->prepare($sqlProj);
+                                    $stmtProj->execute();
+                                    $stmtProj->bindColumn('codigo', $codigoF);
+                                    $stmtProj->bindColumn('nombre', $nombreF);
+                                    while ($rowProj = $stmtProj->fetch(PDO::FETCH_BOUND)) {         
+                                ?>
+                                <option value="<?= $codigoF; ?>" <?=($codigoF==$codProyecto)?"selected":"";?> ><?= $nombreF; ?></option>
+                                <?php 
+                                    }   
+                                ?>
+                            </select>                     
+                        </div>
+                    </div>
+                    
+                    </div>
+                    <div class="row">
+                      <label class="col-sm-3 col-form-label">Nombre</label>
+                      <div class="col-sm-8">
+                        <div class="form-group">
+                          <input class="form-control" type="text" name="nombre" id="nombre" required="true" onkeyup="javascript:this.value=this.value.toUpperCase();"/>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <label class="col-sm-3 col-form-label">Descripcion</label>
+                      <div class="col-sm-8">
+                        <div class="form-group">
+                            <textarea class="form-control" name="observaciones" id="observaciones">
+                            </textarea>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <label class="col-sm-3 col-form-label">Fecha Limite</label>
+                      <div class="col-sm-8">
+                        <div class="form-group">
+                          <input class="form-control" type="date" name="fecha_limite" id="fecha_limite" required="true"/>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <label class="col-sm-3 col-form-label">Prioridad</label>
+                      <div class="col-sm-8">
+                        <div class="form-group">
+                            <select name="prioridad" id="prioridad" class="single-select" data-style="btn btn-warning" required>
+                                <option value="" disabled selected="selected">-</option>
+                                <?php             
+                                    $sqlForaneo="SELECT codigo,nombre FROM actividades_prioridades where cod_estado=1";
+                                    $stmtForaneo=$dbh->prepare($sqlForaneo);
+                                    $stmtForaneo->execute();
+                                    $stmtForaneo->bindColumn('codigo', $codigoF);
+                                    $stmtForaneo->bindColumn('nombre', $nombreF);
+                                    while ($rowForaneo = $stmtForaneo->fetch(PDO::FETCH_BOUND)) {         
+                                ?>
+                                <option value="<?= $codigoF; ?>" ><?= $nombreF; ?></option>
+                                <?php 
+                                    }   
+                                ?>
+                            </select>                     
+                        </div>
+                      </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveNewTask();">Guardar Actividad</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--END MODAL-->
+
+
+    <!-- Long Content Scroll Modal -->
+    <div class="modal fade" id="modal_task_detail" tabindex="-1" role="dialog" aria-labelledby="scrollableModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div id="div_task_detail">
+                </div>
+            </div><!-- /.modal-content -->
+        </div>
+    </div><!-- /.modal -->  
+
+
+
         <!-- Right bar overlay-->
         <div class="rightbar-overlay"></div>
-
         <!-- Vendor js -->
         <script src="assets2/js/vendor.min.js"></script>
-
         <!-- Dragula js -->
         <script src="assets2/libs/dragula/dragula.min.js"></script>
         <!-- Dragula init js-->
         <script src="assets2/js/pages/dragula.init.js"></script>
-
         <!-- Plugins js -->
         <script src="assets2/libs/quill/quill.min.js"></script>
-
         <!-- Init js-->
         <script src="assets2/js/pages/task.init.js"></script>
-
-        <!-- App js -->
-        <!--script src="assets2/js/app.min.js"></script-->
-        
     </body>
 </html>

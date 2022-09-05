@@ -74,11 +74,11 @@ $nombreNivel=nombreNivelConfiguracion($codigoNivelConf);
 				 <!--FIN CAMPOS DINAMICOS-->
 
 				 	<div class="row">
-					  	<label class="col-sm-2 col-form-label">Habilitar Actividades</label>
+					  	<label class="col-sm-2 col-form-label">Habilitar Componente para Enlazar Tareas</label>
 					  	<div class="col-sm-7">
 					  		<div class="custom-control custom-switch">
-							<input type="checkbox" class="custom-control-input" id="Habilitar_actividades" name="Habilitar_actividades">
-							<label class="custom-control-label" for="Habilitar_actividades">Habilitar</label>
+							<input type="checkbox" class="custom-control-input" id="habilitar_actividades" name="habilitar_actividades">
+							<label class="custom-control-label" for="habilitar_actividades">Habilitar</label>
 							</div>
 						</div>
 					</div>

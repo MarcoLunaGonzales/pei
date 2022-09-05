@@ -85,7 +85,10 @@ $stmt->bindColumn('bandera_actividades', $banderaActividades);
                             <?php
                               if($banderaActividades==1){
                             ?>
-                              <a href='index.php?opcion=ListNivelDetallePEI&codigo_nivel_conf=<?=$codigoNivelHijo;?>&codigo_pei_padre=<?=$codigo;?>' rel="tooltip" class="<?=$buttonEdit;?>">
+                              <a href='javascript:showModalConfiguracionPropiedadComponente(<?=$codigo;?>)' rel="tooltip" class="<?=$buttonPrincipal;?>">
+                                <i class="bx bx-show"></i>
+                              </a>
+                              <a href='index.php?opcion=configuracionPropiedadesNiveles&codigo_nivel_conf=<?=$codigoNivelConf;?>&codigo_pei=<?=$codigo;?>&codigo_pei_padre=<?=$codigoPEIPadre;?>' rel="tooltip" class="<?=$buttonEdit;?>">
                                 <i class="bx bx-wrench"></i>
                               </a>
                             <?php
@@ -117,3 +120,24 @@ $stmt->bindColumn('bandera_actividades', $banderaActividades);
           </div>  
         </div>
     </div>
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="modalShowConfiguracionPropiedad" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Configuracion de Propiedad de Componente</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                  <div id="divConfiguracionPropiedadComponente">
+                  </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--END MODAL-->

@@ -84,6 +84,12 @@ if($banderaLogin==1 || $tipoLogin==1){
 		$_SESSION['globalPerfil']=$perfil;
 
 		$_SESSION['globalAdmin']=1;
+		
+		$_SESSION['globalUO']=$codUnidad;
+		$_SESSION['globalArea']=$codArea;
+		$_SESSION['globalNameUO']=$nombreUnidad;
+		$_SESSION['globalNameArea']=$nombreArea;
+
 
 		/*$sIdentificador = "ifinanciero";
 		$sKey="ce94a8dabdf0b112eafa27a5aa475751";

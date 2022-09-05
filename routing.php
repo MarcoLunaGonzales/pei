@@ -85,6 +85,11 @@
 			$codigo_pei_padre=$_GET['codigo_pei_padre'];			
 			require_once('t_niveles_pei/register.php');
 		}
+		if ($_GET['opcion']=='configuracionPropiedadesNiveles') {
+			$codigo_nivel_conf=$_GET['codigo_nivel_conf'];
+			$codigo_pei_padre=$_GET['codigo_pei_padre'];			
+			require_once('t_niveles_pei/configuracion_propiedad.php');
+		}
 
 		if ($_GET['opcion']=='registerOfPOA') {
 			require_once('niveles_configuracion/registerOfPOA.php');
@@ -96,12 +101,15 @@
 		if ($_GET['opcion']=='registerOfHijo') {
 			$codigo=$_GET['codigo'];
 			require_once('niveles_configuracion/registerOfHijo.php');
-		}		
-
+		}			
+		if ($_GET['opcion']=='listProjects') {
+			require_once('actividades/listProjects.php');
+		}	
 		if ($_GET['opcion']=='listKanbanBoard') {
 			require_once('actividades/kanban_board.php');
 		}		
 		if ($_GET['opcion']=='listTasks') {
+			$cod_proyecto=$_GET['cod_proyecto'];
 			require_once('actividades/list.php');
 		}		
 		

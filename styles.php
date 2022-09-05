@@ -17,6 +17,7 @@ $buttonCeleste="btn btn-outline-info m-1 px-5";
 $buttonMorado="btn btn-outline-primary m-1 px-5";
 
 $buttonEdit="btn btn btn-success";
+$buttonPrincipal="btn btn btn-primary";
 $buttonDelete="btn btn btn-danger";
 $buttonDetailMin="btn btn btn-info";
 $buttonCancel="btn btn btn-outline-danger m-1 px-5";

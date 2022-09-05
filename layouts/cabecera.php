@@ -1,3 +1,12 @@
+<?php 
+
+  require_once("conexion.php");
+  $dbh = new Conexion();
+
+  $nombreUnidadCabecera=$_SESSION["globalNameUO"];
+  $nombreAreaCabecera=$_SESSION["globalNameArea"]; 
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -341,7 +350,7 @@
                 <div class="media user-box align-items-center">
                   <div class="media-body user-info">
                     <p class="user-name mb-0">Marco Luna</p>
-                    <p class="designattion mb-0">Available</p>
+                    <p class="designattion mb-0"><?=$nombreUnidadCabecera;?>/<?=$nombreAreaCabecera;?></p>
                   </div>
                   <img src="https://via.placeholder.com/110x110" class="user-img" alt="user avatar">
                 </div>
