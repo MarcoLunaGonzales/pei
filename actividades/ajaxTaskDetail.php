@@ -34,18 +34,28 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
     $sqlNote="SELECT date_format(fecha, '%d-%m-%Y') as fecha, anotacion from actividades_anotaciones where cod_actividad = '$codigoActividad' ORDER BY codigo DESC";
     $stmtNote= $dbh->prepare($sqlNote);
     $stmtNote->execute();
+    
+    /**
+     * Lista de Colaboradores asignados a la Actividad
+     * @autor: Ronald Mollericona
+    **/
+    $sqlColl = "SELECT CONCAT(p.primer_nombre, ' ', p.paterno, ' ', p.materno) as nombre_compl, DATE_FORMAT(ac.fecha_designacion, '%d-%m-%Y') as fecha
+    FROM actividades_colaboradores ac
+    LEFT JOIN personal p on p.codigo = ac.cod_personal";
+    $stmtColl = $dbh->prepare($sqlColl);
+    $stmtColl->execute();
 
 ?>
 <div id="bodyTaskComplete">    
-    <div class="modal-header">
-        <h5 class="modal-title" id="scrollableModalTitle">Actividad <?=$nombreActividad;?>  Proyecto: <?=$nombreProyecto;?></h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-header bg-primary">
+        <h5 class="modal-title text-white" id="scrollableModalTitle">Actividad <?=$nombreActividad;?>  Proyecto: <?=$nombreProyecto;?></h5>
+        <button type="button" class="btn-close bg-white" data-bs-dismiss="modal" aria-label="Close"></button>
     </div>
     <div class="modal-body">
     	<div class="row">
     		<div class="col-lg-8">
                 <!-- Nueva Nota-->
-                <div class="card p-2">
+                <div class="card p-2 mb-1">
                     <h5 class="card-title font-16">Detalle de Actividad</h5>
                     <div class="border rounded">
                         <form action="#" class="comment-area-box">
@@ -54,17 +64,16 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
                                 <div class="file-select" id="src-file1" >
                                     <input type="file" id="src-file1-input" name="src-file1" aria-label="Archivo">
                                 </div>
-                                <button type="button" class="btn btn-sm btn-primary" id="save-annotation"><i class="mdi mdi-account me-1"></i>Agregar Colaborador</button>
-                                <button type="button" class="btn btn-sm btn-success" id="save-annotation"><i class="mdi mdi-send me-1"></i>Enviar Nota</button>
+                                <button type="button" class="btn btn-sm btn-success" id="save-annotation"><i class="mdi mdi-send"></i> Enviar</button>
                             </div>
                         </form>
                     </div>
                 </div>
                 <!-- ARCHIVOS -->
                 <input type="text" id="codeActivity" value="<?=$codigoActividad;?>" hidden>
-                <div class="card p-2">
+                <div class="card p-2 mb-1">
                     <h5 class="card-title font-16">Archivos adjuntos</h5>
-                    <div class="component-file">
+                    <div class="inbox-widget component-file" data-simplebar style="max-height: 200px;">
                         <?php
                             if(!count($rows_files = $stmtActividadFiles->fetchAll())){
                         ?>
@@ -121,7 +130,7 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
                 <div class="card p-2">
                     <h5 class="card-title font-16">Notas</h5>
                     <!-- Lista de Notas -->
-                    <div class="component-annotation">
+                    <div class="inbox-widget component-annotation" data-simplebar style="max-height: 350px;">
                         <?php
                             if(!count($rows_notes = $stmtNote->fetchAll())){
                         ?>
@@ -144,7 +153,8 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
                         <?php
                             }else{
                                 foreach ($rows_notes as $note){
-                        ?>                      
+                        ?>       
+                            <div class="inbox-item">
                                 <div class="d-flex align-items-start p-1">
                                     <img src="assets2/images/users/default.png" class="me-2 rounded-circle" height="36" alt="Perfil">
                                     <div class="w-100">
@@ -154,6 +164,7 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
                                         </h5>
                                     </div>
                                 </div>
+                            </div>
                         <?php
                                 }
                             }
@@ -162,20 +173,26 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
                 </div>
                 <!-- Fin lista de Notas -->
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 pl-0">
                 <div class="card p-2">
-                    <h5 class="card-title font-16">Colaboradores</h5>
-                    <div class="post-user-comment-box m-1">
+                    <button type="button" class="btn btn-success rounded-pill btn-sm addCollaborator"><i class="mdi mdi-plus"></i>Agregar Colaborador</button><br>
+                    <h5 class="card-title font-16 mb-0">Colaboradores</h5>
+                    <div class="post-user-comment-box component-collaborator">
+                        <?php
+                            $rows_coll = $stmtColl->fetchAll();
+                            foreach ($rows_coll as $collaborator){
+                        ?>       
                         <div class="d-flex align-items-start">
-                            <div class="d-flex align-items-start">
-                                <img src="assets2/images/users/default.png" class="me-2 rounded-circle" height="36" alt="Perfil">
-                                <div class="w-100">
-                                    <h5 class="mt-0 mt-1 mb-0 font-size-14">
-                                        Ronald Mollericona
-                                    </h5>
-                                </div>
+                            <img src="assets2/images/users/default.png" class="me-2 rounded-circle" height="36" alt="Perfil">
+                            <div class="w-100">
+                                <h5 class="mt-0 mt-1 mb-0 font-size-14">
+                                    <?=$collaborator['nombre_compl'];?>
+                                </h5>
                             </div>
                         </div>
+                        <?php
+                            }
+                        ?>
                     </div>
                 </div>
             </div>

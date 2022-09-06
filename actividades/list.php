@@ -567,8 +567,6 @@ if($codProyecto!=0){
         </div>
     </div>
     <!--END MODAL-->
-
-
     <!-- Long Content Scroll Modal -->
     <div class="modal fade" id="modal_task_detail" tabindex="-1" role="dialog" aria-labelledby="scrollableModalTitle" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
@@ -579,7 +577,43 @@ if($codProyecto!=0){
         </div>
     </div><!-- /.modal -->  
 
-
+    <div class="modal fade" id="modalCollaborator" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-top">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title text-white">Añadir colaborador</h5>
+                    <button type="button" class="btn-close bg-white close-collaborator" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="col-sm-3 col-form-label">Colaborador</label>
+                                <select name="cod_personal" id="cod_personal" class="form-control" data-style="btn btn-warning" required>
+                                    <option value="" disabled selected="selected">-</option>
+                                    <?php             
+                                        $sqlColl   = "SELECT codigo, CONCAT(primer_nombre, ' ', paterno, ' ',materno) as nombre_personal FROM personal";
+                                        $stmtColl  = $dbh->prepare($sqlColl);
+                                        $stmtColl->execute();
+                                        $rows_collaborators = $stmtColl->fetchAll();
+                                        foreach ($rows_collaborators as $collabolator){       
+                                    ?>
+                                    <option value="<?= $collabolator['codigo']; ?>"  ><?= $collabolator['nombre_personal']; ?></option>
+                                    <?php 
+                                        }   
+                                    ?>
+                                </select>                     
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary close-collaborator" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary save-collaborator">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
         <!-- Right bar overlay-->
         <div class="rightbar-overlay"></div>
@@ -621,44 +655,8 @@ if($codProyecto!=0){
                     data: formData,
                     success:function(response){
                         let resp = JSON.parse(response);
-                        let cp_file = $('.component-file').html();
-                        $('.component-file').html(`
-                            <div class="card mb-1 shadow-none border">
-                                <div class="p-2">
-                                    <div class="row align-items-center">
-                                        <div class="col-auto">
-                                            <div class="avatar-sm">
-                                                <span class="avatar-title badge-soft-success text-success rounded">
-                                                    ${resp.data.extension}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div class="col ps-0">
-                                            <a href="file_activity/${resp.data.ruta}" download="pei_${resp.data.ruta}" class="text-muted fw-bold">${resp.data.ruta}</a>
-                                            <p class="mb-0 font-12">${resp.data.filesize}</p>
-                                        </div>
-                                        <div class="col-auto">
-                                            <a href="file_activity/${resp.data.ruta}" download="pei_${resp.data.ruta}" class="btn btn-link font-16 text-muted">
-                                                <i class="dripicons-download"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        `+cp_file);
-                        if(resp.status){
-                            Swal.fire(
-                                'Correcto!',
-                                'El proceso se completo correctamente',
-                                'success'
-                            );
-                        }else{
-                            Swal.fire(
-                                'Oops...',
-                                '¡Algo salió mal!',
-                                'error'
-                            );
-                        }
+                        $('body .component-file').html(resp.content);
+                        responseAlert(resp.status);
                     }
                 });
             });
@@ -672,6 +670,45 @@ if($codProyecto!=0){
                 formData.append('type', 2);         // Tipo 2 : Guardar Notas
                 formData.append('code_activity', code_act);
                 formData.append('annotation', annotation);
+                if(annotation.length > 5){
+                    $.ajax({
+                        url:"actividades/methods.php",
+                        type:"POST",
+                        contentType: false,
+                        processData: false,
+                        data: formData,
+                        success:function(response){
+                            let resp = JSON.parse(response);
+                            $('body .component-annotation').html(resp.content);
+                            responseAlert(resp.status);
+                            $('body #annotation').val('')
+                        }
+                    });
+                }else{
+                    Swal.fire(
+                        'Oops...',
+                        '¡La nota debe tener al menos 5 caracteres!',
+                        'warning'
+                    );
+                }
+            });
+            /* Abrir modal de asignación de colaborador */
+            $('body').on('click', '.addCollaborator', function(){
+                $('body #modal_task_detail').modal('hide');
+                $('#modalCollaborator').modal('show');
+            });
+            /* Cerrar modal Colaborador */
+            $('.close-collaborator').click(function(){
+                $('body #modal_task_detail').modal('show');
+                $('#modalCollaborator').modal('hide');
+            });
+            /**
+             * Función para enviar y guardar la asignación del colaborador
+             **/
+            $('body').on('change','#save-collaborator',function(){
+                let cod_personal = $('#cod_personal').val();
+                formData.append('type', 3);         // Tipo 3 : Guardar Asignación
+                formData.append('cod_personal', cod_personal);
                 $.ajax({
                     url:"actividades/methods.php",
                     type:"POST",
@@ -680,35 +717,28 @@ if($codProyecto!=0){
                     data: formData,
                     success:function(response){
                         let resp = JSON.parse(response);
-                        let cp_annotation = $('.component-annotation').html();
-                        $('.component-annotation').html(`
-                            <div class="d-flex align-items-start p-1">
-                                <img src="assets2/images/users/default.png" class="me-2 rounded-circle" height="36" alt="Perfil">
-                                <div class="w-100">
-                                    <h5 class="mt-0 mb-0 font-size-14 pt-1">
-                                        <span class="float-end text-muted font-12">${resp.data.fecha}</span>
-                                        ${resp.data.anotacion}
-                                    </h5>
-                                </div>
-                            </div>
-                        `+cp_annotation);
-                        if(resp.status){
-                            Swal.fire(
-                                'Correcto!',
-                                'El proceso se completo correctamente',
-                                'success'
-                            );
-                        }else{
-                            Swal.fire(
-                                'Oops...',
-                                '¡Algo salió mal!',
-                                'error'
-                            );
-                        }
-                        $('body #annotation').val('')
+                        responseAlert(resp.status);
                     }
                 });
             });
+            /**
+             * Mensaje de alerta despues de recibir respuesta del BACKEND
+             **/
+            function responseAlert(status){
+                if(status){
+                    Swal.fire(
+                        'Correcto!',
+                        'El proceso se completo correctamente',
+                        'success'
+                    );
+                }else{
+                    Swal.fire(
+                        'Oops...',
+                        '¡Algo salió mal!',
+                        'error'
+                    );
+                }
+            }
         </script>
     </body>
 </html>
