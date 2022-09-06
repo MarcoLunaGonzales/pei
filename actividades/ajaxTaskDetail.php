@@ -17,6 +17,17 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
 	$nombreProyecto=$rowActividad['nombreproyecto'];
 }
 
+/**
+ * Lista de Archivos de Actividad
+ * @autor: Ronald Mollericona
+**/
+$dbh = new Conexion();
+$sqlActividadFiles="SELECT fecha, ruta from actividades_archivos where cod_actividad = '$codigoActividad'";
+$stmtActividadFiles= $dbh->prepare($sqlActividadFiles);
+$stmtActividadFiles->execute();
+
+$stmtActividadFiles->bindColumn('fecha', $fecha);
+$stmtActividadFiles->bindColumn('ruta', $ruta);
 ?>
 <div id="bodyTaskComplete">    
     <div class="modal-header">
@@ -26,47 +37,75 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
     <div class="modal-body">
     	<div class="row">
     		<div class="col-lg-8">
-                <!-NOTAS->
-                <div class="card border-primary border mb-3">
-	                <div class="card-header">
-	                    <h5 class="card-title">Aqui van las Notas</h5>
-	                </div>
-	                <div class="card-body">
-	                </div>
-	                <div class="button-list">
-	                	<button type="button" class="btn btn-soft-primary btn-xs rounded-pill waves-effect waves-light">
-	                		<i class="bx bxs-file-plus mr-1"></i>
-   	             		</button>
-   	             	</div>
-                </div>
-                <!-FIN NOTAS->
-
-                    <!-- Add note input-->
-                    <div class="mt-3">
-                        <label for="example-textarea" class="form-label">Add a Note:</label>
-                        <textarea class="form-control" id="example-textarea" rows="3" placeholder="Write some note.."></textarea>
-                    </div>
-
-                    <!-- action buttons-->
-                    <div class="row mt-4">
-                        <div class="col-sm-6">
-                            <a href="ecommerce-products.html" class="btn text-muted d-none d-sm-inline-block btn-link fw-semibold">
-                                <i class="mdi mdi-arrow-left"></i> Continue Shopping </a>
-                        </div> <!-- end col -->
-                        <div class="col-sm-6">
-                            <div class="text-sm-end">
-                                <a href="ecommerce-checkout.html" class="btn btn-danger"><i class="mdi mdi-cart-plus me-1"></i> Checkout </a>
+                <!-- NOTAS -->
+                <input type="text" id="codeActivity" value="<?=$codigoActividad;?>" hidden>
+                <div class="card mb-3">
+                    <label for="example-textarea" class="form-label">Archivos adjuntos:</label>
+                    <?php
+                        while ($rowaf = $stmtActividadFiles->fetch(PDO::FETCH_BOUND)) {
+                    ?>                        
+                        <div class="card mb-1 shadow-none border">
+                            <div class="p-2">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <div class="avatar-sm">
+                                            <span class="avatar-title badge-soft-primary text-primary rounded">
+                                                ZIP
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col ps-0">
+                                        <a href="javascript:void(0);" class="text-muted fw-bold"><?=$ruta;?></a>
+                                        <p class="mb-0 font-12">2.3 MB</p>
+                                    </div>
+                                    <div class="col-auto">
+                                        <!-- Button -->
+                                        <a href="javascript:void(0);" class="btn btn-link font-16 text-muted">
+                                            <i class="dripicons-download"></i>
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
-                        </div> <!-- end col -->
-                    </div> <!-- end row-->
+                        </div>
+                    <?php
+                        }
+                    ?>
                 </div>
-                <!-- end col -->
-                <div class="col-lg-4">hola</div>
+                <!-- FIN NOTAS -->
+                <label for="example-textarea" class="form-label">Notas:</label>
+                <!-- Lista de Notas -->
+                <div class="d-flex align-items-start p-1">
+                    <img src="assets2/images/users/user-9.jpg" class="me-2 rounded-circle" height="36" alt="Arya Stark">
+                    <div class="w-100">
+                        <h5 class="mt-0 mb-0 font-size-14">
+                            <span class="float-end text-muted font-12">4:30am</span>
+                            Willy Miranda
+                        </h5>
+                        <p class="mt-1 mb-0 text-muted">
+                            Se deberia revisar el diseno del proyecto.
+                        </p>
+                    </div>
+                </div>
+                <!-- Fin lista de Notas -->
+                <!-- Nueva Nota-->
+                <div class="mt-3">
+                    <label for="example-textarea" class="form-label">Nueva nota:</label>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <textarea class="form-control" id="example-textarea" rows="3" placeholder="Escriba una nota.."></textarea>
+                        </div>
+                        <div class="col-md-12 text-rigth">
+                            <button type="button" class="btn btn-primary btn-block border"> Guardar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 pt-3">
+                <div class="file-select" id="src-file1" >
+                    <input type="file" id="src-file1-input" name="src-file1" aria-label="Archivo">
+                </div>
+            </div>
     	</div>
-    </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
     </div>
 </div>
     

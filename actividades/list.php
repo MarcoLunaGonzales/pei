@@ -44,7 +44,43 @@ if($codProyecto!=0){
 		<link href="assets2/css/icons.min.css" rel="stylesheet" type="text/css" />
 		<!-- Head js -->
 		<script src="assets2/js/head.js"></script>
+        <!-- Style input type FILE -->
+        <style>
+            .file-select {
+                position: relative;
+                display: inline-block;
+            }
 
+            .file-select::before {
+                background-color: #5678EF;
+                color: white;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                border-radius: 3px;
+                content: 'Adjuntar Archivo';
+                position: absolute;
+                left: 0;
+                right: 0;
+                top: 0;
+                bottom: 0;
+            }
+
+            .file-select input[type="file"] {
+                opacity: 0;
+                width: 200px;
+                height: 32px;
+                display: inline-block;
+            }
+
+            :root {
+                --fn: 'Adjuntar Archivo';
+            }
+            .file-select::before {
+                white-space: nowrap;
+                content: var(--fn);
+            }
+        </style>
     </head>
 
     <!-- body start -->
@@ -484,15 +520,14 @@ if($codProyecto!=0){
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Adicionar Tarea</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">    <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row">
                       <label class="col-sm-3 col-form-label">Proyecto / Componente PEI</label>
                       <div class="col-sm-8">
                         <div class="form-group">
-                            <select name="componente_pei" id="componente_pei" class="single-select" data-style="btn btn-warning" required>
+                            <select name="componente_pei" id="componente_pei" class="form-control single-select" data-style="btn btn-warning" required>
                                 <option value="" disabled selected="selected">-</option>
                                 <?php             
                                     $sqlProj="SELECT np.codigo, np.nombre, np.abreviatura from niveles_pei np, nivelespei_unidadesareas npua where np.codigo=npua.cod_nivelpei and npua.cod_area='$globalAreaX' and npua.cod_unidadorganizacional='$globalUnidadX'";
@@ -515,7 +550,7 @@ if($codProyecto!=0){
                       <label class="col-sm-3 col-form-label">Nombre</label>
                       <div class="col-sm-8">
                         <div class="form-group">
-                          <input class="form-control" type="text" name="nombre" id="nombre" required="true" onkeyup="javascript:this.value=this.value.toUpperCase();"/>
+                          <input class="form-control" type="text" name="nombre" id="nombre" required="true" autocomplete="off" onkeyup="javascript:this.value=this.value.toUpperCase();"/>
                         </div>
                       </div>
                     </div>
@@ -540,7 +575,7 @@ if($codProyecto!=0){
                       <label class="col-sm-3 col-form-label">Prioridad</label>
                       <div class="col-sm-8">
                         <div class="form-group">
-                            <select name="prioridad" id="prioridad" class="single-select" data-style="btn btn-warning" required>
+                            <select name="prioridad" id="prioridad" class="single-select form-control" data-style="btn btn-warning" required>
                                 <option value="" disabled selected="selected">-</option>
                                 <?php             
                                     $sqlForaneo="SELECT codigo,nombre FROM actividades_prioridades where cod_estado=1";
@@ -593,5 +628,31 @@ if($codProyecto!=0){
         <script src="assets2/libs/quill/quill.min.js"></script>
         <!-- Init js-->
         <script src="assets2/js/pages/task.init.js"></script>
+
+        <!-- Script - Lista de Tareas -->
+        <script>
+            // Envio de Archivo
+            $('body').on('change','#src-file1-input',function(){
+                // Cambia texto de input de tioo Archivo
+                // var filename = "'" + $(this).val().replace(/^.*[\\\/]/, '') + "'";
+                // $(this).parent().css('--fn', filename);
+                let formData = new FormData();
+                let files    = $(this)[0].files[0];
+                let code_act = $('body #codeActivity').val();
+                formData.append('type', 1);         // Tipo 1 : Guardar Archivos
+                formData.append('code_activity', code_act);
+                formData.append('file', files);
+                $.ajax({
+                    url:"actividades/methods.php",
+                    type:"POST",
+                    contentType: false,
+                    processData: false,
+                    data: formData,
+                    success:function(response){
+                        console.log(response)
+                    }
+                }); 
+            });
+        </script>
     </body>
 </html>
