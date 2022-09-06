@@ -16,28 +16,25 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
 	$nombreActividad=$rowActividad['nombre'];
 	$nombreProyecto=$rowActividad['nombreproyecto'];
 }
-
+    /**********************************************/
+    $array_color = ['primary', 'secondary', 'warning'];
+    $count_array = count($array_color);
     /**
      * Lista de Archivos de Actividad
      * @autor: Ronald Mollericona
     **/
-    $sqlActividadFiles="SELECT fecha, ruta, extension from actividades_archivos where cod_actividad = '$codigoActividad'";
+    $sqlActividadFiles="SELECT codigo, fecha, ruta, filesize, extension from actividades_archivos where cod_actividad = '$codigoActividad' ORDER BY codigo DESC";
     $stmtActividadFiles= $dbh->prepare($sqlActividadFiles);
     $stmtActividadFiles->execute();
 
-    $stmtActividadFiles->bindColumn('fecha', $fecha);
-    $stmtActividadFiles->bindColumn('ruta', $ruta);
-    $stmtActividadFiles->bindColumn('extension', $extension);
     /**
      * Lista de Notas de Actividad
      * @autor: Ronald Mollericona
     **/
-    $sqlNote="SELECT fecha, anotacion from actividades_anotaciones where cod_actividad = '$codigoActividad'";
+    $sqlNote="SELECT date_format(fecha, '%d-%m-%Y') as fecha, anotacion from actividades_anotaciones where cod_actividad = '$codigoActividad' ORDER BY codigo DESC";
     $stmtNote= $dbh->prepare($sqlNote);
     $stmtNote->execute();
 
-    $stmtNote->bindColumn('fecha', $fecha);
-    $stmtNote->bindColumn('anotacion', $anotacion);
 ?>
 <div id="bodyTaskComplete">    
     <div class="modal-header">
@@ -47,94 +44,139 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
     <div class="modal-body">
     	<div class="row">
     		<div class="col-lg-8">
-                <!-- ARCHIVOS -->
-                <input type="text" id="codeActivity" value="<?=$codigoActividad;?>" hidden>
-                <div class="card mb-3">
-                    <label for="example-textarea" class="form-label">Archivos adjuntos:</label>
-                    <!-- <div class="card mb-1 shadow-none border">
-                        <div class="p-2">
-                            <div class="row align-items-center">
-                                <div class="col-auto">
-                                    <div class="avatar-sm">
-                                        <span class="avatar-title badge-danger text-white rounded">
-                                            X
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="col ps-0">
-                                    <h5 class="mt-0 mb-0 font-size-14">No hay archivos adjuntos</h5>
-                                </div>
-                            </div>
-                        </div>
-                    </div> -->
-                    <?php
-                        while ($rowaf = $stmtActividadFiles->fetch(PDO::FETCH_BOUND)) {
-                    ?>
-                        <div class="card mb-1 shadow-none border">
-                            <div class="p-2">
-                                <div class="row align-items-center">
-                                    <div class="col-auto">
-                                        <div class="avatar-sm">
-                                            <span class="avatar-title badge-soft-primary text-primary rounded">
-                                                <?=strtoupper($extension);?>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="col ps-0">
-                                        <a href="file_activity/<?=$ruta;?>" download="pei_<?=$ruta?>" class="text-muted fw-bold"><?=$ruta;?></a>
-                                        <p class="mb-0 font-12">2.3 MB</p>
-                                    </div>
-                                    <div class="col-auto">
-                                        <!-- Button -->
-                                        <a href="javascript:void(0);" class="btn btn-link font-16 text-muted">
-                                            <i class="dripicons-download"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    <?php
-                            }
-                    ?>
-                </div>
-                <!-- FIN NOTAS -->
-                <label for="example-textarea" class="form-label">Notas:</label>
-                <!-- Lista de Notas -->
-                    <?php
-                        while ($rown = $stmtNote->fetch(PDO::FETCH_BOUND)) {
-                    ?>                      
-                        <div class="d-flex align-items-start p-1">
-                            <img src="assets2/images/users/user-9.jpg" class="me-2 rounded-circle" height="36" alt="Arya Stark">
-                            <div class="w-100">
-                                <h5 class="mt-0 mb-0 font-size-14">
-                                    <span class="float-end text-muted font-12"><?=date('d-m-Y', strtotime($fecha));?></span>
-                                    <?=$anotacion;?>
-                                </h5>
-                                <!-- <p class="mt-1 mb-0 text-muted">
-                                    Se deberia revisar el diseno del proyecto.
-                                </p> -->
-                            </div>
-                        </div>
-                    <?php
-                        }
-                    ?>
-                <!-- Fin lista de Notas -->
                 <!-- Nueva Nota-->
-                <div class="mt-3">
-                    <label for="example-textarea" class="form-label">Nueva nota:</label>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <textarea class="form-control" id="annotation" rows="3" placeholder="Escriba una nota.."></textarea>
-                        </div>
-                        <div class="col-md-12 text-rigth">
-                            <button type="button" class="btn btn-primary btn-block border" id="save-annotation"> Guardar</button>
-                        </div>
+                <div class="card p-2">
+                    <h5 class="card-title font-16">Detalle de Actividad</h5>
+                    <div class="border rounded">
+                        <form action="#" class="comment-area-box">
+                            <textarea rows="3" class="form-control border-0 resize-none" id="annotation" placeholder="Escriba una nota.."></textarea>
+                            <div class="p-2 bg-light d-flex justify-content-between align-items-center">
+                                <div class="file-select" id="src-file1" >
+                                    <input type="file" id="src-file1-input" name="src-file1" aria-label="Archivo">
+                                </div>
+                                <button type="button" class="btn btn-sm btn-primary" id="save-annotation"><i class="mdi mdi-account me-1"></i>Agregar Colaborador</button>
+                                <button type="button" class="btn btn-sm btn-success" id="save-annotation"><i class="mdi mdi-send me-1"></i>Enviar Nota</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
+                <!-- ARCHIVOS -->
+                <input type="text" id="codeActivity" value="<?=$codigoActividad;?>" hidden>
+                <div class="card p-2">
+                    <h5 class="card-title font-16">Archivos adjuntos</h5>
+                    <div class="component-file">
+                        <?php
+                            if(!count($rows_files = $stmtActividadFiles->fetchAll())){
+                        ?>
+                            <div class="card mb-1 shadow-none border">
+                                <div class="p-2">
+                                    <div class="row align-items-center">
+                                        <div class="col-auto">
+                                            <div class="avatar-sm">
+                                                <span class="avatar-title badge-soft-danger text-danger rounded">
+                                                    X
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="col ps-0">
+                                            <h5 class="mt-0 mb-0 font-size-14">No hay archivos adjuntos</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php
+                            }else{
+                            foreach ($rows_files as $file){
+                        ?>   
+                            <div class="card shadow-none border">
+                                <div class="p-2">
+                                    <div class="row align-items-center">
+                                        <div class="col-auto">
+                                            <div class="avatar-sm">
+                                                <?php $color_val = $array_color[random_int(0, $count_array-1)]; ?>
+                                                <span class="avatar-title badge-soft-<?= $color_val; ?> text-<?= $color_val; ?> rounded">
+                                                    <?=strtoupper($file['extension']);?>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="col ps-0">
+                                            <a href="file_activity/<?=$file['ruta'];?>" download="pei_<?=$file['ruta']?>" class="text-muted fw-bold"><?=$file['ruta'];?></a>
+                                            <p class="mb-0 font-12"><?=$file['filesize'];?></p>
+                                        </div>
+                                        <div class="col-auto">
+                                            <a href="file_activity/<?=$file['ruta'];?>" download="pei_<?=$file['ruta']?>" class="btn btn-link font-16 text-muted">
+                                                <i class="dripicons-download"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php
+                                }
+                            }
+                        ?>
+                    </div>
+                </div>
+                <!-- FIN NOTAS -->
+                <div class="card p-2">
+                    <h5 class="card-title font-16">Notas</h5>
+                    <!-- Lista de Notas -->
+                    <div class="component-annotation">
+                        <?php
+                            if(!count($rows_notes = $stmtNote->fetchAll())){
+                        ?>
+                            <div class="card shadow-none border">
+                                <div class="p-2">
+                                    <div class="row align-items-center">
+                                        <div class="col-auto">
+                                            <div class="avatar-sm">
+                                                <span class="avatar-title badge-soft-danger text-danger rounded">
+                                                    <i class="fe-message-circle"></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="col ps-0">
+                                            <h5 class="mt-0 mb-0 font-size-14">No hay notas registradas.</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php
+                            }else{
+                                foreach ($rows_notes as $note){
+                        ?>                      
+                                <div class="d-flex align-items-start p-1">
+                                    <img src="assets2/images/users/default.png" class="me-2 rounded-circle" height="36" alt="Perfil">
+                                    <div class="w-100">
+                                        <h5 class="mt-0 mb-0 font-size-14 pt-1">
+                                            <span class="float-end text-muted font-12"><?=$note['fecha'];?></span>
+                                            <?=$note['anotacion'];?>
+                                        </h5>
+                                    </div>
+                                </div>
+                        <?php
+                                }
+                            }
+                        ?>
+                    </div>
+                </div>
+                <!-- Fin lista de Notas -->
             </div>
-            <div class="col-md-4 pt-3">
-                <div class="file-select" id="src-file1" >
-                    <input type="file" id="src-file1-input" name="src-file1" aria-label="Archivo">
+            <div class="col-md-4">
+                <div class="card p-2">
+                    <h5 class="card-title font-16">Colaboradores</h5>
+                    <div class="post-user-comment-box m-1">
+                        <div class="d-flex align-items-start">
+                            <div class="d-flex align-items-start">
+                                <img src="assets2/images/users/default.png" class="me-2 rounded-circle" height="36" alt="Perfil">
+                                <div class="w-100">
+                                    <h5 class="mt-0 mt-1 mb-0 font-size-14">
+                                        Ronald Mollericona
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
     	</div>

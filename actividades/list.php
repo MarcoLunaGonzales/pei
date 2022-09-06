@@ -45,42 +45,7 @@ if($codProyecto!=0){
 		<!-- Head js -->
 		<script src="assets2/js/head.js"></script>
         <!-- Style input type FILE -->
-        <style>
-            .file-select {
-                position: relative;
-                display: inline-block;
-            }
-
-            .file-select::before {
-                background-color: #5678EF;
-                color: white;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                border-radius: 3px;
-                content: 'Adjuntar Archivo';
-                position: absolute;
-                left: 0;
-                right: 0;
-                top: 0;
-                bottom: 0;
-            }
-
-            .file-select input[type="file"] {
-                opacity: 0;
-                width: 200px;
-                height: 32px;
-                display: inline-block;
-            }
-
-            :root {
-                --fn: 'Adjuntar Archivo';
-            }
-            .file-select::before {
-                white-space: nowrap;
-                content: var(--fn);
-            }
-        </style>
+		<link href="assets/css/customStyle.css" rel="stylesheet" type="text/css" />
     </head>
 
     <!-- body start -->
@@ -638,13 +603,64 @@ if($codProyecto!=0){
                 // Cambia texto de input de tioo Archivo
                 // var filename = "'" + $(this).val().replace(/^.*[\\\/]/, '') + "'";
                 // $(this).parent().css('--fn', filename);
+                let sizeByte = $(this)[0].files[0].size;
+                let sizekiloBytes = parseInt(sizeByte / 1024);
+                let sizeFile = sizekiloBytes > 1024 ? (parseInt(sizekiloBytes / 1024) + ' MB') : (sizekiloBytes + ' KB');
                 let formData = new FormData();
                 let files    = $(this)[0].files[0];
                 let code_act = $('body #codeActivity').val();
                 formData.append('type', 1);         // Tipo 1 : Guardar Archivos
                 formData.append('code_activity', code_act);
                 formData.append('file', files);
-                methodUse(formData);
+                formData.append('size', sizeFile);
+                $.ajax({
+                    url:"actividades/methods.php",
+                    type:"POST",
+                    contentType: false,
+                    processData: false,
+                    data: formData,
+                    success:function(response){
+                        let resp = JSON.parse(response);
+                        let cp_file = $('.component-file').html();
+                        $('.component-file').html(`
+                            <div class="card mb-1 shadow-none border">
+                                <div class="p-2">
+                                    <div class="row align-items-center">
+                                        <div class="col-auto">
+                                            <div class="avatar-sm">
+                                                <span class="avatar-title badge-soft-success text-success rounded">
+                                                    ${resp.data.extension}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="col ps-0">
+                                            <a href="file_activity/${resp.data.ruta}" download="pei_${resp.data.ruta}" class="text-muted fw-bold">${resp.data.ruta}</a>
+                                            <p class="mb-0 font-12">${resp.data.filesize}</p>
+                                        </div>
+                                        <div class="col-auto">
+                                            <a href="file_activity/${resp.data.ruta}" download="pei_${resp.data.ruta}" class="btn btn-link font-16 text-muted">
+                                                <i class="dripicons-download"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `+cp_file);
+                        if(resp.status){
+                            Swal.fire(
+                                'Correcto!',
+                                'El proceso se completo correctamente',
+                                'success'
+                            );
+                        }else{
+                            Swal.fire(
+                                'Oops...',
+                                '¡Algo salió mal!',
+                                'error'
+                            );
+                        }
+                    }
+                });
             });
             /**
              * Función para enviar y guardar Nota a "methods.php"
@@ -656,13 +672,6 @@ if($codProyecto!=0){
                 formData.append('type', 2);         // Tipo 2 : Guardar Notas
                 formData.append('code_activity', code_act);
                 formData.append('annotation', annotation);
-                methodUse(formData);
-                $('body #annotation').val('')
-            });
-            /**
-             * Preparación de petición AJAX
-             **/
-            function methodUse(formData){
                 $.ajax({
                     url:"actividades/methods.php",
                     type:"POST",
@@ -670,10 +679,36 @@ if($codProyecto!=0){
                     processData: false,
                     data: formData,
                     success:function(response){
-                        console.log(response)
+                        let resp = JSON.parse(response);
+                        let cp_annotation = $('.component-annotation').html();
+                        $('.component-annotation').html(`
+                            <div class="d-flex align-items-start p-1">
+                                <img src="assets2/images/users/default.png" class="me-2 rounded-circle" height="36" alt="Perfil">
+                                <div class="w-100">
+                                    <h5 class="mt-0 mb-0 font-size-14 pt-1">
+                                        <span class="float-end text-muted font-12">${resp.data.fecha}</span>
+                                        ${resp.data.anotacion}
+                                    </h5>
+                                </div>
+                            </div>
+                        `+cp_annotation);
+                        if(resp.status){
+                            Swal.fire(
+                                'Correcto!',
+                                'El proceso se completo correctamente',
+                                'success'
+                            );
+                        }else{
+                            Swal.fire(
+                                'Oops...',
+                                '¡Algo salió mal!',
+                                'error'
+                            );
+                        }
+                        $('body #annotation').val('')
                     }
-                }); 
-            }
+                });
+            });
         </script>
     </body>
 </html>
