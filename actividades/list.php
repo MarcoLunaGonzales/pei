@@ -631,7 +631,9 @@ if($codProyecto!=0){
 
         <!-- Script - Lista de Tareas -->
         <script>
-            // Envio de Archivo
+            /**
+             * Función para enviar y guardar archivos a "methods.php"
+             **/
             $('body').on('change','#src-file1-input',function(){
                 // Cambia texto de input de tioo Archivo
                 // var filename = "'" + $(this).val().replace(/^.*[\\\/]/, '') + "'";
@@ -642,6 +644,25 @@ if($codProyecto!=0){
                 formData.append('type', 1);         // Tipo 1 : Guardar Archivos
                 formData.append('code_activity', code_act);
                 formData.append('file', files);
+                methodUse(formData);
+            });
+            /**
+             * Función para enviar y guardar Nota a "methods.php"
+             **/
+            $('body').on('click','#save-annotation',function(){
+                let annotation = $('body #annotation').val();
+                let code_act   = $('body #codeActivity').val();
+                let formData   = new FormData();
+                formData.append('type', 2);         // Tipo 2 : Guardar Notas
+                formData.append('code_activity', code_act);
+                formData.append('annotation', annotation);
+                methodUse(formData);
+                $('body #annotation').val('')
+            });
+            /**
+             * Preparación de petición AJAX
+             **/
+            function methodUse(formData){
                 $.ajax({
                     url:"actividades/methods.php",
                     type:"POST",
@@ -652,7 +673,7 @@ if($codProyecto!=0){
                         console.log(response)
                     }
                 }); 
-            });
+            }
         </script>
     </body>
 </html>
