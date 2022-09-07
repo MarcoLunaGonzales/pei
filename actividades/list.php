@@ -181,6 +181,9 @@ if($codProyecto!=0){
                                                                                             <i class="mdi mdi-comment-text-multiple-outline font-16 me-1"></i>
                                                                                             21
                                                                                         </li>
+                                                                                        <li class="list-inline-item text-info pe-2" style="cursor:pointer;">
+                                                                                            <i class="fe-eye"></i>
+                                                                                        </li>
                                                                                         <li class="list-inline-item">
                                                                                             <span class="badge badge-soft-<?=$colorActividad;?> p-1"><?=$nombrePrioridadActividad;?></span>
                                                                                         </li>
@@ -630,6 +633,7 @@ if($codProyecto!=0){
 
         <!-- Script - Lista de Tareas -->
         <script>
+            let label = '> .simplebar-wrapper > .simplebar-mask > .simplebar-offset > .simplebar-content-wrapper > .simplebar-content';
             /**
              * Función para enviar y guardar archivos a "methods.php"
              **/
@@ -655,7 +659,7 @@ if($codProyecto!=0){
                     data: formData,
                     success:function(response){
                         let resp = JSON.parse(response);
-                        $('body .component-file').html(resp.content);
+                        $('body .component-file ' + label).html(resp.content);
                         responseAlert(resp.status);
                     }
                 });
@@ -679,7 +683,7 @@ if($codProyecto!=0){
                         data: formData,
                         success:function(response){
                             let resp = JSON.parse(response);
-                            $('body .component-annotation').html(resp.content);
+                            $('body .component-annotation ' + label).html(resp.content);
                             responseAlert(resp.status);
                             $('body #annotation').val('')
                         }
@@ -729,9 +733,30 @@ if($codProyecto!=0){
                         }else{
                             responseAlert(resp.status);
                         }
-                        $('body .component-collaborator').html(resp.content);
+                        $('body .component-collaborator ' + label).html(resp.content);
                         $('body #modal_task_detail').modal('show');
                         $('#modalCollaborator').modal('hide');
+                    }
+                });
+            });
+            /**
+             * Remover registro
+             **/
+            $('body').on('click', '.remove-note', function(){
+                let cod_anotacion = $(this).data('codigo');
+                let formData     = new FormData();
+                formData.append('type', 4);         // Tipo 4 : Eliminar Nota 
+                formData.append('codigo', cod_anotacion);         // Tipo 4 : Eliminar Nota 
+                $.ajax({
+                    url:"actividades/methods.php",
+                    type:"POST",
+                    contentType: false,
+                    processData: false,
+                    data: formData,
+                    success:function(response){
+                        let resp = JSON.parse(response);
+                        responseAlert(resp.status);
+                        $('.item-note-'+cod_anotacion).remove()
                     }
                 });
             });

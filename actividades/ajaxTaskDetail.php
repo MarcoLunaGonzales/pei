@@ -1,8 +1,10 @@
 <?php
 
 require_once '../conexion.php';
+session_start();
 $dbh = new Conexion();
-$codigoActividad=$_GET["codigo_actividad"];
+$codigoActividad = $_GET["codigo_actividad"];
+$cod_personal    = $_SESSION['globalUser'];
 
 $sqlActividad="SELECT a.codigo, a.nombre, a.observaciones, DATE_FORMAT(a.fecha_limite,'%b %d, %Y')as fecha_limite, a.cod_prioridad, ap.nombre as nombre_prioridad, ap.color,
 (select np.nombre from niveles_pei np where np.codigo=a.cod_componentepei)as nombrecomponentepei, np.nombre as nombreproyecto from actividades a, actividades_prioridades ap, niveles_pei np where a.cod_prioridad=ap.codigo and a.cod_componentepei=np.codigo and a.codigo='$codigoActividad'";
@@ -31,7 +33,12 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
      * Lista de Notas de Actividad
      * @autor: Ronald Mollericona
     **/
-    $sqlNote="SELECT date_format(fecha, '%d-%m-%Y') as fecha, anotacion from actividades_anotaciones where cod_actividad = '$codigoActividad' ORDER BY codigo DESC";
+    $sqlNote="SELECT ac.codigo, date_format(ac.fecha, '%d-%m-%Y') as fecha, ac.anotacion, ac.cod_personal, CONCAT(p.primer_nombre, ' ', p.paterno, ' ', p.materno) as personal
+    FROM actividades_anotaciones ac
+    LEFT JOIN personal p ON p.codigo = ac.cod_personal
+    WHERE ac.cod_actividad = '$codigoActividad' 
+    AND ac.cod_estado = 1
+    ORDER BY ac.codigo DESC";
     $stmtNote= $dbh->prepare($sqlNote);
     $stmtNote->execute();
     
@@ -41,7 +48,8 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
     **/
     $sqlColl = "SELECT CONCAT(p.primer_nombre, ' ', p.paterno, ' ', p.materno) as nombre_compl, DATE_FORMAT(ac.fecha_designacion, '%d-%m-%Y') as fecha
     FROM actividades_colaboradores ac
-    LEFT JOIN personal p on p.codigo = ac.cod_personal";
+    LEFT JOIN personal p on p.codigo = ac.cod_personal
+    WHERE cod_actividad = $codigoActividad";
     $stmtColl = $dbh->prepare($sqlColl);
     $stmtColl->execute();
 
@@ -88,7 +96,7 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
                                             </div>
                                         </div>
                                         <div class="col ps-0">
-                                            <h5 class="mt-0 mb-0 font-size-14">No hay archivos adjuntos</h5>
+                                            <h5 class="mt-0 mb-0 text-muted">No hay archivos adjuntos</h5>
                                         </div>
                                     </div>
                                 </div>
@@ -145,7 +153,7 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
                                             </div>
                                         </div>
                                         <div class="col ps-0">
-                                            <h5 class="mt-0 mb-0 font-size-14">No hay notas registradas.</h5>
+                                            <h5 class="mt-0 mb-0 text-muted">No hay notas registradas.</h5>
                                         </div>
                                     </div>
                                 </div>
@@ -153,17 +161,23 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
                         <?php
                             }else{
                                 foreach ($rows_notes as $note){
-                        ?>       
-                            <div class="inbox-item">
-                                <div class="d-flex align-items-start p-1">
-                                    <img src="assets2/images/users/default.png" class="me-2 rounded-circle" height="36" alt="Perfil">
-                                    <div class="w-100">
-                                        <h5 class="mt-0 mb-0 font-size-14 pt-1">
-                                            <span class="float-end text-muted font-12"><?=$note['fecha'];?></span>
-                                            <?=$note['anotacion'];?>
-                                        </h5>
-                                    </div>
+                        ?>
+                            <div class="inbox-item item-note-<?=$note['codigo'];?>">
+                                <div class="inbox-item-img">
+                                    <img src="assets2/images/users/default.png" class="rounded-circle" alt="perfil">
                                 </div>
+                                <p class="inbox-item-author"><?=$note['personal'];?></p>
+                                <p class="inbox-item-text"><?=$note['anotacion'];?></p>
+                                <p class="inbox-item-date">
+                                    <?=$note['fecha'];?>
+                                    <?php
+                                        if($note['cod_personal'] == $cod_personal){
+                                    ?>
+                                    <a href="javascript:(0);" class="btn btn-sm btn-link text-danger font-15 remove-note" data-codigo="<?=$note['codigo'];?>"><i class="fe-x"></i></a>
+                                    <?php
+                                        }
+                                    ?>
+                                </p>
                             </div>
                         <?php
                                 }
@@ -175,12 +189,29 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
             </div>
             <div class="col-md-4 pl-0 border">
                 <div class="card p-2">
-                    <button type="button" class="btn btn-success rounded-pill btn-sm addCollaborator"><i class="mdi mdi-plus"></i>Agregar Colaborador</button><br>
-                    <h5 class="card-title font-16 mb-0 text-danger"><i class="fe-users"></i> Colaboradores</h5>
+                    <button type="button" class="btn btn-success rounded-pill btn-sm addCollaborator"><i class="mdi mdi-plus"></i>Agregar Colaborador</button>
+                    <h5 class="card-title font-16 mb-0 mt-2 text-primary"><i class="fe-users"></i> Colaboradores</h5>
                     <div class="inbox-widget component-collaborator" data-simplebar style="max-height: 350px;">
                         <?php
-                            $rows_coll = $stmtColl->fetchAll();
-                            foreach ($rows_coll as $collaborator){
+                            if(!count($rows_coll = $stmtColl->fetchAll())){
+                        ?>
+                        <div class="inbox-item">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <div class="avatar-sm">
+                                        <span class="avatar-title badge-soft-danger text-danger rounded">
+                                            <i class="fe-user-x"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col ps-0">
+                                    <h5 class="mt-0 mb-0 text-muted">Actividad sin colaboradores...</h5>
+                                </div>
+                            </div>
+                        </div> 
+                        <?php
+                            }else{
+                                foreach ($rows_coll as $collaborator){
                         ?>
                         <div class="inbox-item">
                             <div class="d-flex align-items-start">
@@ -193,6 +224,7 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
                             </div>
                         </div>
                         <?php
+                                }
                             }
                         ?>
                     </div>
