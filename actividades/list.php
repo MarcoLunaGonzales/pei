@@ -579,7 +579,7 @@ if($codProyecto!=0){
             </div><!-- /.modal-content -->
         </div>
     </div><!-- /.modal -->  
-
+    <!-- Modal Colaborador -->
     <div class="modal fade" id="modalCollaborator" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
         <div class="modal-dialog modal-top">
             <div class="modal-content">
@@ -591,11 +591,11 @@ if($codProyecto!=0){
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
-                                <label class="col-sm-3 col-form-label">Colaborador</label>
+                                <label class="col-sm-3 col-form-label">Colaborador:</label>
                                 <select name="cod_personal" id="cod_personal" class="form-control" data-style="btn btn-warning" required>
                                     <option value="" disabled selected="selected">-</option>
                                     <?php             
-                                        $sqlColl   = "SELECT codigo, CONCAT(primer_nombre, ' ', paterno, ' ',materno) as nombre_personal FROM personal";
+                                        $sqlColl   = "SELECT codigo, CONCAT(primer_nombre, ' ', paterno, ' ',materno) as nombre_personal FROM personal where cod_tipopersonal = 1";
                                         $stmtColl  = $dbh->prepare($sqlColl);
                                         $stmtColl->execute();
                                         $rows_collaborators = $stmtColl->fetchAll();
@@ -613,6 +613,44 @@ if($codProyecto!=0){
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary close-collaborator" data-dismiss="modal">Cerrar</button>
                     <button type="button" class="btn btn-primary save-collaborator">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Presupuesto -->
+    <div class="modal fade" id="modalBudget" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-top">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title text-white">Añadir Presupuesto</h5>
+                    <button type="button" class="btn-close bg-white close-budget" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="col-sm-3 col-form-label">Cuenta:</label>
+                                <select name="cod_account" id="cod_account" class="form-control" data-style="btn btn-warning" required>
+                                    <option value="" disabled selected="selected">-</option>
+                                    <?php             
+                                        $sqlAccount   = "SELECT codigo, numero, nombre FROM plan_cuentas";
+                                        $stmtAccount  = $dbh->prepare($sqlAccount);
+                                        $stmtAccount->execute();
+                                        $rows_accounts = $stmtAccount->fetchAll();
+                                        foreach ($rows_accounts as $account){       
+                                    ?>
+                                    <option value="<?= $account['codigo']; ?>"  ><?= $account['numero']; ?> - <?= $account['nombre']; ?></option>
+                                    <?php 
+                                        }   
+                                    ?>
+                                </select>                     
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary close-budget" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary save-budget">Guardar</button>
                 </div>
             </div>
         </div>
@@ -705,6 +743,16 @@ if($codProyecto!=0){
             $('.close-collaborator').click(function(){
                 $('body #modal_task_detail').modal('show');
                 $('#modalCollaborator').modal('hide');
+            });
+            /* Abrir modal de asignación de presupuesto */
+            $('body').on('click', '.addBudget', function(){
+                $('body #modal_task_detail').modal('hide');
+                $('#modalBudget').modal('show');
+            }); 
+            /* Cerrar modal Presupuesto */
+            $('.close-budget').click(function(){
+                $('body #modal_task_detail').modal('show');
+                $('#modalBudget').modal('hide');
             });
             /**
              * Función para enviar y guardar la asignación del colaborador

@@ -53,18 +53,30 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
     $stmtColl = $dbh->prepare($sqlColl);
     $stmtColl->execute();
 
+    /**
+     * Lista de Presupuestos asignados a la actividad
+     * @autor: Ronald Mollericona
+    **/
+    $sqlAccount = "SELECT ap.codigo, date_format(ap.fecha_ejecucion, '%d-%m-%Y') as fecha, ap.monto, UPPER(p.nombre) as nombre
+    FROM actividades_presupuestos ap
+    LEFT JOIN plan_cuentas p ON p.codigo = ap.cod_cuenta
+    WHERE ap.cod_actividad = '$codigoActividad' 
+    ORDER BY ap.codigo DESC";
+    $stmtAccount = $dbh->prepare($sqlAccount);
+    $stmtAccount->execute();
+
 ?>
 <div id="bodyTaskComplete">    
     <div class="modal-header bg-primary">
         <h5 class="modal-title text-white" id="scrollableModalTitle">Actividad <?=$nombreActividad;?>  Proyecto: <?=$nombreProyecto;?></h5>
         <button type="button" class="btn-close bg-white" data-bs-dismiss="modal" aria-label="Close"></button>
     </div>
-    <div class="modal-body pr-4">
+    <div class="modal-body">
     	<div class="row">
-    		<div class="col-lg-8">
+    		<div class="col-md-8">
                 <!-- Nueva Nota-->
                 <div class="card p-2 mb-1 border">
-                    <h5 class="card-title font-16 text-primary"><i class="fe-airplay"></i> Detalle de Actividad</h5>
+                    <h5 class="card-title font-16 text-primary"><i class="fe-airplay"></i> Detalle</h5>
                     <div class="border rounded">
                         <form action="#" class="comment-area-box">
                             <textarea rows="3" class="form-control border-0 resize-none" id="annotation" placeholder="Escriba una nota.."></textarea>
@@ -187,10 +199,62 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
                 </div>
                 <!-- Fin lista de Notas -->
             </div>
-            <div class="col-md-4 pl-0 border">
-                <div class="card p-2">
-                    <button type="button" class="btn btn-success rounded-pill btn-sm addCollaborator"><i class="mdi mdi-plus"></i>Agregar Colaborador</button>
-                    <h5 class="card-title font-16 mb-0 mt-2 text-primary"><i class="fe-users"></i> Colaboradores</h5>
+    		<div class="col-md-4">
+                <!-- Presupuesto-->
+                <div class="card p-2 mb-1 border">
+                    <div class="pb-1">
+                        <button type="button" class="btn btn-success btn-sm addBudget float-end pl-1 pr-1">
+                            <i class="mdi mdi-plus"></i> Nuevo
+                        </button>
+                        <h5 class="header-title mt-1 text-primary"><i class="fe-tag"></i> Presupuesto</h5>
+                    </div>
+                    <div class="inbox-widget component-budget" data-simplebar style="max-height: 250px;">
+                        <?php
+                            if(!count($rows_account = $stmtAccount->fetchAll())){
+                        ?>
+                        <div class="inbox-item">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <div class="avatar-sm">
+                                        <span class="avatar-title badge-soft-danger text-danger rounded">
+                                            <i class="fe-user-x"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col ps-0">
+                                    <h5 class="mt-0 mb-0 text-muted">Actividad sin presupuesto...</h5>
+                                </div>
+                            </div>
+                        </div> 
+                        <?php
+                            }else{
+                                foreach ($rows_account as $account){
+                        ?>
+                            <div class="inbox-item">
+                                <div class="row">
+                                    <div class="col-md-8 inbox-item-text">
+                                        <p class="inbox-item-author"><?=$account['nombre'];?></p>
+                                        <p class="mb-0 text-success"><i class="fe-file"></i> <?=$account['monto'];?> bs.</p>
+                                    </div>
+                                    <div class="col-md-4 inbox-item-date p-0 text-right">
+                                    <?=$account['fecha'];?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php
+                                }
+                            }
+                        ?>
+                    </div>
+                </div>
+                <!-- Colaboradores-->
+                <div class="card p-2 mb-1 border">
+                    <div>
+                        <button type="button" class="btn btn-success btn-sm addCollaborator float-end pl-1 pr-1">
+                            <i class="mdi mdi-plus"></i> Nuevo
+                        </button>
+                        <h5 class="header-title mt-1 text-primary"><i class="fe-users"></i> Colaboradores</h5>
+                    </div>
                     <div class="inbox-widget component-collaborator" data-simplebar style="max-height: 350px;">
                         <?php
                             if(!count($rows_coll = $stmtColl->fetchAll())){
@@ -213,6 +277,11 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
                             }else{
                                 foreach ($rows_coll as $collaborator){
                         ?>
+                        <!-- <div class="mt-2" id="tooltips-container">
+                            <a href="javascript:void(0);" class="d-inline-block">
+                                <img src="assets2/images/users/default.png" class="rounded-circle avatar-xs" alt="friend" data-bs-container="#tooltips-container" data-bs-toggle="tooltip" data-bs-placement="top" title="Mat Helme">
+                            </a>
+                        </div> -->
                         <div class="inbox-item">
                             <div class="d-flex align-items-start">
                                 <img src="assets2/images/users/default.png" class="me-2 rounded-circle" height="36" alt="Perfil">
