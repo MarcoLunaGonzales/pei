@@ -705,10 +705,13 @@ if($codProyecto!=0){
             /**
              * Función para enviar y guardar la asignación del colaborador
              **/
-            $('body').on('change','#save-collaborator',function(){
+            $('.save-collaborator').click(function(){
                 let cod_personal = $('#cod_personal').val();
+                let code_act     = $('body #codeActivity').val();
+                let formData     = new FormData();
                 formData.append('type', 3);         // Tipo 3 : Guardar Asignación
                 formData.append('cod_personal', cod_personal);
+                formData.append('code_activity', code_act);
                 $.ajax({
                     url:"actividades/methods.php",
                     type:"POST",
@@ -717,7 +720,18 @@ if($codProyecto!=0){
                     data: formData,
                     success:function(response){
                         let resp = JSON.parse(response);
-                        responseAlert(resp.status);
+                        if(resp.status == 3){
+                            Swal.fire(
+                                'Oops...',
+                                'El colaborador ya se cuentra asignado a la actividad',
+                                'warning'
+                            );
+                        }else{
+                            responseAlert(resp.status);
+                        }
+                        $('body .component-collaborator').html(resp.content);
+                        $('body #modal_task_detail').modal('show');
+                        $('#modalCollaborator').modal('hide');
                     }
                 });
             });

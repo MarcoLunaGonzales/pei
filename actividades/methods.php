@@ -27,7 +27,7 @@ if($_POST['type'] == 1){
         	            VALUES ('$code_activity','$cod_personal','$date','$file_name', '$size','$extension','1')";
         $stmt      = $dbh->prepare($sqlInsert);
         $flagSuccess = $stmt->execute();
-        /* Se obtiene ultimo registro */
+        /* Se lista registro */
         $sqlFile = "SELECT codigo, date_format(fecha, '%d-%m-%Y') as fecha, ruta, filesize, UPPER(extension) as extension FROM actividades_archivos ORDER BY codigo DESC";
         $stmFile = $dbh->prepare($sqlFile);
         $stmFile->execute();
@@ -88,7 +88,7 @@ else if($_POST['type'] == 2){
         	            VALUES ('$code_activity','$cod_personal','$date','$anotacion','1')";
         $stmt        = $dbh->prepare($sqlInsert);
         $flagSuccess = $stmt->execute();
-        /* Se obtiene ultimo registro */
+        /* Se lista registro */
         $sqlNote = "SELECT codigo, date_format(fecha, '%d-%m-%Y') as fecha, anotacion FROM actividades_anotaciones ORDER BY codigo DESC";
         $stmtNote = $dbh->prepare($sqlNote);
         $stmtNote->execute();
@@ -125,38 +125,50 @@ else if($_POST['type'] == 2){
  * @autor: Ronald Mollericona
  **/
 else if($_POST['type'] == 3){
-    $staff = $_POST['cod_personal'];
-    $date  = date('Y-m-d');
+    $code_activity = $_POST['code_activity'];
+    $staff_code    = $_POST['cod_personal'];
+    $date          = date('Y-m-d');
     try {
-        $sqlInsert   ="INSERT INTO actividades_anotaciones (cod_actividad, cod_personal, fecha, anotacion, cod_estado)
-        	            VALUES ('$code_activity','$cod_personal','$date','$anotacion','1')";
-        $stmt        = $dbh->prepare($sqlInsert);
-        $flagSuccess = $stmt->execute();
-        /* Se obtiene ultimo registro */
-        $sqlNote = "SELECT codigo, date_format(fecha, '%d-%m-%Y') as fecha, anotacion FROM actividades_anotaciones ORDER BY codigo DESC";
-        $stmtNote = $dbh->prepare($sqlNote);
-        $stmtNote->execute();
-        $content = '';
-        $rows_notes = $stmtNote->fetchAll();
-        foreach ($rows_notes as $note){
-            $content .= '
-            <div class="inbox-item">
-                <div class="d-flex align-items-start p-1">
-                    <img src="assets2/images/users/default.png" class="me-2 rounded-circle" height="36" alt="Perfil">
-                    <div class="w-100">
-                        <h5 class="mt-0 mb-0 font-size-14 pt-1">
-                            <span class="float-end text-muted font-12">'.$note['fecha'].'</span>
-                            '.$note['anotacion'].'
-                        </h5>
+        // Verificación de colaboradores asignados
+        $sqlVerf = "SELECT * FROM actividades_colaboradores WHERE cod_actividad = $code_activity AND cod_personal = $staff_code";
+        $stmtVerf = $dbh->prepare($sqlVerf);
+        $stmtVerf->execute();
+        if(count($stmtVerf->fetchAll())){
+            echo json_encode(array(
+                'status'    => 3
+            ));
+        }else{
+            $sqlInsert   ="INSERT INTO actividades_colaboradores (cod_actividad, cod_personal, fecha_designacion, cod_estado)
+                            VALUES ('$code_activity','$staff_code','$date','1')";
+            $stmt        = $dbh->prepare($sqlInsert);
+            $flagSuccess = $stmt->execute();
+            /* Se lista registro */
+            $sqlColl = "SELECT CONCAT(p.primer_nombre, ' ', p.paterno, ' ', p.materno) as nombre_compl, DATE_FORMAT(ac.fecha_designacion, '%d-%m-%Y') as fecha
+            FROM actividades_colaboradores ac
+            LEFT JOIN personal p on p.codigo = ac.cod_personal";
+            $stmtColl = $dbh->prepare($sqlColl);
+            $stmtColl->execute();
+            $content = '';
+            $rows_coll = $stmtColl->fetchAll();
+            foreach ($rows_coll as $collaborator){
+                $content .= '
+                <div class="inbox-item">
+                    <div class="d-flex align-items-start">
+                        <img src="assets2/images/users/default.png" class="me-2 rounded-circle" height="36" alt="Perfil">
+                        <div class="w-100">
+                            <h5 class="mt-0 mt-1 mb-0 font-size-14">
+                                '.$collaborator['nombre_compl'].'
+                            </h5>
+                        </div>
                     </div>
                 </div>
-            </div>
-            ';
+                ';
+            }
+            echo json_encode(array(
+                'status'    => true,
+                'content'   => $content
+            ));
         }
-        echo json_encode(array(
-            'status'    => true,
-            'content'   => $content
-        ));
     } catch (Exception $e) {
         echo json_encode(array(
             'status' => false
