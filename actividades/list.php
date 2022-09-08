@@ -72,7 +72,7 @@ if($codProyecto!=0){
                                             <li class="breadcrumb-item active">Tasks List</li>
                                         </ol>
                                     </div-->
-                                    <h4 class="page-title">Lista de Tareas  -  <?=$nombreProyecto;?></h4>
+                                    <h4 class="page-title">Lista de Actividades  -  <?=$nombreProyecto;?></h4>
                                 </div>
                             </div>
                         </div>     
@@ -92,7 +92,7 @@ if($codProyecto!=0){
                                                     <input type="hidden" id="estado_activo" name="estado_activo" value="0">
                                                     
                                                     <button type="button" class="btn btn-primary" onclick="showModalNewTask(1)">
-                                                            <i class='bx bx-plus mr-1'></i>Nueva Tarea</button>
+                                                            <i class='bx bx-plus mr-1'></i>Nueva Actividad</button>
                                                     </div>
                                                     <div class="col-sm-9">
                                                         <div class="float-sm-end mt-3 mt-sm-0">
@@ -123,8 +123,21 @@ if($codProyecto!=0){
 
                                                 <div class="row mt-4" data-plugin="dragula" data-containers='["task-list-one", "task-list-two", "task-list-three"]'>
                                                     <div class="col">
+                                                        <?php
+                                                            $sqlAct="SELECT a.codigo, a.nombre, a.observaciones, DATE_FORMAT(a.fecha_limite,'%b %d, %Y')as fecha_limite, a.cod_prioridad, ap.nombre as nombre_prioridad, ap.color,
+                                                                (select np.nombre from niveles_pei np where np.codigo=a.cod_componentepei)as nombrecomponentepei
+                                                                from actividades a, actividades_prioridades ap
+                                                                where a.cod_prioridad=ap.codigo
+                                                                and a.cod_padre is null";
+                                                            if($codProyecto!=0){
+                                                                $sqlAct.=" and a.cod_componentepei='$codProyecto' ";
+                                                            }
+                                                                $stmtAct= $dbh->prepare($sqlAct);
+                                                                $stmtAct->execute();
+                                                                $countAct = $stmtAct->rowCount();
+                                                        ?>
                                                         <a class="text-dark" data-bs-toggle="collapse" href="#todayTasks" aria-expanded="false" aria-controls="todayTasks">
-                                                            <h5 class="mb-0"><i class="mdi mdi-chevron-down font-18"></i> Today <span class="text-muted font-14">(10)</span></h5>
+                                                            <h5 class="mb-0"><i class="mdi mdi-chevron-down font-18"></i> Total <span class="text-muted font-14"><?=$countAct;?> Actividades</span></h5>
                                                         </a>
                                                 
                                                         <div class="collapse show" id="todayTasks">
@@ -132,13 +145,6 @@ if($codProyecto!=0){
                                                                 <div class="card-body pb-0" id="task-list-one">
                                                                     
                                                         <?php
-                                                        $sqlAct="SELECT a.codigo, a.nombre, a.observaciones, DATE_FORMAT(a.fecha_limite,'%b %d, %Y')as fecha_limite, a.cod_prioridad, ap.nombre as nombre_prioridad, ap.color,
-                                                            (select np.nombre from niveles_pei np where np.codigo=a.cod_componentepei)as nombrecomponentepei from actividades a, actividades_prioridades ap where a.cod_prioridad=ap.codigo";
-                                                        if($codProyecto!=0){
-                                                            $sqlAct.=" and a.cod_componentepei='$codProyecto' ";
-                                                        }
-                                                            $stmtAct= $dbh->prepare($sqlAct);
-                                                            $stmtAct->execute();
                                                             while ($rowAct = $stmtAct->fetch(PDO::FETCH_ASSOC)) {
                                                                 $codigoActividad=$rowAct['codigo'];
                                                                 $nombreActividad=$rowAct['nombre'];
@@ -169,6 +175,9 @@ if($codProyecto!=0){
                                                                                 </div>
                                                                                 <div class="mt-3 mt-sm-0">
                                                                                     <ul class="list-inline font-13 text-sm-end">
+                                                                                        <li class="list-inline-item">
+                                                                                            <span class="badge badge-soft-<?=$colorActividad;?> p-1"><?=$nombrePrioridadActividad;?></span>
+                                                                                        </li>
                                                                                         <li class="list-inline-item pe-1">
                                                                                             <i class="mdi mdi-calendar-month-outline font-16 me-1"></i>
                                                                                             <?=$fechaLimiteActividad;?>
@@ -181,11 +190,8 @@ if($codProyecto!=0){
                                                                                             <i class="mdi mdi-comment-text-multiple-outline font-16 me-1"></i>
                                                                                             21
                                                                                         </li>
-                                                                                        <li class="list-inline-item text-info pe-2" style="cursor:pointer;">
-                                                                                            <i class="fe-eye"></i>
-                                                                                        </li>
-                                                                                        <li class="list-inline-item">
-                                                                                            <span class="badge badge-soft-<?=$colorActividad;?> p-1"><?=$nombrePrioridadActividad;?></span>
+                                                                                        <li class="list-inline-item text-primary pe-2" style="cursor:pointer;">
+                                                                                            <i class="fe-eye showActivity" data-cod_activity="<?=$codigoActividad?>"></i>
                                                                                         </li>
                                                                                     </ul>
                                                                                 </div>
@@ -221,238 +227,80 @@ if($codProyecto!=0){
                                 <div class="card">
                                     <div class="card-body">
                                         <div class="row">
-                                            <div class="col">
-                                                <div class="dropdown float-end">
-                                                    <a href="#" class="dropdown-toggle arrow-none text-muted"
-                                                        data-bs-toggle="dropdown" aria-expanded="false">
-                                                        <i class='mdi mdi-dots-horizontal font-18'></i>
-                                                    </a>
-                                                    <div class="dropdown-menu dropdown-menu-end">
-                                                        <!-- item-->
-                                                        <a href="javascript:void(0);" class="dropdown-item">
-                                                            <i class='mdi mdi-attachment me-1'></i>Attachment
-                                                        </a>
-                                                        <!-- item-->
-                                                        <a href="javascript:void(0);" class="dropdown-item">
-                                                            <i class='mdi mdi-pencil-outline me-1'></i>Edit
-                                                        </a>
-                                                        <!-- item-->
-                                                        <a href="javascript:void(0);" class="dropdown-item">
-                                                            <i class='mdi mdi-content-copy me-1'></i>Mark as Duplicate
-                                                        </a>
-                                                        <div class="dropdown-divider"></div>
-                                                        <!-- item-->
-                                                        <a href="javascript:void(0);" class="dropdown-item text-danger">
-                                                            <i class='mdi mdi-delete-outline me-1'></i>Delete
-                                                        </a>
-                                                    </div> <!-- end dropdown menu-->
-                                                </div> <!-- end dropdown-->
+                                            <div class="col initial-activity">
+                                                <div class="card-body text-center">
+                                                    <div class="pt-2 pb-2">
+                                                        <img src="assets2/images/detailActivity.svg" alt="profile-image" width="100%">
+                
+                                                        <h4 class="mt-3"><a href="extras-profile.html" class="text-dark">Manténgase al tanto y al día</a></h4>
+                                                        <p class="text-muted">Invite a personas a las actividades, deje comentarios y añada fechas de limite. Le mostraremos la actividad selecciona más detallada en esta sección. <span> </p>
+                                                    </div> <!-- end .padding -->
+                                                </div>
 
-                                                <div class="form-check float-start">
-                                                    <input type="checkbox" class="form-check-input" id="completedCheck">
-                                                    <label class="form-check-label" for="completedCheck">
-                                                        Marcar como completado!
-                                                    </label>
-                                                </div> <!-- end form-check-->
-                                                <div class="clearfix"></div>
-
-                                                <hr class="my-2" />
+                                                <!-- end comments -->
                                             </div>
-                                        </div>
-
-                                        <div class="row">
-                                            <div class="col">
-                                                <h4>Detalle de las tareas que son revisadas.</h4>
+                                            <div class="col detail-activity" style="display:none">
+                                                <h4>Detalle de las actividades que son revisadas.</h4>
 
                                                 <div class="row">
                                                     <div class="col-6">
-                                                        <!-- assignee -->
-                                                        <p class="mt-2 mb-1 text-muted">Asignado A</p>
+                                                        <p class="mt-2 mb-1 text-muted">Responsable</p>
                                                         <div class="d-flex align-items-start">
                                                             <img src="assets2/images/users/user-9.jpg" alt="Arya S" class="rounded-circle me-2" height="24" />
                                                             <div class="w-100">
-                                                                <h5 class="mt-1 font-size-14">
-                                                                    Marco Luna 
+                                                                <h5 class="mt-1 font-size-14 user_manager">
                                                                 </h5>
                                                             </div>
                                                         </div>
-                                                        <!-- end assignee -->
-                                                    </div> <!-- end col -->
-
+                                                    </div>
                                                     <div class="col-6">
-                                                        <!-- start due date -->
                                                         <p class="mt-2 mb-1 text-muted">Fecha Limite</p>
                                                         <div class="d-flex align-items-start">
                                                             <i class='mdi mdi-calendar-month-outline font-18 text-success me-1'></i>
                                                             <div class="w-100">
-                                                                <h5 class="mt-1 font-size-14">
-                                                                    Hoy 10am
+                                                                <h5 class="mt-1 font-size-14 date_limit">
                                                                 </h5>
                                                             </div>
                                                         </div>
-                                                        <!-- end due date -->
-                                                    </div> <!-- end col -->
-                                                </div> <!-- end row -->
+                                                    </div>
+                                                </div>
 
-                                                <!-- task description -->
                                                 <div class="row mt-3">
                                                     <div class="col">
-                                                        <div id="bubble-editor" style="height: 120px;">
-                                                            <p>Este es un detalle de lo que debe mostrarse como descripcion de las notas de la tarea.</p>
-                                                            <ul>
-                                                                <li>XXXXXX  YYYYYYY ZZZZZZ.</li>
-                                                                <li>Editar el documento!</li>
-                                                            </ul>
-                                                            <p>Final del detalle de la tarea</p>
-                                                        </div>
-                                                    </div> <!-- end col -->
-                                                </div>
-                                                <!-- end task description -->
-
-                                                <!-- start sub tasks/checklists -->
-                                                <h5 class="mt-4 mb-2 font-size-16">Sub-Tareas</h5>
-                                                <div class="form-check mt-1">
-                                                    <input type="checkbox" class="form-check-input" id="checklist1">
-                                                    <label class="form-check-label strikethrough" for="checklist1">
-                                                        Sub-Tarea1
-                                                    </label>
-                                                </div>
-
-                                                <div class="form-check mt-1">
-                                                    <input type="checkbox" class="form-check-input" id="checklist2">
-                                                    <label class="form-check-label strikethrough" for="checklist2">
-                                                        Sub-Tarea2
-                                                    </label>
-                                                </div>
-
-                                                <div class="form-check mt-1">
-                                                    <input type="checkbox" class="form-check-input" id="checklist3">
-                                                    <label class="form-check-label strikethrough" for="checklist3">
-                                                        Sub-Tarea3
-                                                    </label>
-                                                </div>
-                                                <!-- end sub tasks/checklists -->
-
-                                                <!-- start attachments -->
-                                                <h5 class="mt-4 mb-2 font-size-16">Documentos Adjuntos</h5>
-                                                <div class="card mb-1 shadow-none border">
-                                                    <div class="p-2">
-                                                        <div class="row align-items-center">
-                                                            <div class="col-auto">
-                                                                <div class="avatar-sm">
-                                                                    <span class="avatar-title badge-soft-primary text-primary rounded">
-                                                                        ZIP
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col ps-0">
-                                                                <a href="javascript:void(0);" class="text-muted fw-bold">planificacion.zip</a>
-                                                                <p class="mb-0 font-12">2.3 MB</p>
-                                                            </div>
-                                                            <div class="col-auto">
-                                                                <!-- Button -->
-                                                                <a href="javascript:void(0);" class="btn btn-link font-16 text-muted">
-                                                                    <i class="dripicons-download"></i>
-                                                                </a>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-        
-                                                <div class="card mb-1 shadow-none border">
-                                                    <div class="p-2">
-                                                        <div class="row align-items-center">
-                                                            <div class="col-auto">
-                                                                <div class="avatar-sm">
-                                                                    <span class="avatar-title badge-soft-primary text-primary rounded">
-                                                                        JPG
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col ps-0">
-                                                                <a href="javascript:void(0);" class="text-muted fw-bold">DisenoArquitectura.jpg</a>
-                                                                <p class="mb-0 font-12">3.25 MB</p>
-                                                            </div>
-                                                            <div class="col-auto">
-                                                                <!-- Button -->
-                                                                <a href="javascript:void(0);" class="btn btn-link font-16 text-muted">
-                                                                    <i class="dripicons-download"></i>
-                                                                </a>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <!-- end attachments -->
-
-                                                <!-- comments -->
-                                                <div class="row mt-3">
-                                                    <div class="col">
-                                                        <h5 class="mb-2 font-size-16">Comentarios de la Tarea</h5>
-                                                
-                                                        <div class="d-flex align-items-start mt-3 p-1">
-                                                            <img src="assets2/images/users/user-9.jpg" class="me-2 rounded-circle" height="36" alt="Arya Stark" />
-                                                            <div class="w-100">
-                                                                <h5 class="mt-0 mb-0 font-size-14">
-                                                                    <span class="float-end text-muted font-12">4:30am</span>
-                                                                    Willy Miranda
-                                                                </h5>
-                                                                <p class="mt-1 mb-0 text-muted">
-                                                                    Se deberia revisar el diseno del proyecto.
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                        <!-- end comment -->
-                                                
-                                                        <hr />
-                                                
-                                                        <div class="d-flex align-items-start mt-2 p-1">
-                                                            <img src="assets2/images/users/user-5.jpg" class="me-2 rounded-circle" height="36" alt="Dominc B" />
-                                                            <div class="w-100">
-                                                                <h5 class="mt-0 mb-0 font-size-14">
-                                                                    <span class="float-end text-muted font-12">3:30am</span>
-                                                                    Cristina Mejia
-                                                                </h5>
-                                                                <p class="mt-1 mb-0 text-muted">
-                                                                    @WillyMiranda, revisar semanalmente el proyecto.
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                        <!-- end comment-->
-                                                
-                                                        <hr />
-
-                                                    </div>
-                                                    <!-- end col -->
-                                                </div>
-                                                <!-- end row -->
-
-                                                <div class="row mt-2">
-                                                    <div class="col">
-                                                        <div class="border rounded">
-                                                            <form action="#">
-                                                                <textarea rows="3" class="form-control border-0 resize-none" placeholder="Tus Comentarios...."></textarea>
-                                                                <div class="p-2 bg-light d-flex justify-content-between align-items-center">
-                                                                    <div>
-                                                                        <a href="#" class="btn btn-sm px-2 font-16 btn-light"><i class="mdi mdi-cloud-upload-outline"></i></a>
-                                                                        <a href="#" class="btn btn-sm px-2 font-16 btn-light"><i class="mdi mdi-at"></i></a>
+                                                        <h5 class="mb-2 font-size-16"><i class='fe-file-text font-16 text-info'></i> Descripción</h5>
+                                                        <div class="inbox-widget" data-simplebar style="max-height: 200px;">
+                                                            <div class="card mb-1 shadow-none border">
+                                                                <div class="p-2">
+                                                                    <div class="row align-items-center">
+                                                                        <h5 class="mt-0 mb-0 text-muted description_activity">No hay archivos adjuntos</h5>
                                                                     </div>
-                                                                    <button type="submit" class="btn btn-sm btn-success"><i class="mdi mdi-send me-1"></i>Enviar Comentario</button>
                                                                 </div>
-                                                            </form>
-                                                        </div> <!-- end .border-->
-                                                    </div> <!-- end col-->
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <!-- end comments -->
-                                            </div> <!-- end col -->
-                                        </div> <!-- end row-->
-                                    </div> <!-- end card-body -->
-                                </div> <!-- end card-->
-                            </div> <!-- end col -->
-                        </div>
-                        
-                    </div> <!-- container -->
 
-                </div> <!-- content -->
+                                                <h5 class="mt-3 font-size-16"><i class="fe-paperclip text-success"></i> Sub-Actividades</h5>
+                                                <div class="inbox-widget component-subActivity-show" data-simplebar style="max-height: 200px;">
+                                                </div>
+
+                                                <h5 class="mt-3 font-size-16"><i class="fe-download-cloud text-info"></i> Documentos Adjuntos</h5>
+                                                
+                                                <div class="inbox-widget component-file-show" data-simplebar style="max-height: 200px;">
+                                                </div>
+
+                                                <h5 class="mt-3 font-size-16"><i class="fe-feather text-primary"></i> Comentarios de la Tarea</h5>
+                                                <div class="inbox-widget component-annotation-show" data-simplebar style="max-height: 200px;">
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Footer Start -->
                 <footer class="footer">
@@ -487,7 +335,7 @@ if($codProyecto!=0){
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Adicionar Tarea</h5>
+                    <h5 class="modal-title">Adicionar Actividad</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -631,7 +479,11 @@ if($codProyecto!=0){
                                 <label class="col-form-label">Cuenta:</label>
                                 <select name="cod_account" id="cod_account" class="form-control" data-style="btn btn-warning" required>
                                     <?php             
-                                        $sqlAccount   = "SELECT codigo, numero, nombre FROM plan_cuentas";
+                                        $sqlAccount   = "SELECT p.codigo, p.numero, p.nombre 
+                                            FROM plan_cuentas p 
+                                            WHERE p.numero like '5%' 
+                                            AND p.nivel = 5 
+                                            AND p.cod_estadoreferencial = 1";
                                         $stmtAccount  = $dbh->prepare($sqlAccount);
                                         $stmtAccount->execute();
                                         $rows_accounts = $stmtAccount->fetchAll();
@@ -641,9 +493,11 @@ if($codProyecto!=0){
                                     <?php 
                                         }   
                                     ?>
-                                </select>   
+                                </select>
                                 <label class="col-form-label">Monto:</label>
-                                <input type="number" step="0.1" autocomplete="off" id="amount" class="form-control" placeholder="Ingresar presupuesto">                
+                                <input type="number" step="0.1" autocomplete="off" id="amount" class="form-control" placeholder="Ingresar presupuesto"> 
+                                <label class="col-form-label">Fecha Ejecucion:</label>
+                                <input type="date" id="dateBudget" class="form-control">               
                             </div>
                         </div>
                     </div>
@@ -672,7 +526,32 @@ if($codProyecto!=0){
                                     <div class="form-group">
                                     <input class="form-control" type="text" name="sub_nombre" id="sub_nombre" required="true" autocomplete="off" onkeyup="javascript:this.value=this.value.toUpperCase();"/>
                                     </div>
-                                </div>               
+                                </div>
+                                <label class="col-sm-12 col-form-label">Fecha Limite</label>
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                    <input class="form-control" type="date" name="sub_fecha" id="sub_fecha" required="true"/>
+                                    </div>
+                                </div>
+                                <label class="col-sm-12 col-form-label">Prioridad</label>
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <select name="sub_prioridad" id="sub_prioridad" class="single-select form-control" data-style="btn btn-warning" required>
+                                            <option value="" disabled selected="selected">-</option>
+                                            <?php             
+                                                $sqlForaneo="SELECT codigo,nombre FROM actividades_prioridades where cod_estado=1";
+                                                $stmtForaneo=$dbh->prepare($sqlForaneo);
+                                                $stmtForaneo->execute();
+                                                $stmtForaneo->bindColumn('codigo', $codigoF);
+                                                $stmtForaneo->bindColumn('nombre', $nombreF);
+                                                while ($rowForaneo = $stmtForaneo->fetch(PDO::FETCH_BOUND)) {         
+                                            ?>
+                                            <option value="<?= $codigoF; ?>" ><?= $nombreF; ?></option>
+                                            <?php 
+                                                }   
+                                            ?>
+                                        </select>                     
+                                    </div>              
                             </div>
                         </div>
                     </div>
@@ -696,8 +575,7 @@ if($codProyecto!=0){
         <script src="assets2/libs/quill/quill.min.js"></script>
         <!-- Init js-->
         <script src="assets2/js/pages/task.init.js"></script>
-
-        <!-- Script - Lista de Tareas -->
+        <!-- Script - Lista de Actividades -->
         <script>
             let label = '> .simplebar-wrapper > .simplebar-mask > .simplebar-offset > .simplebar-content-wrapper > .simplebar-content';
             /**
@@ -788,6 +666,8 @@ if($codProyecto!=0){
             /* Abrir modal de subactividad */
             $('body').on('click', '.addSubActivity', function(){
                 $("#sub_nombre").val('');
+                $('#sub_fecha').val('');
+                $("#sub_prioridad").val($("#sub_prioridad option:first").val());
                 $('body #modal_task_detail').modal('hide');
                 $('#modalNewSubActivity').modal('show');
             }); 
@@ -834,9 +714,11 @@ if($codProyecto!=0){
              **/
             $('body').on('click', '.remove-note', function(){
                 let cod_anotacion = $(this).data('codigo');
+                let code_act   = $('body #codeActivity').val();
                 let formData     = new FormData();
                 formData.append('type', 4);         // Tipo 4 : Eliminar Nota 
-                formData.append('codigo', cod_anotacion);         // Tipo 4 : Eliminar Nota 
+                formData.append('codigo', cod_anotacion);         // Tipo 4 : Eliminar Nota
+                formData.append('code_activity', code_act);
                 $.ajax({
                     url:"actividades/methods.php",
                     type:"POST",
@@ -856,11 +738,13 @@ if($codProyecto!=0){
             $('.save-budget').click(function(){
                 let cod_account = $('#cod_account').val();
                 let amount      = $('#amount').val();
+                let dateBudget  = $('#dateBudget').val();
                 let code_act    = $('body #codeActivity').val();
                 let formData    = new FormData();
                 formData.append('type', 5);         // Tipo 5 : Guardar Asignación
                 formData.append('cod_account', cod_account);
                 formData.append('amount', amount);
+                formData.append('dateBudget', dateBudget);
                 formData.append('code_activity', code_act);
                 $.ajax({
                     url:"actividades/methods.php",
@@ -881,11 +765,15 @@ if($codProyecto!=0){
              * Función para enviar y guardar la sub actividad
              **/
             $('.save-subActivity').click(function(){
-                let nombre   = $('#sub_nombre').val();
+                let sub_nombre      = $('#sub_nombre').val();
+                let sub_fecha       = $('#sub_fecha').val();
+                let sub_prioridad   = $('#sub_prioridad').val();
                 let code_act = $('body #codeActivity').val();
                 let formData = new FormData();
                 formData.append('type', 6);         // Tipo 6 : Guardar Sub Actividad
-                formData.append('nombre', nombre);
+                formData.append('sub_nombre', sub_nombre);
+                formData.append('sub_fecha', sub_fecha);
+                formData.append('sub_prioridad', sub_prioridad);
                 formData.append('code_activity', code_act);
                 $.ajax({
                     url:"actividades/methods.php",
@@ -909,6 +797,109 @@ if($codProyecto!=0){
              **/
             $('body').on('click', '.show-activity', function(){
                 showModallistTaskDetail($(this).data('cod_actividad'));
+            });
+
+            /**
+             * Visualización de Detalle general de Acitividad
+             **/
+            $('.showActivity').click(function(){
+                let code_act = $(this).data('cod_activity');
+                let formData = new FormData();
+                formData.append('type', 0);         // Tipo 0 : mostrar Detalle de Actividad
+                formData.append('code_activity', code_act);
+                $.ajax({
+                    url:"actividades/methods.php",
+                    type:"POST",
+                    contentType: false,
+                    processData: false,
+                    data: formData,
+                    success:function(response){
+                        let resp = JSON.parse(response);
+                        console.log(resp);
+                        let files = `<div class="card mb-1 shadow-none border">
+                                        <div class="p-2">
+                                            <div class="row align-items-center">
+                                                <div class="col-auto">
+                                                    <div class="avatar-sm">
+                                                        <span class="avatar-title badge-soft-danger text-danger rounded">
+                                                            X
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="col ps-0">
+                                                    <h5 class="mt-0 mb-0 text-muted">No hay archivos adjuntos</h5>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>`;
+                        let notes = `<div class="card shadow-none border">
+                                        <div class="p-2">
+                                            <div class="row align-items-center">
+                                                <div class="col-auto">
+                                                    <div class="avatar-sm">
+                                                        <span class="avatar-title badge-soft-danger text-danger rounded">
+                                                            <i class="fe-message-circle"></i>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="col ps-0">
+                                                    <h5 class="mt-0 mb-0 text-muted">No hay notas registradas.</h5>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>`;
+                        let subActivities = `<div class="inbox-item">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <div class="avatar-sm">
+                                                    <span class="avatar-title badge-soft-danger text-danger rounded">
+                                                        <i class="fe-folder-minus"></i>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="col ps-0">
+                                                <h5 class="mt-0 mb-0 text-muted">No se encontró subactividades...</h5>
+                                            </div>
+                                        </div>
+                                    </div> `;
+                        let badget = `<div class="inbox-item">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <div class="avatar-sm">
+                                                    <span class="avatar-title badge-soft-danger text-danger rounded">
+                                                        <i class="fe-thumbs-down"></i>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="col ps-0">
+                                                <h5 class="mt-0 mb-0 text-muted">Actividad sin presupuesto...</h5>
+                                            </div>
+                                        </div>
+                                    </div> `;
+                        let collaborator = `<div class="inbox-item">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <div class="avatar-sm">
+                                                    <span class="avatar-title badge-soft-danger text-danger rounded">
+                                                        <i class="fe-user-x"></i>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="col ps-0">
+                                                <h5 class="mt-0 mb-0 text-muted">Actividad sin colaboradores...</h5>
+                                            </div>
+                                        </div>
+                                    </div>`;
+                        $('.component-subActivity-show ' + label).html(resp.subAcitividades.length > 0 ? resp.subAcitividades : subActivities);
+                        $('.component-file-show ' + label).html(resp.archivos.length > 0 ? resp.archivos : files);
+                        $('.component-annotation-show ' + label).html(resp.anotacion.length > 0 ? resp.anotacion : notes);
+                        $('.user_manager').html(resp.data.nombre_responsable);
+                        $('.date_limit').html(resp.data.fecha_limite);
+                        $('.description_activity').html(resp.data.observaciones);
+                        $('.initial-activity').hide();
+                        $('.detail-activity').show();
+                    }
+                });
             });
             /**
              * Mensaje de alerta despues de recibir respuesta del BACKEND

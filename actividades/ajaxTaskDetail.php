@@ -5,26 +5,60 @@ session_start();
 $dbh = new Conexion();
 $codigoActividad = $_GET["codigo_actividad"];
 $cod_personal    = $_SESSION['globalUser'];
-
-$sqlActividad="SELECT a.codigo, a.nombre, a.observaciones, DATE_FORMAT(a.fecha_limite,'%b %d, %Y')as fecha_limite, a.cod_prioridad, ap.nombre as nombre_prioridad, ap.color,
-(select np.nombre from niveles_pei np where np.codigo=a.cod_componentepei)as nombrecomponentepei, np.nombre as nombreproyecto, a.cod_padre as cod_padre, date_format(a.fecha_limite, '%d-%m-%Y') as fecha, a.observaciones as obs
-from actividades a, actividades_prioridades ap, niveles_pei np 
-where a.cod_prioridad=ap.codigo 
-and a.cod_componentepei=np.codigo 
-and a.codigo='$codigoActividad'";
-
-$stmtActividad= $dbh->prepare($sqlActividad);
-$stmtActividad->execute();
-$nombreActividad="";
-$nombreProyecto="";
-while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
-    $codigoActividad = $rowActividad['codigo'];
-	$nombreActividad = $rowActividad['nombre'];
-	$fechaLimite     = $rowActividad['fecha'];
-	$obs             = $rowActividad['obs'];
-	$codPadre        = $rowActividad['cod_padre'];
-	$nombreProyecto  = $rowActividad['nombreproyecto'];
+/* Verificación de Tipo de Actividad(Padre o Sub-Actividad) */
+$sqlVerf = "SELECT * 
+FROM actividades
+WHERE codigo = '$codigoActividad'";
+$stmtVerf= $dbh->prepare($sqlVerf);
+$stmtVerf->execute();
+$verf_sub_activity = false;
+while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
+    if(empty($rowVerf['cod_padre'])){
+        $verf_sub_activity = true;
+        $actividad_padre   = $rowVerf['nombre'];
+    }
 }
+
+    if(!$verf_sub_activity){
+        $sqlActividad="SELECT a.codigo, 
+            a.nombre, 
+            a.observaciones, 
+            DATE_FORMAT(a.fecha_limite,'%d-%m-%Y')as fecha_limite, 
+            a.cod_prioridad, 
+            ap.nombre as nombre_prioridad, 
+            ap.color,
+            a.cod_padre as cod_padre,
+            a.observaciones as obs,
+            a.cod_responsable,
+            CONCAT(p.primer_nombre,' ', p.paterno,' ', p.materno) as nombre_responsable, 
+            ek.nombre estado_kanban
+        from actividades a, actividades_prioridades ap, personal p, estados_kanban ek
+        where a.cod_prioridad   = ap.codigo
+        and a.cod_responsable   = p.codigo 
+        and a.cod_estadokanban  = ek.codigo 
+        and a.codigo = '$codigoActividad'";
+    }else{
+        $sqlActividad="SELECT a.codigo, a.nombre, a.observaciones, DATE_FORMAT(a.fecha_limite,'%d-%m-%Y')as fecha_limite, a.cod_prioridad, ap.nombre as nombre_prioridad, ap.color,
+        (select np.nombre from niveles_pei np where np.codigo=a.cod_componentepei)as nombrecomponentepei, np.nombre as nombreproyecto, a.cod_padre as cod_padre, a.observaciones as obs, a.cod_responsable, CONCAT(p.primer_nombre,' ', p.paterno,' ', p.materno) as nombre_responsable, ek.nombre estado_kanban
+        from actividades a, actividades_prioridades ap, niveles_pei np, personal p, estados_kanban ek
+        where a.cod_prioridad=ap.codigo 
+        and a.cod_componentepei=np.codigo 
+        and a.cod_responsable   = p.codigo
+        and a.cod_estadokanban  = ek.codigo 
+        and a.codigo='$codigoActividad'";
+    }
+    $stmtActividad= $dbh->prepare($sqlActividad);
+    $stmtActividad->execute();
+    while ($rowActividad    = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
+        $codigoActividad    = $rowActividad['codigo'];
+        $obs                = $rowActividad['obs'];
+        $nombreActividad    = $rowActividad['nombre'];
+        $fechaLimite        = $rowActividad['fecha_limite'];
+        $nombre_responsable = $rowActividad['nombre_responsable'];
+        $estado_kanban      = $rowActividad['estado_kanban'];
+        $nombreProyecto     = ($verf_sub_activity)?$rowActividad['nombreproyecto']:'';
+       
+    }
     /**********************************************/
     $array_color = ['primary', 'secondary', 'warning'];
     $count_array = count($array_color);
@@ -64,28 +98,30 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
      * Lista de Presupuestos asignados a la actividad
      * @autor: Ronald Mollericona
     **/
-    $sqlAccount = "SELECT ap.codigo, date_format(ap.fecha_ejecucion, '%d-%m-%Y') as fecha, ap.monto, UPPER(p.nombre) as nombre
+    $sqlAccount = "SELECT ap.codigo, date_format(ap.fecha_ejecucion, '%d-%m-%Y') as fecha, ap.monto, UPPER(p.nombre) as nombre, ac.nombre as nombre_estado, ac.estado_etiqueta as etiqueta
     FROM actividades_presupuestos ap
     LEFT JOIN plan_cuentas p ON p.codigo = ap.cod_cuenta
+    LEFT JOIN estados_actividades_presupuesto ac ON ac.codigo = ap.cod_estado_presupuesto
     WHERE ap.cod_actividad = '$codigoActividad' 
     ORDER BY ap.codigo DESC";
     $stmtAccount = $dbh->prepare($sqlAccount);
     $stmtAccount->execute();
     
     /**
-     * Lista de Presupuestos asignados a la actividad
+     * Lista de Sub-Actividades relacionadas a la Actividad
      * @autor: Ronald Mollericona
     **/
     $sqlSubActivity = "SELECT codigo, nombre, fecha_limite
     FROM actividades
-    WHERE cod_padre = '$codigoActividad'";
+    WHERE cod_padre = '$codigoActividad'
+    ORDER BY codigo DESC";
     $stmtsubActivity = $dbh->prepare($sqlSubActivity);
     $stmtsubActivity->execute();
     
 ?>
 <div id="bodyTaskComplete">    
-    <div class="modal-header bg-primary">
-        <h5 class="modal-title text-white" id="scrollableModalTitle">Actividad</h5>
+    <div class="modal-header bg-<?= ($verf_sub_activity)?'primary':'warning'; ?>">
+        <h5 class="modal-title text-white" id="scrollableModalTitle"><?= ($verf_sub_activity)?'Actividad':'Sub-Actividad'; ?></h5>
         <button type="button" class="btn-close bg-white" data-bs-dismiss="modal" aria-label="Close"></button>
     </div>
     <div class="modal-body">
@@ -95,37 +131,39 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
                 <div class="card p-2 pt-0 mb-1 border">
                     <div class="row">
                         <div class="col-4">
-                            <p class="mt-2 mb-1 text-muted">Nombre de Actividad</p>
+                            <p class="mt-2 mb-1 text-muted">Nombre</p>
                             <div class="d-flex align-items-start">
                                 <div class="w-100">
                                     <h5 class="mt-1 font-size-14">
-                                        <i class='fe-book-open font-16 text-warning'></i> <?=$nombreActividad;?>
+                                        <i class='fe-book-open font-16 text-primary'></i> <?=$nombreActividad;?>
                                     </h5>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-4">
-                            <p class="mt-2 mb-1 text-muted">Proyecto</p>
-                            <div class="d-flex align-items-start">
-                                <div class="w-100">
-                                    <h5 class="mt-1 font-size-14">
-                                        <i class='fe-file font-16 text-danger'></i> <?=$nombreProyecto;?>
-                                    </h5>
+                        <?php if($verf_sub_activity){ ?>
+                            <div class="col-md-4">
+                                <p class="mt-2 mb-1 text-muted">Proyecto</p>
+                                <div class="d-flex align-items-start">
+                                    <div class="w-100">
+                                        <h5 class="mt-1 font-size-14">
+                                            <i class='fe-file font-16 text-danger'></i> <?=$nombreProyecto;?>
+                                        </h5>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-4">
+                        <?php } ?>
+                        <div class="col-md-4">
                             <p class="mt-2 mb-1 text-muted">Responsable</p>
                             <div class="d-flex align-items-start">
                                 <img src="assets2/images/users/user-9.jpg" alt="Arya S" class="rounded-circle me-2" height="24" />
                                 <div class="w-100">
                                     <h5 class="mt-1 font-size-14">
-                                        Ronald Mollericona
+                                        <?=$nombre_responsable;?>
                                     </h5>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-4">
+                        <div class="col-md-4">
                             <p class="mt-2 mb-1 text-muted">Fecha Limite</p>
                             <div class="d-flex align-items-start">
                                 <div class="w-100">
@@ -135,12 +173,20 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
                                 </div>
                             </div>
                         </div>
-                        <div class="col-8">
-                            <p class="mt-2 mb-1 text-muted">Observaciones</p>
+                        <div class="col-md-4">
+                            <p class="mt-2 mb-1 text-muted">Estado</p>
+                            <div class="d-flex align-items-start">
+                                <h5 class="mt-1 font-size-14">
+                                    <i class='fe-bell font-16 text-warning'></i> <?=$estado_kanban;?>
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-md-<?= $verf_sub_activity?'4':'8' ?>">
+                            <p class="mt-2 mb-1 text-muted">Descripción</p>
                             <div class="d-flex align-items-start">
                                 <div class="w-100">
                                     <h5 class="mt-1 font-size-14">
-                                        <i class='fe-file-text font-16 text-warning'></i> <?=$obs;?>
+                                        <i class='fe-file-text font-16 text-info'></i> <?=$obs;?>
                                     </h5>
                                 </div>
                             </div>
@@ -277,16 +323,16 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
     		<div class="col-md-4">
                 <!-- SubActividades-->
                 <?php
-                    if(empty($codPadre)){
+                    if($verf_sub_activity){
                 ?>
                 <div class="card p-2 mb-1 border">
                     <div class="pb-1">
                                 <button type="button" class="btn btn-success btn-sm addSubActivity float-end pl-1 pr-1">
-                                    <i class="mdi mdi-plus"></i> Nuevo <?=$codPadre;?>
+                                    <i class="mdi mdi-plus"></i> Nuevo
                                 </button>
                         <h5 class="header-title mt-1 text-primary"><i class="fe-paperclip"></i>Sub Actividades</h5>
                     </div>
-                    <div class="inbox-widget" data-simplebar style="max-height: 250px;">
+                    <div class="inbox-widget" data-simplebar style="max-height: 220px;">
                         <?php
                             if(!count($rows_sub_activity = $stmtsubActivity->fetchAll())){
                         ?>
@@ -332,7 +378,7 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
                         </button>
                         <h5 class="header-title mt-1 text-primary"><i class="fe-tag"></i> Presupuesto</h5>
                     </div>
-                    <div class="inbox-widget component-budget" data-simplebar style="max-height: 250px;">
+                    <div class="inbox-widget component-budget" data-simplebar style="max-height: 220px;">
                         <?php
                             if(!count($rows_account = $stmtAccount->fetchAll())){
                         ?>
@@ -361,7 +407,8 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
                                         <p class="mb-0 text-success"><i class="fe-file"></i> <?=$account['monto'];?> bs.</p>
                                     </div>
                                     <div class="col-md-4 inbox-item-date p-0 text-right">
-                                    <?=$account['fecha'];?>
+                                        <?=$account['fecha'];?>
+                                        <span class="badge bg-<?=$account['etiqueta'];?> float-end p-1"><?=$account['nombre_estado'];?></span>
                                     </div>
                                 </div>
                             </div>
@@ -379,7 +426,7 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
                         </button>
                         <h5 class="header-title mt-1 text-primary"><i class="fe-users"></i> Colaboradores</h5>
                     </div>
-                    <div class="inbox-widget component-collaborator" data-simplebar style="max-height: 350px;">
+                    <div class="inbox-widget component-collaborator" data-simplebar style="max-height: 300px;">
                         <?php
                             if(!count($rows_coll = $stmtColl->fetchAll())){
                         ?>
