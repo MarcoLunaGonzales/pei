@@ -7,16 +7,23 @@ $codigoActividad = $_GET["codigo_actividad"];
 $cod_personal    = $_SESSION['globalUser'];
 
 $sqlActividad="SELECT a.codigo, a.nombre, a.observaciones, DATE_FORMAT(a.fecha_limite,'%b %d, %Y')as fecha_limite, a.cod_prioridad, ap.nombre as nombre_prioridad, ap.color,
-(select np.nombre from niveles_pei np where np.codigo=a.cod_componentepei)as nombrecomponentepei, np.nombre as nombreproyecto from actividades a, actividades_prioridades ap, niveles_pei np where a.cod_prioridad=ap.codigo and a.cod_componentepei=np.codigo and a.codigo='$codigoActividad'";
+(select np.nombre from niveles_pei np where np.codigo=a.cod_componentepei)as nombrecomponentepei, np.nombre as nombreproyecto, a.cod_padre as cod_padre, date_format(a.fecha_limite, '%d-%m-%Y') as fecha, a.observaciones as obs
+from actividades a, actividades_prioridades ap, niveles_pei np 
+where a.cod_prioridad=ap.codigo 
+and a.cod_componentepei=np.codigo 
+and a.codigo='$codigoActividad'";
 
 $stmtActividad= $dbh->prepare($sqlActividad);
 $stmtActividad->execute();
 $nombreActividad="";
 $nombreProyecto="";
 while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
-    $codigoActividad=$rowActividad['codigo'];
-	$nombreActividad=$rowActividad['nombre'];
-	$nombreProyecto=$rowActividad['nombreproyecto'];
+    $codigoActividad = $rowActividad['codigo'];
+	$nombreActividad = $rowActividad['nombre'];
+	$fechaLimite     = $rowActividad['fecha'];
+	$obs             = $rowActividad['obs'];
+	$codPadre        = $rowActividad['cod_padre'];
+	$nombreProyecto  = $rowActividad['nombreproyecto'];
 }
     /**********************************************/
     $array_color = ['primary', 'secondary', 'warning'];
@@ -78,11 +85,69 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
 ?>
 <div id="bodyTaskComplete">    
     <div class="modal-header bg-primary">
-        <h5 class="modal-title text-white" id="scrollableModalTitle">Actividad <?=$nombreActividad;?>  Proyecto: <?=$nombreProyecto;?></h5>
+        <h5 class="modal-title text-white" id="scrollableModalTitle">Actividad</h5>
         <button type="button" class="btn-close bg-white" data-bs-dismiss="modal" aria-label="Close"></button>
     </div>
     <div class="modal-body">
     	<div class="row">
+    		<div class="col-md-12">
+                <!-- Nueva Nota-->
+                <div class="card p-2 pt-0 mb-1 border">
+                    <div class="row">
+                        <div class="col-4">
+                            <p class="mt-2 mb-1 text-muted">Nombre de Actividad</p>
+                            <div class="d-flex align-items-start">
+                                <div class="w-100">
+                                    <h5 class="mt-1 font-size-14">
+                                        <i class='fe-book-open font-16 text-warning'></i> <?=$nombreActividad;?>
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <p class="mt-2 mb-1 text-muted">Proyecto</p>
+                            <div class="d-flex align-items-start">
+                                <div class="w-100">
+                                    <h5 class="mt-1 font-size-14">
+                                        <i class='fe-file font-16 text-danger'></i> <?=$nombreProyecto;?>
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <p class="mt-2 mb-1 text-muted">Responsable</p>
+                            <div class="d-flex align-items-start">
+                                <img src="assets2/images/users/user-9.jpg" alt="Arya S" class="rounded-circle me-2" height="24" />
+                                <div class="w-100">
+                                    <h5 class="mt-1 font-size-14">
+                                        Ronald Mollericona
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <p class="mt-2 mb-1 text-muted">Fecha Limite</p>
+                            <div class="d-flex align-items-start">
+                                <div class="w-100">
+                                    <h5 class="mt-1 font-size-14">
+                                        <i class='fe-calendar font-16 text-success'></i> <?=$fechaLimite;?>
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-8">
+                            <p class="mt-2 mb-1 text-muted">Observaciones</p>
+                            <div class="d-flex align-items-start">
+                                <div class="w-100">
+                                    <h5 class="mt-1 font-size-14">
+                                        <i class='fe-file-text font-16 text-warning'></i> <?=$obs;?>
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
     		<div class="col-md-8">
                 <!-- Nueva Nota-->
                 <div class="card p-2 mb-1 border">
@@ -211,14 +276,17 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
             </div>
     		<div class="col-md-4">
                 <!-- SubActividades-->
+                <?php
+                    if(empty($codPadre)){
+                ?>
                 <div class="card p-2 mb-1 border">
                     <div class="pb-1">
-                        <button type="button" class="btn btn-success btn-sm addSubActivity float-end pl-1 pr-1">
-                            <i class="mdi mdi-plus"></i> Nuevo
-                        </button>
-                        <h5 class="header-title mt-1 text-primary"><i class="fe-paperclip"></i> Sub Actividad</h5>
+                                <button type="button" class="btn btn-success btn-sm addSubActivity float-end pl-1 pr-1">
+                                    <i class="mdi mdi-plus"></i> Nuevo <?=$codPadre;?>
+                                </button>
+                        <h5 class="header-title mt-1 text-primary"><i class="fe-paperclip"></i>Sub Actividades</h5>
                     </div>
-                    <div class="inbox-widget component-budget" data-simplebar style="max-height: 250px;">
+                    <div class="inbox-widget" data-simplebar style="max-height: 250px;">
                         <?php
                             if(!count($rows_sub_activity = $stmtsubActivity->fetchAll())){
                         ?>
@@ -242,8 +310,8 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
                         ?>
                             <div class="inbox-item">
                                 <div class="row">
-                                    <div class="col-md-12 inbox-item-text">
-                                        <p class="inbox-item-author show-activity" data-cod_actividad="<?=$sub_activity['codigo'];?>"><?=$sub_activity['nombre'];?></p>
+                                    <div class="col-md-13 inbox-item-text">
+                                        <p class="inbox-item-author show-activity" data-cod_actividad="<?=$sub_activity['codigo'];?>" style="cursor:pointer;"><i class="fe-file"></i><?=$sub_activity['nombre'];?></p>
                                     </div>
                                 </div>
                             </div>
@@ -253,6 +321,9 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
                         ?>
                     </div>
                 </div>
+                <?php
+                    }
+                ?>
                 <!-- Presupuesto-->
                 <div class="card p-2 mb-1 border">
                     <div class="pb-1">

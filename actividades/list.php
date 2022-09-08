@@ -643,7 +643,7 @@ if($codProyecto!=0){
                                     ?>
                                 </select>   
                                 <label class="col-form-label">Monto:</label>
-                                <input type="number" step="0.1" id="amount" class="form-control" placeholder="Ingresar presupuesto">                
+                                <input type="number" step="0.1" autocomplete="off" id="amount" class="form-control" placeholder="Ingresar presupuesto">                
                             </div>
                         </div>
                     </div>
@@ -655,7 +655,35 @@ if($codProyecto!=0){
             </div>
         </div>
     </div>
-
+    <!-- Modal Nueva Sub Actividad -->
+    <div class="modal fade" id="modalNewSubActivity" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-top">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title text-white">Añadir Sub Actividad</h5>
+                    <button type="button" class="btn-close bg-white close-subActivity" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="col-sm-12 col-form-label">Nombre</label>
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                    <input class="form-control" type="text" name="sub_nombre" id="sub_nombre" required="true" autocomplete="off" onkeyup="javascript:this.value=this.value.toUpperCase();"/>
+                                    </div>
+                                </div>               
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary close-subActivity" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary save-subActivity">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
         <!-- Right bar overlay-->
         <div class="rightbar-overlay"></div>
         <!-- Vendor js -->
@@ -757,6 +785,17 @@ if($codProyecto!=0){
                 $('body #modal_task_detail').modal('show');
                 $('#modalBudget').modal('hide');
             });
+            /* Abrir modal de subactividad */
+            $('body').on('click', '.addSubActivity', function(){
+                $("#sub_nombre").val('');
+                $('body #modal_task_detail').modal('hide');
+                $('#modalNewSubActivity').modal('show');
+            }); 
+            /* Cerrar modal Presupuesto */
+            $('.close-subActivity').click(function(){
+                $('body #modal_task_detail').modal('show');
+                $('#modalNewSubActivity').modal('hide');
+            });
             /**
              * Función para enviar y guardar la asignación del colaborador
              **/
@@ -835,6 +874,33 @@ if($codProyecto!=0){
                         $('body .component-budget ' + label).html(resp.content);
                         $('body #modal_task_detail').modal('show');
                         $('#modalBudget').modal('hide');
+                    }
+                });
+            });
+            /**
+             * Función para enviar y guardar la sub actividad
+             **/
+            $('.save-subActivity').click(function(){
+                let nombre   = $('#sub_nombre').val();
+                let code_act = $('body #codeActivity').val();
+                let formData = new FormData();
+                formData.append('type', 6);         // Tipo 6 : Guardar Sub Actividad
+                formData.append('nombre', nombre);
+                formData.append('code_activity', code_act);
+                $.ajax({
+                    url:"actividades/methods.php",
+                    type:"POST",
+                    contentType: false,
+                    processData: false,
+                    data: formData,
+                    success:function(response){
+                        let resp = JSON.parse(response);
+                        $('body #modal_task_detail').modal('show');
+                        $('#modalNewSubActivity').modal('hide');
+                        responseAlert(resp.status);
+                        if(resp.status){
+                            showModallistTaskDetail(resp.code_activity);
+                        }
                     }
                 });
             });

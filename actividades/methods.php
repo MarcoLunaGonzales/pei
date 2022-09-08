@@ -214,38 +214,83 @@ else if($_POST['type'] == 5){
     $cod_account = $_POST['cod_account'];
     $amount       = $_POST['amount'];
     $date         = date('Y-m-d');
-    $sqlInsert    = "INSERT INTO actividades_presupuestos (cod_actividad, cod_cuenta, fecha_ejecucion, monto, cod_estado)
-                    VALUES ('$code_activity','$cod_account','$date','$amount','1')";
+    try {
+        $sqlInsert    = "INSERT INTO actividades_presupuestos (cod_actividad, cod_cuenta, fecha_ejecucion, monto, cod_estado)
+                        VALUES ('$code_activity','$cod_account','$date','$amount','1')";
+        $stmt         = $dbh->prepare($sqlInsert);
+        $stmt->execute();
+        /* Lista de registros */
+        $sqlAccount = "SELECT ap.codigo, date_format(ap.fecha_ejecucion, '%d-%m-%Y') as fecha, ap.monto, UPPER(p.nombre) as nombre
+        FROM actividades_presupuestos ap
+        LEFT JOIN plan_cuentas p ON p.codigo = ap.cod_cuenta
+        WHERE ap.cod_actividad = '$code_activity' 
+        ORDER BY ap.codigo DESC";
+        $stmtAccount = $dbh->prepare($sqlAccount);
+        $stmtAccount->execute();
+        $content = '';
+        $rows_account = $stmtAccount->fetchAll();
+        foreach ($rows_account as $account){
+            $content .= '
+            <div class="inbox-item">
+                <div class="row">
+                    <div class="col-md-8 inbox-item-text">
+                        <p class="inbox-item-author">'.$account['nombre'].'</p>
+                        <p class="mb-0 text-success"><i class="fe-file"></i>'.$account['monto'].' bs.</p>
+                    </div>
+                    <div class="col-md-4 inbox-item-date p-0 text-right">
+                    '.$account['fecha'].'
+                    </div>
+                </div>
+            </div>
+            ';
+        }
+        echo json_encode(array(
+            'status'    => true,
+            'content'   => $content
+        ));   
+    } catch (Exception $e) {
+        echo json_encode(array(
+            'status' => false
+        ));
+    }
+}
+/**
+ * Registrar Sub Actividad
+ * method: POST
+ * @autor: Ronald Mollericona
+ **/
+else if($_POST['type'] == 6){
+    $nombre = $_POST['nombre'];
+    /* Obtenemos datos de la Actividad Padre */
+    $sqlFindActivity = "SELECT * FROM actividades
+    WHERE codigo = '$code_activity'";
+    $stmtFindActividad= $dbh->prepare($sqlFindActivity);
+    $stmtFindActividad->execute();
+    while ($rowFind = $stmtFindActividad->fetch(PDO::FETCH_ASSOC)) {
+        $cod_prioridad     = $rowFind['cod_prioridad'];
+        $cod_estadokanban  = $rowFind['cod_estadokanban'];
+        $fecha_limite      = $rowFind['fecha_limite'];
+        $cod_responsable   = $rowFind['cod_responsable'];
+        $cod_componentepei = $rowFind['cod_componentepei'];
+    }
+    /* Insertar Datos */
+    $sqlInsert    = "INSERT INTO actividades (nombre, cod_prioridad, cod_estadokanban, fecha_limite, cod_responsable, cod_componentepei, cod_padre)
+                    VALUES ('$nombre', '$cod_prioridad', '$cod_estadokanban', '$fecha_limite', '$cod_responsable', '$cod_componentepei','$code_activity')";
     $stmt         = $dbh->prepare($sqlInsert);
     $stmt->execute();
     /* Lista de registros */
-    $sqlAccount = "SELECT ap.codigo, date_format(ap.fecha_ejecucion, '%d-%m-%Y') as fecha, ap.monto, UPPER(p.nombre) as nombre
-    FROM actividades_presupuestos ap
-    LEFT JOIN plan_cuentas p ON p.codigo = ap.cod_cuenta
-    WHERE ap.cod_actividad = '$code_activity' 
-    ORDER BY ap.codigo DESC";
-    $stmtAccount = $dbh->prepare($sqlAccount);
-    $stmtAccount->execute();
-    $content = '';
-    $rows_account = $stmtAccount->fetchAll();
-    foreach ($rows_account as $account){
-        $content .= '
-        <div class="inbox-item">
-            <div class="row">
-                <div class="col-md-8 inbox-item-text">
-                    <p class="inbox-item-author">'.$account['nombre'].'</p>
-                    <p class="mb-0 text-success"><i class="fe-file"></i>'.$account['monto'].' bs.</p>
-                </div>
-                <div class="col-md-4 inbox-item-date p-0 text-right">
-                '.$account['fecha'].'
-                </div>
-            </div>
-        </div>
-        ';
+    $sqlActivity = "SELECT * FROM actividades
+    ORDER BY codigo DESC
+    LIMIT 1";
+
+    $stmtActividad= $dbh->prepare($sqlActivity);
+    $stmtActividad->execute();
+    while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
+        $codigoActividad = $rowActividad['codigo'];
     }
     echo json_encode(array(
-        'status'    => true,
-        'content'   => $content
+        'status'        => true,
+        'code_activity' => $codigoActividad
     ));
 }
 ?>
