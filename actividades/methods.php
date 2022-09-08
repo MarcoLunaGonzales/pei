@@ -8,9 +8,11 @@ $dbh = new Conexion();
  * method: POST
  * @autor: Ronald Mollericona
  **/
-$cod_personal = $_SESSION['globalUser'];
+
+$cod_personal  = $_SESSION['globalUser'];
+$code_activity = $_POST['code_activity'];
+
 if($_POST['type'] == 1){
-    $code_activity = $_POST['code_activity'];
     $date          = date('Y-m-d');
     // Preparación de archivo
     $folder        = 'file_activity';
@@ -26,8 +28,8 @@ if($_POST['type'] == 1){
         $sqlInsert = "INSERT INTO actividades_archivos (cod_actividad, cod_personal, fecha, ruta, filesize, extension, cod_estado)
         	            VALUES ('$code_activity','$cod_personal','$date','$file_name', '$size','$extension','1')";
         $stmt      = $dbh->prepare($sqlInsert);
-        $flagSuccess = $stmt->execute();
-        /* Se lista registro */
+        $stmt->execute();
+        /* Lista de registros */
         $sqlFile = "SELECT codigo, date_format(fecha, '%d-%m-%Y') as fecha, ruta, filesize, UPPER(extension) as extension 
         FROM actividades_archivos 
         WHERE cod_actividad = $code_activity 
@@ -81,15 +83,14 @@ if($_POST['type'] == 1){
  * @autor: Ronald Mollericona
  **/
 else if($_POST['type'] == 2){
-    $code_activity = $_POST['code_activity'];
     $anotacion     = $_POST['annotation'];
     $date          = date('Y-m-d');
     try {
         $sqlInsert   ="INSERT INTO actividades_anotaciones (cod_actividad, cod_personal, fecha, anotacion, cod_estado)
         	            VALUES ('$code_activity','$cod_personal','$date','$anotacion','1')";
         $stmt        = $dbh->prepare($sqlInsert);
-        $flagSuccess = $stmt->execute();
-        /* Se lista registro */
+        $stmt->execute();
+        /* Lista de registros */
         $sqlNote = "SELECT ac.codigo, date_format(ac.fecha, '%d-%m-%Y') as fecha, ac.anotacion, ac.cod_personal, CONCAT(p.primer_nombre, ' ', p.paterno, ' ', p.materno) as personal
         FROM actividades_anotaciones ac
         LEFT JOIN personal p ON p.codigo = ac.cod_personal
@@ -134,7 +135,6 @@ else if($_POST['type'] == 2){
  * @autor: Ronald Mollericona
  **/
 else if($_POST['type'] == 3){
-    $code_activity = $_POST['code_activity'];
     $staff_code    = $_POST['cod_personal'];
     $date          = date('Y-m-d');
     try {
@@ -150,8 +150,8 @@ else if($_POST['type'] == 3){
             $sqlInsert   ="INSERT INTO actividades_colaboradores (cod_actividad, cod_personal, fecha_designacion, cod_estado)
                             VALUES ('$code_activity','$staff_code','$date','1')";
             $stmt        = $dbh->prepare($sqlInsert);
-            $flagSuccess = $stmt->execute();
-            /* Se lista registro */
+            $stmt->execute();
+            /* Lista de registros */
             $sqlColl = "SELECT CONCAT(p.primer_nombre, ' ', p.paterno, ' ', p.materno) as nombre_compl, DATE_FORMAT(ac.fecha_designacion, '%d-%m-%Y') as fecha
             FROM actividades_colaboradores ac
             LEFT JOIN personal p on p.codigo = ac.cod_personal";
@@ -204,5 +204,48 @@ else if($_POST['type'] == 4){
             'status' => false
         ));
     }
+}
+/**
+ * Registrar el presupuesto asignado a la actividad
+ * method: POST
+ * @autor: Ronald Mollericona
+ **/
+else if($_POST['type'] == 5){
+    $cod_account = $_POST['cod_account'];
+    $amount       = $_POST['amount'];
+    $date         = date('Y-m-d');
+    $sqlInsert    = "INSERT INTO actividades_presupuestos (cod_actividad, cod_cuenta, fecha_ejecucion, monto, cod_estado)
+                    VALUES ('$code_activity','$cod_account','$date','$amount','1')";
+    $stmt         = $dbh->prepare($sqlInsert);
+    $stmt->execute();
+    /* Lista de registros */
+    $sqlAccount = "SELECT ap.codigo, date_format(ap.fecha_ejecucion, '%d-%m-%Y') as fecha, ap.monto, UPPER(p.nombre) as nombre
+    FROM actividades_presupuestos ap
+    LEFT JOIN plan_cuentas p ON p.codigo = ap.cod_cuenta
+    WHERE ap.cod_actividad = '$code_activity' 
+    ORDER BY ap.codigo DESC";
+    $stmtAccount = $dbh->prepare($sqlAccount);
+    $stmtAccount->execute();
+    $content = '';
+    $rows_account = $stmtAccount->fetchAll();
+    foreach ($rows_account as $account){
+        $content .= '
+        <div class="inbox-item">
+            <div class="row">
+                <div class="col-md-8 inbox-item-text">
+                    <p class="inbox-item-author">'.$account['nombre'].'</p>
+                    <p class="mb-0 text-success"><i class="fe-file"></i>'.$account['monto'].' bs.</p>
+                </div>
+                <div class="col-md-4 inbox-item-date p-0 text-right">
+                '.$account['fecha'].'
+                </div>
+            </div>
+        </div>
+        ';
+    }
+    echo json_encode(array(
+        'status'    => true,
+        'content'   => $content
+    ));
 }
 ?>

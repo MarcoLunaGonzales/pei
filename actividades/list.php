@@ -591,9 +591,8 @@ if($codProyecto!=0){
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
-                                <label class="col-sm-3 col-form-label">Colaborador:</label>
+                                <label class="col-form-label">Colaborador:</label>
                                 <select name="cod_personal" id="cod_personal" class="form-control" data-style="btn btn-warning" required>
-                                    <option value="" disabled selected="selected">-</option>
                                     <?php             
                                         $sqlColl   = "SELECT codigo, CONCAT(primer_nombre, ' ', paterno, ' ',materno) as nombre_personal FROM personal where cod_tipopersonal = 1";
                                         $stmtColl  = $dbh->prepare($sqlColl);
@@ -629,9 +628,8 @@ if($codProyecto!=0){
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
-                                <label class="col-sm-3 col-form-label">Cuenta:</label>
+                                <label class="col-form-label">Cuenta:</label>
                                 <select name="cod_account" id="cod_account" class="form-control" data-style="btn btn-warning" required>
-                                    <option value="" disabled selected="selected">-</option>
                                     <?php             
                                         $sqlAccount   = "SELECT codigo, numero, nombre FROM plan_cuentas";
                                         $stmtAccount  = $dbh->prepare($sqlAccount);
@@ -643,7 +641,9 @@ if($codProyecto!=0){
                                     <?php 
                                         }   
                                     ?>
-                                </select>                     
+                                </select>   
+                                <label class="col-form-label">Monto:</label>
+                                <input type="number" step="0.1" id="amount" class="form-control" placeholder="Ingresar presupuesto">                
                             </div>
                         </div>
                     </div>
@@ -736,6 +736,7 @@ if($codProyecto!=0){
             });
             /* Abrir modal de asignación de colaborador */
             $('body').on('click', '.addCollaborator', function(){
+                $("#cod_personal").val($("#cod_personal option:first").val());
                 $('body #modal_task_detail').modal('hide');
                 $('#modalCollaborator').modal('show');
             });
@@ -746,6 +747,8 @@ if($codProyecto!=0){
             });
             /* Abrir modal de asignación de presupuesto */
             $('body').on('click', '.addBudget', function(){
+                $("#cod_account").val($("#cod_account option:first").val());
+                $("#amount").val('');
                 $('body #modal_task_detail').modal('hide');
                 $('#modalBudget').modal('show');
             }); 
@@ -807,6 +810,39 @@ if($codProyecto!=0){
                         $('.item-note-'+cod_anotacion).remove()
                     }
                 });
+            });
+            /**
+             * Función para enviar y guardar el presupuesto asignado a la actividad
+             **/
+            $('.save-budget').click(function(){
+                let cod_account = $('#cod_account').val();
+                let amount      = $('#amount').val();
+                let code_act    = $('body #codeActivity').val();
+                let formData    = new FormData();
+                formData.append('type', 5);         // Tipo 5 : Guardar Asignación
+                formData.append('cod_account', cod_account);
+                formData.append('amount', amount);
+                formData.append('code_activity', code_act);
+                $.ajax({
+                    url:"actividades/methods.php",
+                    type:"POST",
+                    contentType: false,
+                    processData: false,
+                    data: formData,
+                    success:function(response){
+                        let resp = JSON.parse(response);
+                        responseAlert(resp.status);
+                        $('body .component-budget ' + label).html(resp.content);
+                        $('body #modal_task_detail').modal('show');
+                        $('#modalBudget').modal('hide');
+                    }
+                });
+            });
+            /**
+             * Visualización de nueva actividad
+             **/
+            $('body').on('click', '.show-activity', function(){
+                showModallistTaskDetail($(this).data('cod_actividad'));
             });
             /**
              * Mensaje de alerta despues de recibir respuesta del BACKEND

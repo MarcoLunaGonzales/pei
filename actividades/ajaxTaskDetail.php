@@ -64,7 +64,17 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
     ORDER BY ap.codigo DESC";
     $stmtAccount = $dbh->prepare($sqlAccount);
     $stmtAccount->execute();
-
+    
+    /**
+     * Lista de Presupuestos asignados a la actividad
+     * @autor: Ronald Mollericona
+    **/
+    $sqlSubActivity = "SELECT codigo, nombre, fecha_limite
+    FROM actividades
+    WHERE cod_padre = '$codigoActividad'";
+    $stmtsubActivity = $dbh->prepare($sqlSubActivity);
+    $stmtsubActivity->execute();
+    
 ?>
 <div id="bodyTaskComplete">    
     <div class="modal-header bg-primary">
@@ -200,6 +210,49 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
                 <!-- Fin lista de Notas -->
             </div>
     		<div class="col-md-4">
+                <!-- SubActividades-->
+                <div class="card p-2 mb-1 border">
+                    <div class="pb-1">
+                        <button type="button" class="btn btn-success btn-sm addSubActivity float-end pl-1 pr-1">
+                            <i class="mdi mdi-plus"></i> Nuevo
+                        </button>
+                        <h5 class="header-title mt-1 text-primary"><i class="fe-paperclip"></i> Sub Actividad</h5>
+                    </div>
+                    <div class="inbox-widget component-budget" data-simplebar style="max-height: 250px;">
+                        <?php
+                            if(!count($rows_sub_activity = $stmtsubActivity->fetchAll())){
+                        ?>
+                        <div class="inbox-item">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <div class="avatar-sm">
+                                        <span class="avatar-title badge-soft-danger text-danger rounded">
+                                            <i class="fe-folder-minus"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col ps-0">
+                                    <h5 class="mt-0 mb-0 text-muted">No se encontró subactividades...</h5>
+                                </div>
+                            </div>
+                        </div> 
+                        <?php
+                            }else{
+                                foreach ($rows_sub_activity as $sub_activity){
+                        ?>
+                            <div class="inbox-item">
+                                <div class="row">
+                                    <div class="col-md-12 inbox-item-text">
+                                        <p class="inbox-item-author show-activity" data-cod_actividad="<?=$sub_activity['codigo'];?>"><?=$sub_activity['nombre'];?></p>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php
+                                }
+                            }
+                        ?>
+                    </div>
+                </div>
                 <!-- Presupuesto-->
                 <div class="card p-2 mb-1 border">
                     <div class="pb-1">
@@ -217,7 +270,7 @@ while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
                                 <div class="col-auto">
                                     <div class="avatar-sm">
                                         <span class="avatar-title badge-soft-danger text-danger rounded">
-                                            <i class="fe-user-x"></i>
+                                            <i class="fe-thumbs-down"></i>
                                         </span>
                                     </div>
                                 </div>
