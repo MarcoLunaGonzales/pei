@@ -88,7 +88,7 @@ if($codProyecto!=0){
                                                 <!-- cta -->
                                                 <div class="row">
                                                     <div class="col-sm-3">
-                                                    <!--Este campo es para la creacion de nuevas tareas-->
+                                                    <!--Este campo es para la creacion de nuevas actividades-->
                                                     <input type="hidden" id="estado_activo" name="estado_activo" value="0">
                                                     
                                                     <button type="button" class="btn btn-primary" onclick="showModalNewTask(1)">
@@ -125,7 +125,9 @@ if($codProyecto!=0){
                                                     <div class="col">
                                                         <?php
                                                             $sqlAct="SELECT a.codigo, a.nombre, a.observaciones, DATE_FORMAT(a.fecha_limite,'%b %d, %Y')as fecha_limite, a.cod_prioridad, ap.nombre as nombre_prioridad, ap.color,
-                                                                (select np.nombre from niveles_pei np where np.codigo=a.cod_componentepei)as nombrecomponentepei
+                                                                (select np.nombre from niveles_pei np where np.codigo=a.cod_componentepei)as nombrecomponentepei,
+                                                                (SELECT COUNT(*) as files_count FROM actividades_archivos aa WHERE aa.cod_actividad = a.codigo AND aa.cod_estado = 1) as files_count,
+                                                                (SELECT COUNT(*) as notes_count FROM actividades_anotaciones an WHERE an.cod_actividad = a.codigo AND an.cod_estado = 1) as notes_count
                                                                 from actividades a, actividades_prioridades ap
                                                                 where a.cod_prioridad=ap.codigo
                                                                 and a.cod_padre is null";
@@ -154,6 +156,8 @@ if($codProyecto!=0){
                                                                 $nombrePrioridadActividad=$rowAct['nombre_prioridad'];
                                                                 $colorActividad=$rowAct['color'];
                                                                 $nombreComponentePEI=$rowAct['nombrecomponentepei'];
+                                                                $files_count = $rowAct['files_count'];
+                                                                $notes_count = $rowAct['notes_count'];
                                                             
                                                         ?>
                                                                     <!-- task -->
@@ -184,11 +188,11 @@ if($codProyecto!=0){
                                                                                         </li>
                                                                                         <li class="list-inline-item pe-1">
                                                                                             <i class="mdi mdi-tune font-16 me-1"></i>
-                                                                                            3/7
+                                                                                            <?=$files_count;?>
                                                                                         </li>
                                                                                         <li class="list-inline-item pe-2">
                                                                                             <i class="mdi mdi-comment-text-multiple-outline font-16 me-1"></i>
-                                                                                            21
+                                                                                            <?=$notes_count;?>
                                                                                         </li>
                                                                                         <li class="list-inline-item text-primary pe-2" style="cursor:pointer;">
                                                                                             <i class="fe-eye showActivity" data-cod_activity="<?=$codigoActividad?>"></i>
@@ -289,7 +293,7 @@ if($codProyecto!=0){
                                                 <div class="inbox-widget component-file-show" data-simplebar style="max-height: 200px;">
                                                 </div>
 
-                                                <h5 class="mt-3 font-size-16"><i class="fe-feather text-primary"></i> Comentarios de la Tarea</h5>
+                                                <h5 class="mt-3 font-size-16"><i class="fe-feather text-primary"></i> Comentarios de la Actividad</h5>
                                                 <div class="inbox-widget component-annotation-show" data-simplebar style="max-height: 200px;">
                                                 </div>
 
