@@ -127,9 +127,12 @@ if($codProyecto!=0){
                                                             $sqlAct="SELECT a.codigo, a.nombre, a.observaciones, DATE_FORMAT(a.fecha_limite,'%b %d, %Y')as fecha_limite, a.cod_prioridad, ap.nombre as nombre_prioridad, ap.color,
                                                                 (select np.nombre from niveles_pei np where np.codigo=a.cod_componentepei)as nombrecomponentepei,
                                                                 (SELECT COUNT(*) as files_count FROM actividades_archivos aa WHERE aa.cod_actividad = a.codigo AND aa.cod_estado = 1) as files_count,
-                                                                (SELECT COUNT(*) as notes_count FROM actividades_anotaciones an WHERE an.cod_actividad = a.codigo AND an.cod_estado = 1) as notes_count
-                                                                from actividades a, actividades_prioridades ap
+                                                                (SELECT COUNT(*) as notes_count FROM actividades_anotaciones an WHERE an.cod_actividad = a.codigo AND an.cod_estado = 1) as notes_count,
+                                                                (SELECT COUNT(*) as notes_count FROM actividades_anotaciones an WHERE an.cod_actividad = a.codigo AND an.cod_estado = 1) as notes_count,
+                                                                pimg.imagen as imagen_personal
+                                                                from actividades a, actividades_prioridades ap, personalimagen pimg
                                                                 where a.cod_prioridad=ap.codigo
+                                                                and a.cod_responsable = pimg.codigo
                                                                 and a.cod_padre is null";
                                                             if($codProyecto!=0){
                                                                 $sqlAct.=" and a.cod_componentepei='$codProyecto' ";
@@ -158,6 +161,7 @@ if($codProyecto!=0){
                                                                 $nombreComponentePEI=$rowAct['nombrecomponentepei'];
                                                                 $files_count = $rowAct['files_count'];
                                                                 $notes_count = $rowAct['notes_count'];
+                                                                $imagen_personal = $rowAct['imagen_personal'];
                                                             
                                                         ?>
                                                                     <!-- task -->
@@ -175,7 +179,7 @@ if($codProyecto!=0){
                                                                         <div class="col-lg-6">
                                                                             <div class="d-sm-flex justify-content-between">
                                                                                 <div id="tooltips-container">
-                                                                                    <img src="assets2/images/users/user-9.jpg" lt="image" class="avatar-xs rounded-circle" data-bs-container="#tooltips-container" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Assigned to Arya S" />
+                                                                                    <img src="assets/imagenes_personal/<?=$imagen_personal;?>" lt="image" class="avatar-xs rounded-circle" data-bs-container="#tooltips-container" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Assigned to Arya S" />
                                                                                 </div>
                                                                                 <div class="mt-3 mt-sm-0">
                                                                                     <ul class="list-inline font-13 text-sm-end">

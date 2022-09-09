@@ -31,20 +31,23 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
             a.observaciones as obs,
             a.cod_responsable,
             CONCAT(p.primer_nombre,' ', p.paterno,' ', p.materno) as nombre_responsable, 
-            ek.nombre estado_kanban
-        from actividades a, actividades_prioridades ap, personal p, estados_kanban ek
+            ek.nombre estado_kanban,
+            pimg.imagen as imagen_personal
+        from actividades a, actividades_prioridades ap, personal p, estados_kanban ek, personalimagen pimg
         where a.cod_prioridad   = ap.codigo
         and a.cod_responsable   = p.codigo 
-        and a.cod_estadokanban  = ek.codigo 
+        and a.cod_responsable = pimg.codigo
         and a.codigo = '$codigoActividad'";
     }else{
         $sqlActividad="SELECT a.codigo, a.nombre, a.observaciones, DATE_FORMAT(a.fecha_limite,'%d-%m-%Y')as fecha_limite, a.cod_prioridad, ap.nombre as nombre_prioridad, ap.color,
-        (select np.nombre from niveles_pei np where np.codigo=a.cod_componentepei)as nombrecomponentepei, np.nombre as nombreproyecto, a.cod_padre as cod_padre, a.observaciones as obs, a.cod_responsable, CONCAT(p.primer_nombre,' ', p.paterno,' ', p.materno) as nombre_responsable, ek.nombre estado_kanban
-        from actividades a, actividades_prioridades ap, niveles_pei np, personal p, estados_kanban ek
+        (select np.nombre from niveles_pei np where np.codigo=a.cod_componentepei)as nombrecomponentepei, np.nombre as nombreproyecto, a.cod_padre as cod_padre, a.observaciones as obs, a.cod_responsable, CONCAT(p.primer_nombre,' ', p.paterno,' ', p.materno) as nombre_responsable, ek.nombre estado_kanban,
+        pimg.imagen as imagen_personal
+        from actividades a, actividades_prioridades ap, niveles_pei np, personal p, estados_kanban ek, personalimagen pimg
         where a.cod_prioridad=ap.codigo 
         and a.cod_componentepei=np.codigo 
         and a.cod_responsable   = p.codigo
         and a.cod_estadokanban  = ek.codigo 
+        and a.cod_responsable = pimg.codigo
         and a.codigo='$codigoActividad'";
     }
     
@@ -59,6 +62,7 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
         $fechaLimite        = $rowActividad['fecha_limite'];
         $nombre_responsable = $rowActividad['nombre_responsable'];
         $estado_kanban      = $rowActividad['estado_kanban'];
+        $imagen_personal      = $rowActividad['imagen_personal'];
         $nombreProyecto     = ($verf_sub_activity)?$rowActividad['nombreproyecto']:'';
        
     }
@@ -158,7 +162,7 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
                         <div class="col-md-4">
                             <p class="mt-2 mb-1 text-muted">Responsable</p>
                             <div class="d-flex align-items-start">
-                                <img src="assets2/images/users/user-9.jpg" alt="Arya S" class="rounded-circle me-2" height="24" />
+                                <img src="assets/imagenes_personal/<?=$imagen_personal;?>" alt="Arya S" class="rounded-circle me-2" height="24" />
                                 <div class="w-100">
                                     <h5 class="mt-1 font-size-14">
                                         <?=$nombre_responsable;?>
