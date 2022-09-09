@@ -62,7 +62,7 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
         $fechaLimite        = $rowActividad['fecha_limite'];
         $nombre_responsable = $rowActividad['nombre_responsable'];
         $estado_kanban      = $rowActividad['estado_kanban'];
-        $imagen_personal      = $rowActividad['imagen_personal'];
+        $imagen_personal    = $rowActividad['imagen_personal'];
         $nombreProyecto     = ($verf_sub_activity)?$rowActividad['nombreproyecto']:'';
        
     }

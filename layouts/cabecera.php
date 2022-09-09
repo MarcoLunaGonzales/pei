@@ -5,7 +5,7 @@
 
   $nombreUnidadCabecera=$_SESSION["globalNameUO"];
   $nombreAreaCabecera=$_SESSION["globalNameArea"]; 
-
+  $nombreUsuario=$_SESSION["globalNameUser"]; 
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -349,7 +349,7 @@
               <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="javascript:;" data-toggle="dropdown">
                 <div class="media user-box align-items-center">
                   <div class="media-body user-info">
-                    <p class="user-name mb-0">Marco Luna</p>
+                    <p class="user-name mb-0"><?=$nombreUsuario;?></p>
                     <p class="designattion mb-0"><?=$nombreUnidadCabecera;?>/<?=$nombreAreaCabecera;?></p>
                   </div>
                   <img src="https://via.placeholder.com/110x110" class="user-img" alt="user avatar">
