@@ -93,49 +93,49 @@ $dbh = new Conexion();
 
                         <div class="row">
                             <?php
-                            $sqlProj="SELECT np.codigo, np.nombre, np.abreviatura from niveles_pei np, nivelespei_unidadesareas npua where np.codigo=npua.cod_nivelpei and npua.cod_area='$globalAreaX' and npua.cod_unidadorganizacional='$globalUnidadX'";
+                            $sqlProj="SELECT np.codigo, 
+                                np.nombre, 
+                                np.abreviatura, 
+                                (SELECT COUNT(*) as act_total
+                                FROM actividades a
+                                WHERE a.cod_componentepei = np.codigo) as act_total,
+                                (SELECT COUNT(aa.codigo)
+                                FROM actividades a
+                                LEFT JOIN actividades_anotaciones aa ON aa.cod_actividad = a.codigo
+                                WHERE a.cod_componentepei = np.codigo) as ant_total
+                            from niveles_pei np, nivelespei_unidadesareas npua 
+                            where np.codigo=npua.cod_nivelpei 
+                            and npua.cod_area='$globalAreaX' 
+                            and npua.cod_unidadorganizacional='$globalUnidadX'";
                             //echo $sqlProj;
                             $stmtProj= $dbh->prepare($sqlProj);
                             $stmtProj->execute();
                             while ($rowProj = $stmtProj->fetch(PDO::FETCH_ASSOC)) {
                                 $codigoProyecto=$rowProj['codigo'];
                                 $nombreProyecto=$rowProj['nombre'];
+                                $totalActividades=$rowProj['act_total'];
+                                $totalAnotaciones=$rowProj['ant_total'];
                                 $abreviaturaProyecto=$rowProj['abreviatura'];
                             ?>
                             <div class="col-lg-4">
                                 <div class="card project-box">
                                     <div class="card-body">
-                                        <div class="dropdown float-end">
-                                            <a href="#" class="dropdown-toggle card-drop arrow-none" data-bs-toggle="dropdown" aria-expanded="false">
-                                                <i class="mdi mdi-dots-horizontal m-0 text-muted h3"></i>
-                                            </a>
-                                            <div class="dropdown-menu dropdown-menu-end">
-                                                <a class="dropdown-item" href="#">Edit</a>
-                                                <a class="dropdown-item" href="#">Delete</a>
-                                                <a class="dropdown-item" href="#">Add Members</a>
-                                                <a class="dropdown-item" href="#">Add Due Date</a>
-                                            </div>
-                                        </div> <!-- end dropdown -->
                                         <!-- Title-->
                                         <h4 class="mt-0"><a href="index.php?opcion=listTasks&cod_proyecto=<?=$codigoProyecto;?>" class="text-dark"><?=$nombreProyecto;?></a></h4>
                                         <p class="text-muted text-uppercase"><i class="mdi mdi-account-circle"></i> <small><?=$abreviaturaProyecto;?></small></p>
-                                        <div class="badge bg-soft-success text-success mb-3">En curso</div>
-                                        <!-- Desc-->
-                                        <p class="text-muted font-13 mb-3 sp-line-2">Esta es la descripcion larga de los proyectos<a href="javascript:void(0);" class="fw-bold text-muted">view more</a>
-                                        </p>
                                         <!-- Task info-->
                                         <p class="mb-1">
                                             <span class="pe-2 text-nowrap mb-2 d-inline-block">
                                                 <i class="mdi mdi-format-list-bulleted-type text-muted"></i>
-                                                <b>78</b> Tareas
+                                                <b><?=$totalActividades;?></b> Actividades
                                             </span>
                                             <span class="text-nowrap mb-2 d-inline-block">
                                                 <i class="mdi mdi-comment-multiple-outline text-muted"></i>
-                                                <b>214</b> Comentarios
+                                                <b><?=$totalAnotaciones;?></b> Comentarios
                                             </span>
                                         </p>
                                         <!-- Team-->
-                                        <div class="avatar-group mb-3" id="tooltips-container">
+                                        <!-- <div class="avatar-group mb-3" id="tooltips-container">
                                             <a href="javascript: void(0);" class="avatar-group-item">
                                                 <img src="assets2/images/users/user-1.jpg" class="rounded-circle avatar-sm" alt="friend" data-bs-container="#tooltips-container" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Mat Helme" />
                                             </a>
@@ -155,7 +155,7 @@ $dbh = new Conexion();
                                             <a href="javascript: void(0);" class="avatar-group-item">
                                                 <img src="assets2/images/users/user-5.jpg" class="rounded-circle avatar-sm" alt="friend" data-bs-container="#tooltips-container" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Username" />
                                             </a>
-                                        </div>
+                                        </div> -->
                                         <!-- Progress-->
                                         <!--p class="mb-2 fw-semibold">Task completed: <span class="float-end">28/78</span></p>
                                         <div class="progress mb-1" style="height: 7px;">
