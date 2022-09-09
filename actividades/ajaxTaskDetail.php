@@ -47,6 +47,9 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
         and a.cod_estadokanban  = ek.codigo 
         and a.codigo='$codigoActividad'";
     }
+    
+    //echo $sqlActividad;
+
     $stmtActividad= $dbh->prepare($sqlActividad);
     $stmtActividad->execute();
     while ($rowActividad    = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {

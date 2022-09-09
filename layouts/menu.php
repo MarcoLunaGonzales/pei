@@ -20,11 +20,13 @@
               <div class="menu-title">Datos Generales</div>
             </a>
             <ul>
-              <li> <a href="index.php?opcion=listEmpresas"><i class="bx bx-right-arrow-alt"></i>Empresas</a>
+              <li><a class="has-arrow" href="javascript:;"><i class="bx bx-right-arrow-alt"></i>Administracion del Sistema</a>
+                <ul>
+                  <li> <a href="index.php?opcion=listTiposCampo"><i class="bx bx-right-arrow-alt"></i>Tipos de Campo</a></li>
+                  <li> <a href="index.php?opcion=listCamposPersonalizados"><i class="bx bx-right-arrow-alt"></i>Creacion de Campos Personalizados</a></li>
+                </ul>
               </li>
-              <li> <a href="index.php?opcion=listTiposCampo"><i class="bx bx-right-arrow-alt"></i>Tipos de Campo</a>
-              </li>
-              <li> <a href="index.php?opcion=listCamposPersonalizados"><i class="bx bx-right-arrow-alt"></i>Creacion de Campos Personalizados</a>
+              <li> <a href="index.php?opcion=listEmpresas"><i class="bx bx-right-arrow-alt"></i>Instancias del PEI</a>
               </li>
               <li> <a href="index.php?opcion=listNivelesConfiguracion"><i class="bx bx-right-arrow-alt"></i>Configuracion de Niveles</a>
               </li>

@@ -1,8 +1,8 @@
 <?php
 //AQUI SE DEFINEN LAS VARIABLES PARA EL ABM
 $table="empresas";
-$moduleNameSingular="Empresa";
-$moduleNamePlural="Empresas";
+$moduleNameSingular="Instancia del PEI";
+$moduleNamePlural="Instancias del PEI";
 
 $urlList="../index.php?opcion=listEmpresas";
 $urlList2="index.php?opcion=listEmpresas";
