@@ -37,6 +37,12 @@ if($_POST['type'] == 0){
         'colaboradores' => $colaboradores,
         'data'          => $stmtActividad->fetch(PDO::FETCH_ASSOC)
     ));
+
+/**
+ * Almacenamiento de Archivos
+ * method: POST
+ * @autor: Ronald Mollericona
+ **/
 }else if($_POST['type'] == 1){
     $date          = date('Y-m-d');
     // Preparación de archivo
@@ -209,6 +215,47 @@ else if($_POST['type'] == 6){
         echo json_encode(array(
             'status'        => true,
             'code_activity' => $codigoActividad
+        ));
+    } catch (Exception $e) {
+        echo json_encode(array(
+            'status' => false
+        ));
+    }
+}
+/**
+ * Actualización de Datos - Case para actualizar cierta información
+ * method: POST
+ * @autor: Ronald Mollericona
+ **/
+else if($_POST['type'] == 7){
+    $data        = $_POST['data'];
+    $select_data = $_POST['select_data'];
+    $query       = '';
+    switch ($select_data) {
+        // Nombre de la Actividad
+        case 1:
+            $query = 'nombre';
+            break;
+        // ID nuevo responsable
+        case 2:
+            $query = 'cod_responsable';
+            break;
+        // Fecha Limite
+        case 3:
+            $query = 'fecha_limite';
+            break;
+        // Observaciones
+        case 5:
+            $query = 'observaciones';
+            break;
+    }
+    try {
+        $sqlUpdate    = "UPDATE actividades SET $query = '$data' WHERE codigo = $code_activity";
+        $stmt         = $dbh->prepare($sqlUpdate);
+        $stmt->execute();
+        echo json_encode(array(
+            'status'        => true,
+            'code_activity' => $code_activity
         ));
     } catch (Exception $e) {
         echo json_encode(array(

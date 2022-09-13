@@ -6,16 +6,17 @@ $dbh = new Conexion();
 $codigoActividad = $_GET["codigo_actividad"];
 $cod_personal    = $_SESSION['globalUser'];
 /* Verificación de Tipo de Actividad(Padre o Sub-Actividad) */
-$sqlVerf = "SELECT * 
-FROM actividades
-WHERE codigo = '$codigoActividad'";
+$sqlVerf = "SELECT * FROM actividades WHERE codigo = '$codigoActividad'";
 $stmtVerf= $dbh->prepare($sqlVerf);
 $stmtVerf->execute();
-$verf_sub_activity = false;
+$verf_sub_activity = true;     // Verificación de SubActividad
+$subA_limit_date   = '';        // Validación Fecha limite
+$codigo_padre      = '';        // Codigo padre de Actividad
 while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
-    if(empty($rowVerf['cod_padre'])){
-        $verf_sub_activity = true;
-        $actividad_padre   = $rowVerf['nombre'];
+    if(!empty($rowVerf['cod_padre'])){
+        $verf_sub_activity = false;
+        $codigo_padre    = $rowVerf['cod_padre'];
+        $actividad_padre = $rowVerf['nombre'];
     }
 }
 
@@ -36,8 +37,17 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
         from actividades a, actividades_prioridades ap, personal p, estados_kanban ek, personalimagen pimg
         where a.cod_prioridad   = ap.codigo
         and a.cod_responsable   = p.codigo 
+        and a.cod_estadokanban  = ek.codigo 
         and a.cod_responsable = pimg.codigo
         and a.codigo = '$codigoActividad'";
+        // Datos de Actividad Padre
+        $sqlPadre  = "SELECT fecha_limite FROM actividades WHERE codigo = $codigo_padre";
+        $stmtPadre = $dbh->prepare($sqlPadre);
+        $stmtPadre->execute();
+        while ($rowPadre    = $stmtPadre->fetch(PDO::FETCH_ASSOC)) {
+            $subA_limit_date = $rowPadre['fecha_limite'];
+           
+        }
     }else{
         $sqlActividad="SELECT a.codigo, a.nombre, a.observaciones, DATE_FORMAT(a.fecha_limite,'%d-%m-%Y')as fecha_limite, a.cod_prioridad, ap.nombre as nombre_prioridad, ap.color,
         (select np.nombre from niveles_pei np where np.codigo=a.cod_componentepei)as nombrecomponentepei, np.nombre as nombreproyecto, a.cod_padre as cod_padre, a.observaciones as obs, a.cod_responsable, CONCAT(p.primer_nombre,' ', p.paterno,' ', p.materno) as nombre_responsable, ek.nombre estado_kanban,
@@ -140,11 +150,14 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
                         <div class="col-4">
                             <p class="mt-2 mb-1 text-muted">Nombre</p>
                             <div class="d-flex align-items-start">
-                                <div class="w-100">
+                                <!-- Información -->
+                                <div class="w-100 data_select" style="cursor:pointer;" data-select="1" data-inp="name_up">
                                     <h5 class="mt-1 font-size-14">
                                         <i class='fe-book-open font-16 text-primary'></i> <?=$nombreActividad;?>
                                     </h5>
                                 </div>
+                                <!-- Actualzación -->
+                                <input type="text" class="form-control data_update" id="name_up" placeholder="Ingresar nombre de actividad" value="<?=$nombreActividad;?>" style="display:none;">
                             </div>
                         </div>
                         <?php if($verf_sub_activity){ ?>
@@ -163,21 +176,51 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
                             <p class="mt-2 mb-1 text-muted">Responsable</p>
                             <div class="d-flex align-items-start">
                                 <img src="assets/imagenes_personal/<?=$imagen_personal;?>" alt="Arya S" class="rounded-circle me-2" height="24" />
-                                <div class="w-100">
+                                <!-- Información -->
+                                <div class="w-100 data_select" style="cursor:pointer;" data-select="2" data-inp="responsible_up">
                                     <h5 class="mt-1 font-size-14">
                                         <?=$nombre_responsable;?>
                                     </h5>
                                 </div>
+                                
+                                <!-- Actualzación -->
+                                <select name="responsible_up" id="responsible_up" class="form-control data_update"  style="display:none;">
+                                    <?php             
+                                        $sqlColl   = "SELECT codigo, CONCAT(primer_nombre, ' ', paterno, ' ',materno) as nombre_personal FROM personal where cod_tipopersonal = 1
+                                        ORDER BY nombre_personal ASC";
+                                        $stmtColl  = $dbh->prepare($sqlColl);
+                                        $stmtColl->execute();
+                                        $rows_collaborators = $stmtColl->fetchAll();
+                                        foreach ($rows_collaborators as $collabolator){       
+                                    ?>
+                                    <option value="<?= $collabolator['codigo']; ?>"  ><?= $collabolator['nombre_personal']; ?></option>
+                                    <?php 
+                                        }   
+                                    ?>
+                                </select> 
                             </div>
                         </div>
                         <div class="col-md-4">
                             <p class="mt-2 mb-1 text-muted">Fecha Limite</p>
                             <div class="d-flex align-items-start">
-                                <div class="w-100">
+                                <!-- Información -->
+                                <div class="w-100 data_select" style="cursor:pointer;" data-select="3" data-inp="date_up">
                                     <h5 class="mt-1 font-size-14">
                                         <i class='fe-calendar font-16 text-success'></i> <?=$fechaLimite;?>
                                     </h5>
                                 </div>
+                                <!-- Actualzación -->
+                                <?php
+                                    if(!$verf_sub_activity){
+                                ?>
+                                    <input type="date" min="<?=date('Y-m-d')?>" max="<?=date('Y-m-d', strtotime($subA_limit_date));?>" class="form-control data_update" id="date_up" value="<?=date('Y-m-d', strtotime($fechaLimite));?>" style="display:none;">
+                                <?php
+                                    }else{
+                                ?>
+                                    <input type="date" min="<?=date('Y-m-d')?>" class="form-control data_update" id="date_up" value="<?=date('Y-m-d', strtotime($fechaLimite));?>" style="display:none;">
+                                <?php
+                                    }
+                                ?>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -191,11 +234,14 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
                         <div class="col-md-<?= $verf_sub_activity?'4':'8' ?>">
                             <p class="mt-2 mb-1 text-muted">Descripción</p>
                             <div class="d-flex align-items-start">
-                                <div class="w-100">
+                                <!-- Información -->
+                                <div class="w-100 data_select" style="cursor:pointer;" data-select="5" data-inp="description_up">
                                     <h5 class="mt-1 font-size-14">
                                         <i class='fe-file-text font-16 text-info'></i> <?=$obs;?>
                                     </h5>
                                 </div>
+                                <!-- Actualzación -->
+                                <textarea class="form-control data_update" name="description_up" id="description_up" style="display:none;"><?=$obs;?></textarea>
                             </div>
                         </div>
                     </div>
@@ -334,9 +380,9 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
                 ?>
                 <div class="card p-2 mb-1 border">
                     <div class="pb-1">
-                                <button type="button" class="btn btn-success btn-sm addSubActivity float-end pl-1 pr-1">
-                                    <i class="mdi mdi-plus"></i> Nuevo
-                                </button>
+                        <button type="button" class="btn btn-success rounded-pill btn-sm addSubActivity float-end">
+                            <i class="mdi mdi-plus"></i>
+                        </button>
                         <h5 class="header-title mt-1 text-primary"><i class="fe-paperclip"></i>Sub Actividades</h5>
                     </div>
                     <div class="inbox-widget" data-simplebar style="max-height: 220px;">
@@ -380,8 +426,8 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
                 <!-- Presupuesto-->
                 <div class="card p-2 mb-1 border">
                     <div class="pb-1">
-                        <button type="button" class="btn btn-success btn-sm addBudget float-end pl-1 pr-1">
-                            <i class="mdi mdi-plus"></i> Nuevo
+                        <button type="button" class="btn btn-success rounded-pill btn-sm addBudget float-end">
+                            <i class="mdi mdi-plus"></i>
                         </button>
                         <h5 class="header-title mt-1 text-primary"><i class="fe-tag"></i> Presupuesto</h5>
                     </div>
@@ -428,8 +474,8 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
                 <!-- Colaboradores-->
                 <div class="card p-2 mb-1 border">
                     <div>
-                        <button type="button" class="btn btn-success btn-sm addCollaborator float-end pl-1 pr-1">
-                            <i class="mdi mdi-plus"></i> Nuevo
+                        <button type="button" class="btn btn-success rounded-pill btn-sm addCollaborator float-end">
+                            <i class="mdi mdi-plus"></i>
                         </button>
                         <h5 class="header-title mt-1 text-primary"><i class="fe-users"></i> Colaboradores</h5>
                     </div>
