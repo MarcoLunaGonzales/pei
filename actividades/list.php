@@ -16,7 +16,18 @@ $nombreProyecto="";
 if($codProyecto!=0){
     $nombreProyecto=nombreNivelPEI($codProyecto);
 }
+
+/* Obtenemos Configuración de ruta de imagenes */
+$sqlFind = "SELECT * FROM configuraciones
+WHERE id_configuracion = 2";
+$stmtFind = $dbh->prepare($sqlFind);
+$stmtFind->execute();
+while ($row = $stmtFind->fetch(PDO::FETCH_ASSOC)) {
+    $ruta  = $row['valor_configuracion'];
+}
+
 ?>
+
 
 
 <!DOCTYPE html>
@@ -46,6 +57,9 @@ if($codProyecto!=0){
 		<script src="assets2/js/head.js"></script>
         <!-- Style input type FILE -->
 		<link href="assets/css/customStyle.css" rel="stylesheet" type="text/css" />
+        <!-- Sweet Alert-->
+        <link href="assets2/libs/sweetalert2/sweetalert2.min.css" rel="stylesheet" type="text/css" />
+
     </head>
 
     <!-- body start -->
@@ -179,7 +193,7 @@ if($codProyecto!=0){
                                                                         <div class="col-lg-6">
                                                                             <div class="d-sm-flex justify-content-between">
                                                                                 <div id="tooltips-container">
-                                                                                    <img src="assets/imagenes_personal/<?=$imagen_personal;?>" lt="image" class="avatar-xs rounded-circle" data-bs-container="#tooltips-container" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Assigned to Arya S" />
+                                                                                    <img src="<?=$ruta?><?=$imagen_personal;?>" lt="image" class="avatar-xs rounded-circle" data-bs-container="#tooltips-container" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Assigned to Arya S" />
                                                                                 </div>
                                                                                 <div class="mt-3 mt-sm-0">
                                                                                     <ul class="list-inline font-13 text-sm-end">
@@ -382,8 +396,15 @@ if($codProyecto!=0){
                       <label class="col-sm-3 col-form-label">Descripcion</label>
                       <div class="col-sm-8">
                         <div class="form-group">
-                            <textarea class="form-control" name="observaciones" id="observaciones">
-                            </textarea>
+                            <textarea class="form-control" name="observaciones" id="observaciones"></textarea>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <label class="col-sm-3 col-form-label">Fecha Inicio</label>
+                      <div class="col-sm-8">
+                        <div class="form-group">
+                          <input class="form-control" type="date" name="fecha_inicio" id="fecha_inicio" required="true"/>
                         </div>
                       </div>
                     </div>
@@ -428,7 +449,7 @@ if($codProyecto!=0){
     <!--END MODAL-->
     <!-- Long Content Scroll Modal -->
     <div class="modal fade" id="modal_task_detail" tabindex="-1" role="dialog" aria-labelledby="scrollableModalTitle" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div id="div_task_detail">
                 </div>
@@ -450,7 +471,8 @@ if($codProyecto!=0){
                                 <label class="col-form-label">Colaborador:</label>
                                 <select name="cod_personal" id="cod_personal" class="form-control" data-style="btn btn-warning" required>
                                     <?php             
-                                        $sqlColl   = "SELECT codigo, CONCAT(primer_nombre, ' ', paterno, ' ',materno) as nombre_personal FROM personal where cod_tipopersonal = 1
+                                        $sqlColl   = "SELECT codigo, CONCAT(primer_nombre, ' ', paterno, ' ',materno) as nombre_personal FROM personal 
+                                        WHERE cod_estadopersonal = 1
                                         ORDER BY nombre_personal ASC";
                                         $stmtColl  = $dbh->prepare($sqlColl);
                                         $stmtColl->execute();
@@ -518,6 +540,42 @@ if($codProyecto!=0){
             </div>
         </div>
     </div>
+    
+    <!-- Modal Nuevo Hito -->
+    <div class="modal fade" id="modalNewHito" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-top">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title text-white">Añadir Hito</h5>
+                    <button type="button" class="btn-close bg-white close-hito" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="col-sm-12 col-form-label">Nombre</label>
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                    <input class="form-control" type="text" name="nombre_hito" id="nombre_hito" required="true" autocomplete="off"/>
+                                    </div>
+                                </div>
+                                <label class="col-sm-12 col-form-label">Fecha Hito</label>
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                    <input class="form-control" type="date" name="date_hito" id="date_hito" required="true"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary close-hito" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary save-hito">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Modal Nueva Sub Actividad -->
     <div class="modal fade" id="modalNewSubActivity" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
         <div class="modal-dialog modal-top">
@@ -534,6 +592,12 @@ if($codProyecto!=0){
                                 <div class="col-sm-12">
                                     <div class="form-group">
                                     <input class="form-control" type="text" name="sub_nombre" id="sub_nombre" required="true" autocomplete="off" onkeyup="javascript:this.value=this.value.toUpperCase();"/>
+                                    </div>
+                                </div>
+                                <label class="col-sm-12 col-form-label">Fecha Inicial</label>
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                    <input class="form-control" type="date" name="sub_fecha_inicial" id="sub_fecha_inicial" required="true"/>
                                     </div>
                                 </div>
                                 <label class="col-sm-12 col-form-label">Fecha Limite</label>

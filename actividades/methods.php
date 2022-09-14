@@ -85,11 +85,9 @@ else if($_POST['type'] == 2){
         	            VALUES ('$code_activity','$cod_personal','$date','$anotacion','1')";
         $stmt        = $dbh->prepare($sqlInsert);
         $stmt->execute();
-        /* Lista de registros anotaciones*/
-        $content = listaAnotaciones($code_activity, $cod_personal, $dbh);
         echo json_encode(array(
-            'status'    => true,
-            'content'   => $content
+            'status'        => true,
+            'code_activity' => $code_activity
         ));
     } catch (Exception $e) {
         echo json_encode(array(
@@ -145,7 +143,8 @@ else if($_POST['type'] == 4){
         $stmtDel = $dbh->prepare($sqlDel);
         $stmtDel->execute();
         echo json_encode(array(
-            'status'    => true,
+            'status'        => true,
+            'code_activity' => $code_activity
         ));
     } catch (Exception $e) {
         echo json_encode(array(
@@ -166,12 +165,17 @@ else if($_POST['type'] == 5){
         $sqlInsert    = "INSERT INTO actividades_presupuestos (cod_actividad, cod_cuenta, fecha_ejecucion, monto, cod_estado_presupuesto)
                         VALUES ('$code_activity','$cod_account','$date','$amount','1')";
         $stmt         = $dbh->prepare($sqlInsert);
-        $stmt->execute();
-        /* Lista de registros */
-        $content = listaPresupuesto($code_activity, $dbh);
+        $stmt->execute();        
+        /* Se obtiene el ultimo registro */
+        $sqlActivity = "SELECT * FROM actividades WHERE codigo = $code_activity";
+        $stmtActividad= $dbh->prepare($sqlActivity);
+        $stmtActividad->execute();
+        while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
+            $codigoActividad = $rowActividad['codigo'];
+        }
         echo json_encode(array(
-            'status'    => true,
-            'content'   => $content
+            'status'        => true,
+            'code_activity' => $codigoActividad
         ));   
     } catch (Exception $e) {
         echo json_encode(array(
@@ -186,6 +190,7 @@ else if($_POST['type'] == 5){
  **/
 else if($_POST['type'] == 6){
     $sub_nombre    = $_POST['sub_nombre'];
+    $sub_fecha_inicial = $_POST['sub_fecha_inicial'];
     $sub_fecha     = $_POST['sub_fecha'];
     $sub_prioridad = $_POST['sub_prioridad'];
     try {
@@ -206,12 +211,25 @@ else if($_POST['type'] == 6){
         $sqlActivity = "SELECT * FROM actividades
         ORDER BY codigo DESC
         LIMIT 1";
-
         $stmtActividad= $dbh->prepare($sqlActivity);
         $stmtActividad->execute();
         while ($rowActividad = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
             $codigoActividad = $rowActividad['codigo'];
         }
+        /* Obtenemos Configuración estado inicial de KANBAN */
+        $sqlFindState = "SELECT * FROM configuraciones
+        WHERE id_configuracion = 1";
+        $stmtFindState= $dbh->prepare($sqlFindState);
+        $stmtFindState->execute();
+        while ($rowFind = $stmtFindState->fetch(PDO::FETCH_ASSOC)) {
+            $codEstadoKanban = $rowFind["valor_configuracion"];
+        }
+
+        $sqlInsert="INSERT INTO actividades_cambios_estado (cod_actividad, cod_personal, fecha, cod_estadoactividad)
+                VALUES ('$codigoActividad','$cod_personal','$sub_fecha_inicial','$codEstadoKanban')";
+        $stmt = $dbh->prepare($sqlInsert);
+        $flagSuccess=$stmt->execute();
+        
         echo json_encode(array(
             'status'        => true,
             'code_activity' => $codigoActividad
@@ -240,18 +258,115 @@ else if($_POST['type'] == 7){
         case 2:
             $query = 'cod_responsable';
             break;
-        // Fecha Limite
+        // Fecha Inicial
         case 3:
+            $query = 'fecha_inicial';
+            break;
+        // Fecha Limite
+        case 4:
             $query = 'fecha_limite';
             break;
-        // Observaciones
+        // Cambio de Estado
         case 5:
+            $query = 'cod_estadokanban';
+            break;
+        // Observaciones
+        case 6:
             $query = 'observaciones';
             break;
     }
     try {
-        $sqlUpdate    = "UPDATE actividades SET $query = '$data' WHERE codigo = $code_activity";
-        $stmt         = $dbh->prepare($sqlUpdate);
+        if($select_data == 3){
+            /* Obtenemos Configuración estado inicial de KANBAN */
+            $sqlFindState = "SELECT * FROM configuraciones
+            WHERE id_configuracion = 1";
+            $stmtFindState= $dbh->prepare($sqlFindState);
+            $stmtFindState->execute();
+            while ($rowFind = $stmtFindState->fetch(PDO::FETCH_ASSOC)) {
+                $codEstadoKanban = $rowFind["valor_configuracion"];
+            }
+            /* Actualizar Fecha de Estado inicial */
+            $sqlUpdate    = "UPDATE actividades_cambios_estado SET fecha = '$data' WHERE cod_actividad = $code_activity AND cod_estadoactividad = $codEstadoKanban";
+            $stmt         = $dbh->prepare($sqlUpdate);
+            $stmt->execute();
+        }else{
+            /* Actualización de datos */
+            $sqlUpdate    = "UPDATE actividades SET $query = '$data' WHERE codigo = $code_activity";
+            $stmt         = $dbh->prepare($sqlUpdate);
+            $stmt->execute();
+        }
+        echo json_encode(array(
+            'status'        => true,
+            'code_activity' => $code_activity
+        ));
+    } catch (Exception $e) {
+        echo json_encode(array(
+            'status' => false
+        ));
+    }
+}
+/**
+ * Eliminar Presupuesto que se encuentra en estado Pendiente
+ * method: POST
+ * @autor: Ronald Mollericona
+ **/
+else if($_POST['type'] == 8){
+    $cod_presupuesto = $_POST['codigo'];
+    try {
+        // Eliminar Presupuesto
+        $sqlDel = "DELETE FROM actividades_presupuestos
+                WHERE codigo = $cod_presupuesto";
+        $stmtDel = $dbh->prepare($sqlDel);
+        $stmtDel->execute();
+        echo json_encode(array(
+            'code_activity' => $code_activity,
+            'status'        => true,
+        ));
+    } catch (Exception $e) {
+        echo json_encode(array(
+            'status' => false
+        ));
+    }
+}
+/**
+ * Eliminar Colaboradores asignados a la Actividad
+ * method: POST
+ * @autor: Ronald Mollericona
+ **/
+else if($_POST['type'] == 9){
+    $cod_colaborador = $_POST['codigo'];
+    try {
+        // Eliminar Colaborador - Lógica
+        $sqlDel = "UPDATE actividades_colaboradores
+                SET cod_estado = 2
+                WHERE cod_actividad = $code_activity
+                AND cod_personal = $cod_colaborador
+                AND cod_estado = 1";
+        $stmtDel = $dbh->prepare($sqlDel);
+        $stmtDel->execute();
+        echo json_encode(array(
+            'code_activity' => $code_activity,
+            'status'        => true,
+        ));
+    } catch (Exception $e) {
+        echo json_encode(array(
+            'status' => false
+        ));
+    }
+}
+/**
+ * Registro de Hito asignado a Actividad
+ * method: POST
+ * @autor: Ronald Mollericona
+ **/
+else if($_POST['type'] == 10){
+    $nombre_hito = $_POST['nombre_hito'];
+    $date        = date('Y-m-d H:i:s');
+    $date_hito   = $_POST['date_hito'];
+    try {
+        $sqlInsert   ="INSERT INTO actividades_hitos (cod_actividad, cod_personal, fecha_registro, fecha_hito, nombre, cod_estado)
+        	            VALUES ('$code_activity','$cod_personal','$date','$date_hito','$nombre_hito','1')";
+        $stmt        = $dbh->prepare($sqlInsert);
         $stmt->execute();
         echo json_encode(array(
             'status'        => true,
@@ -263,6 +378,7 @@ else if($_POST['type'] == 7){
         ));
     }
 }
+
 /* Función Lista Archivos Adjuntos */
 function listaArchivos($code_activity, $dbh){
     $sqlFile = "SELECT codigo, date_format(fecha, '%d-%m-%Y') as fecha, ruta, filesize, UPPER(extension) as extension 

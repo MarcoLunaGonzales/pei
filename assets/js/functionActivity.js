@@ -49,9 +49,10 @@ $('body').on('click','#save-annotation',function(){
             data: formData,
             success:function(response){
                 let resp = JSON.parse(response);
-                $('body .component-annotation ' + label).html(resp.content);
                 responseAlert(resp.status);
-                $('body #annotation').val('')
+                if(resp.status){
+                    showModallistTaskDetail(resp.code_activity);
+                }
             }
         });
     }else{
@@ -88,15 +89,32 @@ $('.close-budget').click(function(){
 /* Abrir modal de subactividad */
 $('body').on('click', '.addSubActivity', function(){
     $("#sub_nombre").val('');
-    $('#sub_fecha').val('');
+    $('#sub_fecha_inicial').attr('min', $(this).data('start'))
+                            .attr('max', $(this).data('end'))
+                            .val($(this).data('val'));
+    $('#sub_fecha').attr('min', $(this).data('start'))
+                            .attr('max', $(this).data('end'))
+                            .val($(this).data('val'));
     $("#sub_prioridad").val($("#sub_prioridad option:first").val());
     $('body #modal_task_detail').modal('hide');
     $('#modalNewSubActivity').modal('show');
+}); 
+/* Abrir modal de hito */
+$('body').on('click', '.addHito', function(){
+    $("#nombre_hito").val('');
+    $('#date_hito').val('');   
+    $('body #modal_task_detail').modal('hide');
+    $('#modalNewHito').modal('show');
 }); 
 /* Cerrar modal Presupuesto */
 $('.close-subActivity').click(function(){
     $('body #modal_task_detail').modal('show');
     $('#modalNewSubActivity').modal('hide');
+});
+/* Cerrar modal Hito */
+$('.close-hito').click(function(){
+    $('body #modal_task_detail').modal('show');
+    $('#modalNewHito').modal('hide');
 });
 /**
  * Función para enviar y guardar la asignación del colaborador
@@ -150,7 +168,9 @@ $('body').on('click', '.remove-note', function(){
         success:function(response){
             let resp = JSON.parse(response);
             responseAlert(resp.status);
-            $('.item-note-'+cod_anotacion).remove()
+            if(resp.status){
+                showModallistTaskDetail(resp.code_activity);
+            }
         }
     });
 });
@@ -175,11 +195,12 @@ $('.save-budget').click(function(){
         processData: false,
         data: formData,
         success:function(response){
-            let resp = JSON.parse(response);
-            responseAlert(resp.status);
-            $('body .component-budget ' + label).html(resp.content);
-            $('body #modal_task_detail').modal('show');
+            let resp = JSON.parse(response);            
             $('#modalBudget').modal('hide');
+            responseAlert(resp.status);
+            if(resp.status){
+                showModallistTaskDetail(resp.code_activity);
+            }
         }
     });
 });
@@ -189,12 +210,14 @@ $('.save-budget').click(function(){
 $('.save-subActivity').click(function(){
     let sub_nombre      = $('#sub_nombre').val();
     let sub_fecha       = $('#sub_fecha').val();
+    let sub_fecha_inicial = $('#sub_fecha_inicial').val();
     let sub_prioridad   = $('#sub_prioridad').val();
     let code_act = $('body #codeActivity').val();
     let formData = new FormData();
     formData.append('type', 6);         // Tipo 6 : Guardar Sub Actividad
     formData.append('sub_nombre', sub_nombre);
     formData.append('sub_fecha', sub_fecha);
+    formData.append('sub_fecha_inicial', sub_fecha_inicial);
     formData.append('sub_prioridad', sub_prioridad);
     formData.append('code_activity', code_act);
     $.ajax({
@@ -214,6 +237,34 @@ $('.save-subActivity').click(function(){
         }
     });
 });
+/** 
+ * Registrar Hito 
+**/
+$('.save-hito').click(function(){
+    let nombre_hito = $('#nombre_hito').val();
+    let date_hito   = $('#date_hito').val();
+    let code_act = $('body #codeActivity').val();
+    let formData = new FormData();
+    formData.append('type', 10);         // Tipo 10 : Registro de Hito
+    formData.append('nombre_hito', nombre_hito);
+    formData.append('date_hito', date_hito);
+    formData.append('code_activity', code_act);
+    $.ajax({
+        url:"actividades/methods.php",
+        type:"POST",
+        contentType: false,
+        processData: false,
+        data: formData,
+        success:function(response){
+            let resp = JSON.parse(response);
+            $('#modalNewHito').modal('hide');
+            responseAlert(resp.status);
+            if(resp.status){
+                showModallistTaskDetail(resp.code_activity);
+            }
+        }
+    });
+})
 /**
  * Visualización de nueva actividad
  **/
@@ -284,34 +335,6 @@ $('.showActivity').click(function(){
                                 </div>
                             </div>
                         </div> `;
-            let badget = `<div class="inbox-item">
-                            <div class="row align-items-center">
-                                <div class="col-auto">
-                                    <div class="avatar-sm">
-                                        <span class="avatar-title badge-soft-danger text-danger rounded">
-                                            <i class="fe-thumbs-down"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="col ps-0">
-                                    <h5 class="mt-0 mb-0 text-muted">Actividad sin presupuesto...</h5>
-                                </div>
-                            </div>
-                        </div> `;
-            let collaborator = `<div class="inbox-item">
-                            <div class="row align-items-center">
-                                <div class="col-auto">
-                                    <div class="avatar-sm">
-                                        <span class="avatar-title badge-soft-danger text-danger rounded">
-                                            <i class="fe-user-x"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="col ps-0">
-                                    <h5 class="mt-0 mb-0 text-muted">Actividad sin colaboradores...</h5>
-                                </div>
-                            </div>
-                        </div>`;
             $('.component-subActivity-show ' + label).html(resp.subAcitividades.length > 0 ? resp.subAcitividades : subActivities);
             $('.component-file-show ' + label).html(resp.archivos.length > 0 ? resp.archivos : files);
             $('.component-annotation-show ' + label).html(resp.anotacion.length > 0 ? resp.anotacion : notes);
@@ -388,3 +411,81 @@ function updateData(data, code_act){
         
     });
 }
+/**
+ * Eliminar presupuesto que aun se encuentra en estado PENDIENTE
+ **/
+$('body').on('click','.selectBudget', function(){
+    swal({
+        title: 'Está Seguro?',
+        text: "No podrá revertir el borrado!",
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonClass: 'btn btn-success',
+        cancelButtonClass: 'btn btn-danger',
+        confirmButtonText: 'Si, Borrar!',
+        cancelButtonText: 'No, Cancelar!',
+        buttonsStyling: false
+    }).then((result) => {
+        if (result.value) {
+            let cod_presupuesto = $(this).data('codigo');
+            let code_act        = $('body #codeActivity').val();
+            let formData        = new FormData();
+            formData.append('type', 8);         // Tipo 8 : Eliminar Presupuesto 
+            formData.append('codigo', cod_presupuesto);
+            formData.append('code_activity', code_act);
+            $.ajax({
+                url:"actividades/methods.php",
+                type:"POST",
+                contentType: false,
+                processData: false,
+                data: formData,
+                success:function(response){
+                    let resp = JSON.parse(response);
+                    responseAlert(resp.status);
+                    if(resp.status){
+                        showModallistTaskDetail(resp.code_activity);
+                    }
+                }
+            });
+        }
+    });
+});
+/**
+ * Quitar Colaborador asignado a la Actividad
+ **/
+$('body').on('click','.selectCollaborator', function(){
+    swal({
+        title: 'Está Seguro?',
+        text: "No podrá revertir el borrado!",
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonClass: 'btn btn-success',
+        cancelButtonClass: 'btn btn-danger',
+        confirmButtonText: 'Si, Borrar!',
+        cancelButtonText: 'No, Cancelar!',
+        buttonsStyling: false
+    }).then((result) => {
+        if (result.value) {
+            let cod_personal = $(this).data('codigo_personal');
+            let code_act     = $('body #codeActivity').val();
+            let formData     = new FormData();
+            formData.append('type', 9);         // Tipo 9 : Eliminar Colaborador 
+            formData.append('codigo', cod_personal);
+            formData.append('code_activity', code_act);
+            $.ajax({
+                url:"actividades/methods.php",
+                type:"POST",
+                contentType: false,
+                processData: false,
+                data: formData,
+                success:function(response){
+                    let resp = JSON.parse(response);
+                    responseAlert(resp.status);
+                    if(resp.status){
+                        showModallistTaskDetail(resp.code_activity);
+                    }
+                }
+            });
+        }
+    });
+});
