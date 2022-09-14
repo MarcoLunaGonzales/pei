@@ -5,6 +5,7 @@ session_start();
 $dbh = new Conexion();
 $codigoActividad = $_GET["codigo_actividad"];
 $cod_personal    = $_SESSION['globalUser'];
+
 /* Verificación de Tipo de Actividad(Padre o Sub-Actividad) */
 $sqlVerf = "SELECT * FROM actividades WHERE codigo = '$codigoActividad'";
 $stmtVerf= $dbh->prepare($sqlVerf);
@@ -123,12 +124,13 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
      * Lista de Notas de Actividad
      * @autor: Ronald Mollericona
     **/
-    $sqlNote="SELECT ac.codigo, date_format(ac.fecha, '%d-%m-%Y') as fecha, ac.anotacion, ac.cod_personal, CONCAT(p.primer_nombre, ' ', p.paterno, ' ', p.materno) as personal
-    FROM actividades_anotaciones ac
-    LEFT JOIN personal p ON p.codigo = ac.cod_personal
-    WHERE ac.cod_actividad = '$codigoActividad' 
-    AND ac.cod_estado = 1
-    ORDER BY ac.codigo DESC";
+    $sqlNote="SELECT an.codigo, date_format(an.fecha, '%d-%m-%Y') as fecha, an.anotacion, an.cod_personal, CONCAT(p.primer_nombre, ' ', p.paterno, ' ', p.materno) as personal, pimg.imagen as imagen_personal
+    FROM actividades_anotaciones an
+    LEFT JOIN personal p ON p.codigo = an.cod_personal
+    LEFT JOIN personalimagen pimg on pimg.codigo = an.cod_personal
+    WHERE an.cod_actividad = '$codigoActividad' 
+    AND an.cod_estado = 1
+    ORDER BY an.codigo DESC";
     $stmtNote= $dbh->prepare($sqlNote);
     $stmtNote->execute();
     
@@ -190,6 +192,18 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
     ORDER BY ah.codigo DESC";
     $stmtHito = $dbh->prepare($sqlHito);
     $stmtHito->execute();
+
+    /**
+     * Lista de Funciones relacionadas a la Actividad
+     * @autor: Ronald Mollericona
+    **/
+    $sqlFuncion = "SELECT afc.codigo, cf.nombre_funcion
+    FROM actividades_funciones_cargo afc
+    LEFT JOIN cargos_funciones cf ON cf.cod_funcion = afc.cod_funcion_cargo
+    WHERE afc.cod_actividad = '$codigoActividad'
+    AND afc.cod_estado = 1";
+    $stmtFuncion = $dbh->prepare($sqlFuncion);
+    $stmtFuncion->execute();
     
 ?>
 <div id="bodyTaskComplete">    
@@ -305,16 +319,29 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <p class="mt-2 mb-1 text-muted"><i class="fe-chevron-right"></i> Estado</p>
+                            <p class="mt-2 mb-1 text-muted">
+                                <i class="fe-chevron-right"></i> Estado 
+                                <!-- Paralizar -->
+                                <?php if($cod_estado == 2){?>
+                                    <i class="fe-alert-octagon text-danger data_update" data-select="5" data-state="5"></i>
+                                <?php }?>
+                                <!-- Continuar en Proceso -->
+                                <?php if($cod_estado == 5){?>
+                                    <i class="fe-check-circle text-success data_update" data-select="5" data-state="2"></i>
+                                <?php }?>
+                            </p>
                             <div class="d-flex align-items-start">
                                 <!-- Información para actualizar -->
-                                <h5 class="mt-1 font-size-14 data_select" style="cursor:pointer;" data-select="5" data-inp="state_up">
+                                <h5 class="mt-1 font-size-14 <?=($cod_estado < 4 ?'data_select':'');?>" style="cursor:pointer;" data-select="5" data-inp="state_up">
                                     <i class='fe-bell font-16 text-warning'></i> <?=$estado_kanban;?>
                                 </h5>
                                 <!-- Actualzación -->
                                 <select name="state_up" id="state_up" class="form-control data_update"  style="display:none;">
                                     <?php             
-                                        $sqlColl   = "SELECT codigo, nombre FROM estados_kanban where codigo >= $cod_estado
+                                        $sqlColl   = "SELECT codigo, nombre 
+                                        FROM estados_kanban 
+                                        WHERE codigo >= $cod_estado
+                                        AND codigo < 5
                                         ORDER BY codigo ASC";
                                         $stmtState = $dbh->prepare($sqlColl);
                                         $stmtState->execute();
@@ -445,7 +472,7 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
                         ?>
                             <div class="inbox-item item-note-<?=$note['codigo'];?>">
                                 <div class="inbox-item-img">
-                                    <img src="assets2/images/users/default.png" class="rounded-circle" alt="perfil">
+                                    <img src="<?=$ruta?><?=$note['imagen_personal'];?>" class="rounded-circle" alt="perfil">
                                 </div>
                                 <p class="inbox-item-author"><?=$note['personal'];?></p>
                                 <p class="inbox-item-text"><?=$note['anotacion'];?></p>
@@ -653,6 +680,47 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
                                 </div>
                             </div>
                         </div>
+                        <?php
+                                }
+                            }
+                        ?>
+                    </div>
+                </div>
+                <!-- Funciones de Cargo -->
+                <div class="card p-2 mb-1 border">
+                    <div class="pb-1">
+                        <button type="button" class="btn btn-success rounded-pill btn-sm float-end addPosition">
+                            <i class="mdi mdi-plus"></i>
+                        </button>
+                        <h5 class="header-title mt-1 text-primary"><i class="fe-airplay"></i> Funciones de Cargo</h5>
+                    </div>
+
+                    <div class="inbox-widget" data-simplebar style="max-height: 220px;">
+                        <?php
+                            if(!count($rowsFuncion = $stmtFuncion->fetchAll())){
+                        ?>
+                        <div class="inbox-item">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <div class="avatar-sm">
+                                        <span class="avatar-title badge-soft-danger text-danger rounded">
+                                            <i class="fe-folder-minus"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col ps-0">
+                                    <h5 class="mt-0 mb-0 text-muted"> No se encontró funciones...</h5>
+                                </div>
+                            </div>
+                        </div> 
+                        <?php
+                            }else{
+                                foreach ($rowsFuncion as $funcion){
+                        ?>
+                            <a href="javascript: void(0);" class="text-reset mb-2 d-block selectFunction" data-codigo="<?=$funcion['codigo']?>">
+                                <i class="mdi mdi-checkbox-blank-circle-outline me-1 text-warning"></i>
+                                <span class="mb-0 mt-1"><?=$funcion['nombre_funcion']?></span>
+                            </a>
                         <?php
                                 }
                             }

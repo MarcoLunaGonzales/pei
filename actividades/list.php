@@ -5,10 +5,11 @@ require_once 'layouts/body_empty2.php';
 
 $dbh = new Conexion();
 
-$globalUnidadX=$_SESSION["globalUO"];
-$globalAreaX=$_SESSION["globalArea"];
-$nombreUnidadCabecera=$_SESSION["globalNameUO"];
-$nombreAreaCabecera=$_SESSION["globalNameArea"]; 
+$globalUnidadX          = $_SESSION["globalUO"];
+$globalAreaX            = $_SESSION["globalArea"];
+$nombreUnidadCabecera   = $_SESSION["globalNameUO"];
+$nombreAreaCabecera     = $_SESSION["globalNameArea"];
+$cod_personal           = $_SESSION['globalUser'];
 
 $codProyecto=$_GET["cod_proyecto"];
 
@@ -26,6 +27,15 @@ while ($row = $stmtFind->fetch(PDO::FETCH_ASSOC)) {
     $ruta  = $row['valor_configuracion'];
 }
 
+/* Datos de Personal */
+$sqlP = "SELECT cod_cargo 
+FROM personal
+WHERE codigo = 17";
+$stmtP = $dbh->prepare($sqlP);
+$stmtP->execute();
+while ($rowP = $stmtP->fetch(PDO::FETCH_ASSOC)) {
+    $codCargoP = $rowP['cod_cargo'];
+}
 ?>
 
 
@@ -86,7 +96,7 @@ while ($row = $stmtFind->fetch(PDO::FETCH_ASSOC)) {
                                             <li class="breadcrumb-item active">Tasks List</li>
                                         </ol>
                                     </div-->
-                                    <h4 class="page-title">Lista de Actividades  -  <?=$nombreProyecto;?></h4>
+                                    <h4 class="page-title">Lista de Actividades -  <?=$nombreProyecto;?></h4>
                                 </div>
                             </div>
                         </div>     
@@ -144,10 +154,13 @@ while ($row = $stmtFind->fetch(PDO::FETCH_ASSOC)) {
                                                                 (SELECT COUNT(*) as notes_count FROM actividades_anotaciones an WHERE an.cod_actividad = a.codigo AND an.cod_estado = 1) as notes_count,
                                                                 (SELECT COUNT(*) as notes_count FROM actividades_anotaciones an WHERE an.cod_actividad = a.codigo AND an.cod_estado = 1) as notes_count,
                                                                 pimg.imagen as imagen_personal
-                                                                from actividades a, actividades_prioridades ap, personalimagen pimg
-                                                                where a.cod_prioridad=ap.codigo
-                                                                and a.cod_responsable = pimg.codigo
-                                                                and a.cod_padre is null";
+                                                                from actividades a
+                                                                LEFT JOIN actividades_prioridades ap ON a.cod_prioridad = ap.codigo
+                                                                LEFT JOIN personalimagen pimg ON a.cod_responsable = pimg.codigo
+                                                                LEFT JOIN actividades_colaboradores aco ON aco.cod_actividad = a.codigo
+                                                                WHERE a.cod_padre is null
+                                                                AND a.cod_responsable = '$cod_personal'
+                                                                OR aco.cod_personal = '$cod_personal'";
                                                             if($codProyecto!=0){
                                                                 $sqlAct.=" and a.cod_componentepei='$codProyecto' ";
                                                             }
@@ -540,6 +553,47 @@ while ($row = $stmtFind->fetch(PDO::FETCH_ASSOC)) {
             </div>
         </div>
     </div>
+    <!-- Modal Funciones Cargos -->
+    <div class="modal fade" id="modalPosition" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-top">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title text-white">Añadir Funciones</h5>
+                    <button type="button" class="btn-close bg-white close-position" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="col-form-label">Funciones:</label>
+                                <select name="cod_funcion" id="cod_funcion" class="form-control" data-style="btn btn-warning" required>
+                                    <option value="">-</option>
+                                    <?php
+                                        $sqlPosition   = "SELECT af.cod_funcion as codigo, af.nombre_funcion as nombre  FROM cargos_funciones af
+                                            WHERE af.cod_estado = 1
+                                            AND af.cod_funcion = '$codCargoP'
+                                            ORDER BY codigo DESC";
+                                        $stmtPosition  = $dbh->prepare($sqlPosition);
+                                        $stmtPosition->execute();
+                                        $rowsPositions = $stmtPosition->fetchAll();
+                                        foreach ($rowsPositions as $position){       
+                                    ?>
+                                    <option value="<?= $position['codigo']; ?>"  ><?= $position['nombre']; ?></option>
+                                    <?php
+                                        }
+                                    ?>
+                                </select>             
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary close-position" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary save-position">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div> 
     
     <!-- Modal Nuevo Hito -->
     <div class="modal fade" id="modalNewHito" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">

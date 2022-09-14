@@ -60,11 +60,10 @@ if($_POST['type'] == 0){
         	            VALUES ('$code_activity','$cod_personal','$date','$file_name', '$size','$extension','1')";
         $stmt      = $dbh->prepare($sqlInsert);
         $stmt->execute();
-        /* Lista de registros Archivos */
-        $content = listaArchivos($code_activity, $dbh);
+        
         echo json_encode(array(
             'status'  => true,
-            'content' => $content
+            'code_activity' => $code_activity
         ));
     } else {
         echo json_encode(array(
@@ -105,23 +104,25 @@ else if($_POST['type'] == 3){
     $date          = date('Y-m-d');
     try {
         // Verificación de colaboradores asignados
-        $sqlVerf = "SELECT * FROM actividades_colaboradores WHERE cod_actividad = $code_activity AND cod_personal = $staff_code";
+        $sqlVerf = "SELECT * FROM actividades_colaboradores 
+                    WHERE cod_actividad = $code_activity 
+                    AND cod_personal = $staff_code
+                    AND cod_estado = 1";
         $stmtVerf = $dbh->prepare($sqlVerf);
         $stmtVerf->execute();
         if(count($stmtVerf->fetchAll())){
             echo json_encode(array(
-                'status'    => 3
+                'status'    => 3,
+                'code_activity' => $code_activity
             ));
         }else{
             $sqlInsert   ="INSERT INTO actividades_colaboradores (cod_actividad, cod_personal, fecha_designacion, cod_estado)
                             VALUES ('$code_activity','$staff_code','$date','1')";
             $stmt        = $dbh->prepare($sqlInsert);
             $stmt->execute();
-            /* Lista de registros colaboradores */
-            $content = listaColaboradores($code_activity, $dbh);
             echo json_encode(array(
-                'status'    => true,
-                'content'   => $content
+                'status'        => true,
+                'code_activity' => $code_activity
             ));
         }
     } catch (Exception $e) {
@@ -289,6 +290,18 @@ else if($_POST['type'] == 7){
             $sqlUpdate    = "UPDATE actividades_cambios_estado SET fecha = '$data' WHERE cod_actividad = $code_activity AND cod_estadoactividad = $codEstadoKanban";
             $stmt         = $dbh->prepare($sqlUpdate);
             $stmt->execute();
+        }else if($select_data == 5){
+            /* Actualización de datos */
+            $sqlUpdate    = "UPDATE actividades SET $query = '$data' WHERE codigo = $code_activity";
+            $stmt         = $dbh->prepare($sqlUpdate);
+            $stmt->execute();
+            // Registrar estado KANBAN - Historial
+            $fecha = date('Y-m-d H:i:s');
+            $sqlInsert="INSERT INTO actividades_cambios_estado (cod_actividad, cod_personal, fecha, cod_estadoactividad)
+            VALUES ('$code_activity','$cod_personal','$fecha','$data')";
+            //echo $sqlInsert;
+            $stmt = $dbh->prepare($sqlInsert);
+            $flagSuccess=$stmt->execute();
         }else{
             /* Actualización de datos */
             $sqlUpdate    = "UPDATE actividades SET $query = '$data' WHERE codigo = $code_activity";
@@ -378,12 +391,71 @@ else if($_POST['type'] == 10){
         ));
     }
 }
-
+/**
+ * Almacenar Función de Cargo
+ * method: POST
+ * @autor: Ronald Mollericona
+ **/
+else if($_POST['type'] == 11){
+    $cod_funcion_cargo = $_POST['cod_funcion_cargo'];
+    $date              = date('Y-m-d');
+    try {
+        // Verificación de funciones de cargo asignados
+        $sqlVerf = "SELECT * FROM actividades_funciones_cargo 
+                    WHERE cod_actividad   = $code_activity 
+                    AND cod_funcion_cargo = $cod_funcion_cargo
+                    AND cod_estado = 1";
+        $stmtVerf = $dbh->prepare($sqlVerf);
+        $stmtVerf->execute();
+        if(count($stmtVerf->fetchAll())){
+            echo json_encode(array(
+                'status'        => 3,
+                'code_activity' => $code_activity
+            ));
+        }else{
+            $sqlInsert   ="INSERT INTO actividades_funciones_cargo (cod_actividad, cod_personal, cod_funcion_cargo, fecha, cod_estado)
+                            VALUES ('$code_activity','$cod_personal','$cod_funcion_cargo', '$date', '1')";
+            $stmt        = $dbh->prepare($sqlInsert);
+            $stmt->execute();
+            echo json_encode(array(
+                'status'        => true,
+                'code_activity' => $code_activity
+            ));
+        }
+    } catch (Exception $e) {
+        echo json_encode(array(
+            'status' => false
+        ));
+    }
+}
+/**
+ * Eliminar Función de Cargo
+ * method: POST
+ * @autor: Ronald Mollericona
+ **/
+else if($_POST['type'] == 12){
+    $code_function = $_POST['codigo'];
+    try {
+        // Verificación de colaboradores asignados
+        $sqlDel = "UPDATE actividades_funciones_cargo SET cod_estado = 2 WHERE codigo = $code_function";
+        $stmtDel = $dbh->prepare($sqlDel);
+        $stmtDel->execute();
+        echo json_encode(array(
+            'status'        => true,
+            'code_activity' => $code_activity
+        ));
+    } catch (Exception $e) {
+        echo json_encode(array(
+            'status' => false
+        ));
+    }
+}
 /* Función Lista Archivos Adjuntos */
 function listaArchivos($code_activity, $dbh){
     $sqlFile = "SELECT codigo, date_format(fecha, '%d-%m-%Y') as fecha, ruta, filesize, UPPER(extension) as extension 
         FROM actividades_archivos 
-        WHERE cod_actividad = $code_activity 
+        WHERE cod_actividad = $code_activity
+        AND cod_estado = 1 
         ORDER BY codigo DESC";
     $stmFile = $dbh->prepare($sqlFile);
     $stmFile->execute();
@@ -485,7 +557,8 @@ function listaColaboradores($code_activity, $dbh){
     $sqlColl = "SELECT CONCAT(p.primer_nombre, ' ', p.paterno, ' ', p.materno) as nombre_compl, DATE_FORMAT(ac.fecha_designacion, '%d-%m-%Y') as fecha
             FROM actividades_colaboradores ac
             LEFT JOIN personal p on p.codigo = ac.cod_personal
-            WHERE ac.cod_actividad = '$code_activity'";
+            WHERE ac.cod_actividad = '$code_activity'
+            AND cod_estado = 1 ";
     $stmtColl = $dbh->prepare($sqlColl);
     $stmtColl->execute();
     $content = '';

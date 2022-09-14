@@ -25,8 +25,10 @@ $('body').on('change','#src-file1-input',function(){
         data: formData,
         success:function(response){
             let resp = JSON.parse(response);
-            $('body .component-file ' + label).html(resp.content);
             responseAlert(resp.status);
+            if(resp.status){
+                showModallistTaskDetail(resp.code_activity);
+            }
         }
     });
 });
@@ -116,6 +118,17 @@ $('.close-hito').click(function(){
     $('body #modal_task_detail').modal('show');
     $('#modalNewHito').modal('hide');
 });
+/* Abrir modal de asignacion de Funciones */
+$('body').on('click', '.addPosition', function(){
+    $("#cod_funcion").val($("#cod_personal option:first").val());
+    $('body #modal_task_detail').modal('hide');
+    $('#modalPosition').modal('show');
+});
+/* Cerrar modal Funcion */
+$('.close-position').click(function(){
+    $('body #modal_task_detail').modal('show');
+    $('#modalPosition').modal('hide');
+});
 /**
  * Función para enviar y guardar la asignación del colaborador
  **/
@@ -143,9 +156,11 @@ $('.save-collaborator').click(function(){
             }else{
                 responseAlert(resp.status);
             }
-            $('body .component-collaborator ' + label).html(resp.content);
-            $('body #modal_task_detail').modal('show');
             $('#modalCollaborator').modal('hide');
+            console.log(resp)
+            if(resp.status){
+                showModallistTaskDetail(resp.code_activity);
+            }
         }
     });
 });
@@ -238,7 +253,7 @@ $('.save-subActivity').click(function(){
     });
 });
 /** 
- * Registrar Hito 
+ * Registrar Nuevo Hito 
 **/
 $('.save-hito').click(function(){
     let nombre_hito = $('#nombre_hito').val();
@@ -387,6 +402,13 @@ $('body').on('change', '.data_update', function(){
     let code_act = $('body #codeActivity').val();
     updateData($(this).val(), code_act);
 });
+// Actualización Evento Click 
+$('body').on('click', '.data_update', function(){
+    console.log('holas')
+    let code_act = $('body #codeActivity').val();
+    select_data  = $(this).data('select');
+    updateData($(this).data('state'), code_act);
+});
 // Actualzación de DATOS de Actividad
 function updateData(data, code_act){
     let formData = new FormData();
@@ -455,7 +477,7 @@ $('body').on('click','.selectBudget', function(){
  **/
 $('body').on('click','.selectCollaborator', function(){
     swal({
-        title: 'Está Seguro?',
+        title: '¿Está seguro?',
         text: "No podrá revertir el borrado!",
         type: 'warning',
         showCancelButton: true,
@@ -471,6 +493,80 @@ $('body').on('click','.selectCollaborator', function(){
             let formData     = new FormData();
             formData.append('type', 9);         // Tipo 9 : Eliminar Colaborador 
             formData.append('codigo', cod_personal);
+            formData.append('code_activity', code_act);
+            $.ajax({
+                url:"actividades/methods.php",
+                type:"POST",
+                contentType: false,
+                processData: false,
+                data: formData,
+                success:function(response){
+                    let resp = JSON.parse(response);
+                    responseAlert(resp.status);
+                    if(resp.status){
+                        showModallistTaskDetail(resp.code_activity);
+                    }
+                }
+            });
+        }
+    });
+});
+/**
+ * Función para almacenar Funciones de Cargo
+ **/
+$('.save-position').click(function(){
+    let cod_funcion_cargo = $('#cod_funcion').val();
+    let code_act          = $('body #codeActivity').val();
+    let formData          = new FormData();
+    formData.append('type', 11);         // Tipo 11 : Guardar Función de Cargo
+    formData.append('cod_funcion_cargo', cod_funcion_cargo);
+    formData.append('code_activity', code_act);
+    $.ajax({
+        url:"actividades/methods.php",
+        type:"POST",
+        contentType: false,
+        processData: false,
+        data: formData,
+        success:function(response){
+            let resp = JSON.parse(response);
+            if(resp.status == 3){
+                Swal.fire(
+                    'Oops...',
+                    'La Función de Cargo ya se cuentra asignado a la actividad',
+                    'warning'
+                );
+            }else{
+                responseAlert(resp.status);
+            }
+            $('#modalPosition').modal('hide');
+            console.log(resp)
+            if(resp.status){
+                showModallistTaskDetail(resp.code_activity);
+            }
+        }
+    });
+});
+/**
+ * Quitar Cargo de Función
+ **/
+$('body').on('click','.selectFunction', function(){
+    swal({
+        title: '¿Está seguro de Eliminar?',
+        text: "No podrá revertir el borrado!",
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonClass: 'btn btn-success',
+        cancelButtonClass: 'btn btn-danger',
+        confirmButtonText: 'Si, Borrar!',
+        cancelButtonText: 'No, Cancelar!',
+        buttonsStyling: false
+    }).then((result) => {
+        if (result.value) {
+            let cod_funcion = $(this).data('codigo');
+            let code_act    = $('body #codeActivity').val();
+            let formData    = new FormData();
+            formData.append('type', 12);         // Tipo 12 : Quitar Función de Cargo 
+            formData.append('codigo', cod_funcion);
             formData.append('code_activity', code_act);
             $.ajax({
                 url:"actividades/methods.php",
