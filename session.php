@@ -48,11 +48,11 @@ if($tipoLogin==2){
 if($banderaLogin==1 || $tipoLogin==1){
 	//echo "entro por modulo propio";
 	$sql="";
-	if($tipoLogin==2){
+	if($tipoLogin==1){
 		$sql="SELECT p.codigo, p.nombre, p.cod_area, p.cod_unidad as cod_unidadorganizacional, pd.perfil from personal2 p, personal_datosadicionales pd 
 		where p.codigo=pd.cod_personal and pd.usuario='$user' and pd.contrasena='$password'";		
 	}else{
-		$sql="SELECT p.codigo, CONCAT_WS(' ',p.paterno,p.materno,p.primer_nombre)as nombre, p.cod_area, p.cod_unidadorganizacional, 1 as perfil as cargo
+		$sql="SELECT p.codigo, CONCAT_WS(' ',p.paterno,p.materno,p.primer_nombre)as nombre, p.cod_area, p.cod_unidadorganizacional, 1 as perfil
 			from personal p 
 			where (p.codigo='$idUsuarioSW' or p.codigo='$idUsuarioSW2') ";		
 	}

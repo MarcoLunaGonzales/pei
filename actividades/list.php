@@ -30,7 +30,7 @@ while ($row = $stmtFind->fetch(PDO::FETCH_ASSOC)) {
 /* Datos de Personal */
 $sqlP = "SELECT cod_cargo 
 FROM personal
-WHERE codigo = 17";
+WHERE codigo = $cod_personal";
 $stmtP = $dbh->prepare($sqlP);
 $stmtP->execute();
 while ($rowP = $stmtP->fetch(PDO::FETCH_ASSOC)) {
@@ -96,7 +96,7 @@ while ($rowP = $stmtP->fetch(PDO::FETCH_ASSOC)) {
                                             <li class="breadcrumb-item active">Tasks List</li>
                                         </ol>
                                     </div-->
-                                    <h4 class="page-title">Lista de Actividades -  <?=$nombreProyecto;?></h4>
+                                    <h4 class="page-title">Lista de Actividades <?=$cod_personal;?>- <?=$nombreProyecto;?></h4>
                                 </div>
                             </div>
                         </div>     

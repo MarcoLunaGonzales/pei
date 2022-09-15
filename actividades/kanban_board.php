@@ -489,7 +489,7 @@
 
         <!-- Vendor js -->
         <script src="assets2/js/vendor.min.js"></script>
-        <!-- <script src="assets2/libs/sortablejs/Sortable.min.js"></script> -->
+        <script src="assets2/libs/sortablejs/Sortable.min.js"></script>
         <!-- Init -->
         <script src="assets2/js/pages/kanban.init.js"></script>
         <!-- App js -->
