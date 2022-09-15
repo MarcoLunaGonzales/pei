@@ -1,8 +1,20 @@
 <?php
-require_once 'conexion.php';
-require_once 'layouts/body_empty.php';
+    require_once 'conexion.php';
+    require_once 'layouts/body_empty.php';
 
-$dbh = new Conexion();
+    $dbh = new Conexion();
+    // Codigo de PERSONAL Logueado
+    $cod_personal = $_SESSION['globalUser'];
+
+    /* Obtenemos Configuración de ruta de imagenes */
+    $sqlFind = "SELECT * FROM configuraciones
+    WHERE id_configuracion = 2";
+    $stmtFind = $dbh->prepare($sqlFind);
+    $stmtFind->execute();
+    while ($row = $stmtFind->fetch(PDO::FETCH_ASSOC)) {
+        $ruta  = $row['valor_configuracion'];
+    }
+
 
 ?>
 
@@ -27,6 +39,8 @@ $dbh = new Conexion();
 		<!-- Head js -->
 		<script src="assets2/js/head.js"></script>
 
+        <!-- Style input type FILE -->
+		<link href="assets/css/customStyle.css" rel="stylesheet" type="text/css" />
     </head>
 
     <!-- body start -->
@@ -77,17 +91,6 @@ $dbh = new Conexion();
                             <div class="col-lg-4">
                                 <div class="card">
                                     <div class="card-body">
-                                        <div class="dropdown float-end">
-                                            <a href="#" class="dropdown-toggle arrow-none" data-bs-toggle="dropdown" aria-expanded="false">
-                                                <i class="mdi mdi-dots-vertical m-0 text-muted h3"></i>
-                                            </a>
-                                            <div class="dropdown-menu dropdown-menu-end">
-                                                <a class="dropdown-item" href="#">Edit</a>
-                                                <a class="dropdown-item" href="#">Delete</a>
-                                                <a class="dropdown-item" href="#">Add Members</a>
-                                                <a class="dropdown-item" href="#">Add Due Date</a>
-                                            </div>
-                                        </div> <!-- end dropdown -->
                                         
                                         <h4 class="header-title"><?=$nombreEK;?></h4>
                                         <p class="sub-header">
@@ -96,7 +99,13 @@ $dbh = new Conexion();
     
                                         <ul class="sortable-list tasklist list-unstyled" id="<?=$nombreEK;?>">
                                         <?php
-                                        $sqlAct="SELECT a.codigo, a.nombre, a.observaciones, DATE_FORMAT(a.fecha_limite,'%b %d, %Y')as fecha_limite, a.cod_prioridad, ap.nombre as nombre_prioridad, ap.color from actividades a, actividades_prioridades ap where a.cod_prioridad=ap.codigo and a.cod_estadokanban='$codigoEK'";
+                                        $sqlAct="SELECT a.codigo, a.nombre, a.observaciones, DATE_FORMAT(a.fecha_limite,'%b %d, %Y')as fecha_limite, a.cod_prioridad, ap.nombre as nombre_prioridad, ap.color 
+                                        from actividades a
+                                        LEFT JOIN actividades_prioridades ap ON ap.codigo = a.cod_prioridad
+                                        LEFT JOIN actividades_colaboradores aco ON aco.cod_actividad = a.codigo
+                                        WHERE a.cod_estadokanban = '$codigoEK'
+                                        AND a.cod_padre is null
+                                        AND (a.cod_responsable = '$cod_personal' OR aco.cod_personal = '$cod_personal')";
                                         $stmtAct= $dbh->prepare($sqlAct);
                                         $stmtAct->execute();
                                         while ($rowAct = $stmtAct->fetch(PDO::FETCH_ASSOC)) {
@@ -107,14 +116,26 @@ $dbh = new Conexion();
                                             $codPrioridadActividad=$rowAct['cod_prioridad'];
                                             $nombrePrioridadActividad=$rowAct['nombre_prioridad'];
                                             $colorActividad=$rowAct['color'];
-                                        
+                                            /**
+                                             * Lista de Colaboradores asignados a la Actividad
+                                             * @autor: Ronald Mollericona
+                                            **/
+                                            $sqlColl = "SELECT ac.cod_personal as codigo_personal, 
+                                            CONCAT(p.primer_nombre, ' ', p.paterno, ' ', p.materno) as nombre_compl,
+                                            pimg.imagen as imagen_personal,
+                                            ac.cod_estado as estado
+                                            FROM actividades_colaboradores ac
+                                            LEFT JOIN personal p on p.codigo = ac.cod_personal
+                                            LEFT JOIN personalimagen pimg on pimg.codigo = ac.cod_personal
+                                            WHERE ac.cod_actividad = $codigoActividad
+                                            AND ac.cod_estado = 1";
+                                            $stmtColl = $dbh->prepare($sqlColl);
+                                            $stmtColl->execute();
+                                            $rows_coll = $stmtColl->fetchAll();
                                         ?>
                                             <li id="task<?=$codigoActividad;?>">
                                                 <span class="badge bg-soft-<?=$colorActividad;?> text-<?=$colorActividad;?> float-end"><?=$nombrePrioridadActividad;?></span>
-                                                <h5 class="mt-0"><a href="javascript: void(0);" class="text-dark"><?=$nombreActividad?></a></h5>
-                                                <div class="form-check float-end ps-0">
-                                                    <input class="form-check-input" type="checkbox" value="">
-                                                </div>
+                                                <h5 class="mt-0"><a href="javascript: void(0);" class="text-dark" onclick="javascript:showModallistTaskDetail(<?=$codigoActividad?>)"><?=$nombreActividad?></a></h5>
                                                 <p><?=$obsActividad;?></p>
                                                 <div class="clearfix"></div>
                                                 <div class="row">
@@ -123,12 +144,15 @@ $dbh = new Conexion();
                                                     </div>
                                                     <div class="col-auto">
                                                         <div class="text-end">
-                                                            <a href="javascript: void(0);" class="text-muted">
-                                                                <img src="assets2/images/users/user-1.jpg" alt="task-user" class="avatar-sm img-thumbnail rounded-circle">
-                                                            </a> 
-                                                            <a href="javascript: void(0);" class="text-muted">
-                                                                <img src="assets2/images/users/user-3.jpg" alt="task-user" class="avatar-sm img-thumbnail rounded-circle">
-                                                            </a> 
+                                                            <?php
+                                                                foreach($rows_coll as $collaborator){
+                                                            ?>
+                                                                <a href="javascript: void(0);" class="text-muted">
+                                                                    <img src="<?=$ruta;?><?=$collaborator['imagen_personal'];?>" alt="task-user" class="avatar-sm img-thumbnail rounded-circle" title="<?=$collaborator['nombre_compl'];?>">
+                                                                </a> 
+                                                            <?php
+                                                                }
+                                                            ?>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -142,7 +166,7 @@ $dbh = new Conexion();
                                         <div id="ajaxNewTask"></div>
 
                                         </ul>
-                                        <button type="button" class="btn btn-primary m-2" onclick="showModalNewTask(<?=$codigoEK;?>)">Small Modal</button>
+                                        <!-- <button type="button" class="btn btn-primary m-2" onclick="showModalNewTask(<?=$codigoEK;?>)">Small Modal</button> -->
                                     </div>
                                 </div>
                             </div> <!-- FINALIZANDO COLUMNA -->
@@ -162,6 +186,16 @@ $dbh = new Conexion();
         </div>
         <!-- END wrapper -->
 
+    <!-- Detalle de Información Actividad -->
+    <div class="modal fade" id="modal_task_detail" tabindex="-1" role="dialog" aria-labelledby="scrollableModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div id="div_task_detail">
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Detalle -->  
 
     <!-- Modal -->
     <div class="modal fade" id="modalNewTask" tabindex="-1" role="dialog" aria-hidden="true">
@@ -231,13 +265,236 @@ $dbh = new Conexion();
     <!--END MODAL-->
 
 
+        <!-- Modal Colaborador -->
+        <div class="modal fade" id="modalCollaborator" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog modal-top">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary">
+                        <h5 class="modal-title text-white">Añadir colaborador</h5>
+                        <button type="button" class="btn-close bg-white close-collaborator" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="col-form-label">Colaborador:</label>
+                                    <select name="cod_personal" id="cod_personal" class="form-control" data-style="btn btn-warning" required>
+                                        <?php             
+                                            $sqlColl   = "SELECT codigo, CONCAT(primer_nombre, ' ', paterno, ' ',materno) as nombre_personal FROM personal 
+                                            WHERE cod_estadopersonal = 1
+                                            ORDER BY nombre_personal ASC";
+                                            $stmtColl  = $dbh->prepare($sqlColl);
+                                            $stmtColl->execute();
+                                            $rows_collaborators = $stmtColl->fetchAll();
+                                            foreach ($rows_collaborators as $collabolator){       
+                                        ?>
+                                        <option value="<?= $collabolator['codigo']; ?>"  ><?= $collabolator['nombre_personal']; ?></option>
+                                        <?php 
+                                            }   
+                                        ?>
+                                    </select>                     
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary close-collaborator" data-dismiss="modal">Cerrar</button>
+                        <button type="button" class="btn btn-primary save-collaborator">Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal Presupuesto -->
+        <div class="modal fade" id="modalBudget" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog modal-top">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary">
+                        <h5 class="modal-title text-white">Añadir Presupuesto</h5>
+                        <button type="button" class="btn-close bg-white close-budget" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="col-form-label">Cuenta:</label>
+                                    <select name="cod_account" id="cod_account" class="form-control" data-style="btn btn-warning" required>
+                                        <?php             
+                                            $sqlAccount   = "SELECT p.codigo, p.numero, p.nombre 
+                                                FROM plan_cuentas p 
+                                                WHERE p.numero like '5%' 
+                                                AND p.nivel = 5 
+                                                AND p.cod_estadoreferencial = 1";
+                                            $stmtAccount  = $dbh->prepare($sqlAccount);
+                                            $stmtAccount->execute();
+                                            $rows_accounts = $stmtAccount->fetchAll();
+                                            foreach ($rows_accounts as $account){       
+                                        ?>
+                                        <option value="<?= $account['codigo']; ?>"  ><?= $account['numero']; ?> - <?= $account['nombre']; ?></option>
+                                        <?php 
+                                            }   
+                                        ?>
+                                    </select>
+                                    <label class="col-form-label">Monto:</label>
+                                    <input type="number" step="0.1" autocomplete="off" id="amount" class="form-control" placeholder="Ingresar presupuesto"> 
+                                    <label class="col-form-label">Fecha Ejecucion:</label>
+                                    <input type="date" id="dateBudget" class="form-control">               
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary close-budget" data-dismiss="modal">Cerrar</button>
+                        <button type="button" class="btn btn-primary save-budget">Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal Funciones Cargos -->
+        <div class="modal fade" id="modalPosition" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog modal-top">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary">
+                        <h5 class="modal-title text-white">Añadir Funciones</h5>
+                        <button type="button" class="btn-close bg-white close-position" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="col-form-label">Funciones:</label>
+                                    <select name="cod_funcion" id="cod_funcion" class="form-control" data-style="btn btn-warning" required>
+                                        <option value="">-</option>
+                                        <?php
+                                            $sqlPosition   = "SELECT af.cod_funcion as codigo, af.nombre_funcion as nombre  FROM cargos_funciones af
+                                                WHERE af.cod_estado = 1
+                                                AND af.cod_funcion = '$codCargoP'
+                                                ORDER BY codigo DESC";
+                                            $stmtPosition  = $dbh->prepare($sqlPosition);
+                                            $stmtPosition->execute();
+                                            $rowsPositions = $stmtPosition->fetchAll();
+                                            foreach ($rowsPositions as $position){       
+                                        ?>
+                                        <option value="<?= $position['codigo']; ?>"  ><?= $position['nombre']; ?></option>
+                                        <?php
+                                            }
+                                        ?>
+                                    </select>             
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary close-position" data-dismiss="modal">Cerrar</button>
+                        <button type="button" class="btn btn-primary save-position">Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </div> 
+        
+        <!-- Modal Nuevo Hito -->
+        <div class="modal fade" id="modalNewHito" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog modal-top">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary">
+                        <h5 class="modal-title text-white">Añadir Hito</h5>
+                        <button type="button" class="btn-close bg-white close-hito" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="col-sm-12 col-form-label">Nombre</label>
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                        <input class="form-control" type="text" name="nombre_hito" id="nombre_hito" required="true" autocomplete="off"/>
+                                        </div>
+                                    </div>
+                                    <label class="col-sm-12 col-form-label">Fecha Hito</label>
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                        <input class="form-control" type="date" name="date_hito" id="date_hito" required="true"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary close-hito" data-dismiss="modal">Cerrar</button>
+                        <button type="button" class="btn btn-primary save-hito">Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal Nueva Sub Actividad -->
+        <div class="modal fade" id="modalNewSubActivity" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog modal-top">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary">
+                        <h5 class="modal-title text-white">Añadir Sub Actividad</h5>
+                        <button type="button" class="btn-close bg-white close-subActivity" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="col-sm-12 col-form-label">Nombre</label>
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                        <input class="form-control" type="text" name="sub_nombre" id="sub_nombre" required="true" autocomplete="off" onkeyup="javascript:this.value=this.value.toUpperCase();"/>
+                                        </div>
+                                    </div>
+                                    <label class="col-sm-12 col-form-label">Fecha Inicial</label>
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                        <input class="form-control" type="date" name="sub_fecha_inicial" id="sub_fecha_inicial" required="true"/>
+                                        </div>
+                                    </div>
+                                    <label class="col-sm-12 col-form-label">Fecha Limite</label>
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                        <input class="form-control" type="date" name="sub_fecha" id="sub_fecha" required="true"/>
+                                        </div>
+                                    </div>
+                                    <label class="col-sm-12 col-form-label">Prioridad</label>
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <select name="sub_prioridad" id="sub_prioridad" class="single-select form-control" data-style="btn btn-warning" required>
+                                                <option value="" disabled selected="selected">-</option>
+                                                <?php             
+                                                    $sqlForaneo="SELECT codigo,nombre FROM actividades_prioridades where cod_estado=1";
+                                                    $stmtForaneo=$dbh->prepare($sqlForaneo);
+                                                    $stmtForaneo->execute();
+                                                    $stmtForaneo->bindColumn('codigo', $codigoF);
+                                                    $stmtForaneo->bindColumn('nombre', $nombreF);
+                                                    while ($rowForaneo = $stmtForaneo->fetch(PDO::FETCH_BOUND)) {         
+                                                ?>
+                                                <option value="<?= $codigoF; ?>" ><?= $nombreF; ?></option>
+                                                <?php 
+                                                    }   
+                                                ?>
+                                            </select>                     
+                                        </div>              
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary close-subActivity" data-dismiss="modal">Cerrar</button>
+                        <button type="button" class="btn btn-primary save-subActivity">Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Vendor js -->
         <script src="assets2/js/vendor.min.js"></script>
-        <script src="assets2/libs/sortablejs/Sortable.min.js"></script>
+        <!-- <script src="assets2/libs/sortablejs/Sortable.min.js"></script> -->
         <!-- Init -->
         <script src="assets2/js/pages/kanban.init.js"></script>
         <!-- App js -->
         <script src="assets2/js/app.min.js"></script>
+        <!-- Script - Lista de Actividades -->
+        <script src="assets/js/functionActivity.js"></script>
     </body>
 </html>

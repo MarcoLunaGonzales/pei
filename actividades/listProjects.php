@@ -112,8 +112,7 @@ $dbh = new Conexion();
                                 WHERE a.cod_componentepei = np.codigo
                                 AND aa.cod_estado = 1
                                 AND a.cod_padre is null
-                                AND a.cod_responsable = '$cod_personal'
-                                OR aco.cod_personal = '$cod_personal') as ant_total
+                                AND (a.cod_responsable = '$cod_personal' OR aco.cod_personal = '$cod_personal')) as ant_total
                             from niveles_pei np, nivelespei_unidadesareas npua 
                             where np.codigo=npua.cod_nivelpei 
                             and npua.cod_area='$globalAreaX' 

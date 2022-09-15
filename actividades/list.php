@@ -159,8 +159,7 @@ while ($rowP = $stmtP->fetch(PDO::FETCH_ASSOC)) {
                                                                 LEFT JOIN personalimagen pimg ON a.cod_responsable = pimg.codigo
                                                                 LEFT JOIN actividades_colaboradores aco ON aco.cod_actividad = a.codigo
                                                                 WHERE a.cod_padre is null
-                                                                AND a.cod_responsable = '$cod_personal'
-                                                                OR aco.cod_personal = '$cod_personal'";
+                                                                AND (a.cod_responsable = '$cod_personal' OR aco.cod_personal = '$cod_personal')";
                                                             if($codProyecto!=0){
                                                                 $sqlAct.=" and a.cod_componentepei='$codProyecto' ";
                                                             }

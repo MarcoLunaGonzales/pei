@@ -402,9 +402,8 @@ $('body').on('change', '.data_update', function(){
     let code_act = $('body #codeActivity').val();
     updateData($(this).val(), code_act);
 });
-// Actualización Evento Click 
-$('body').on('click', '.data_update', function(){
-    console.log('holas')
+// Actualización Evento Click - Cambio de estado PARADO
+$('body').on('click', '.data_update_state', function(){
     let code_act = $('body #codeActivity').val();
     select_data  = $(this).data('select');
     updateData($(this).data('state'), code_act);

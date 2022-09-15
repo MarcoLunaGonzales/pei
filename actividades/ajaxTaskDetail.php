@@ -323,11 +323,11 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
                                 <i class="fe-chevron-right"></i> Estado 
                                 <!-- Paralizar -->
                                 <?php if($cod_estado == 2){?>
-                                    <i class="fe-alert-octagon text-danger data_update" data-select="5" data-state="5"></i>
+                                    <i class="fe-alert-octagon text-danger data_update_state" data-select="5" data-state="5"></i>
                                 <?php }?>
                                 <!-- Continuar en Proceso -->
                                 <?php if($cod_estado == 5){?>
-                                    <i class="fe-check-circle text-success data_update" data-select="5" data-state="2"></i>
+                                    <i class="fe-check-circle text-success data_update_state" data-select="5" data-state="2"></i>
                                 <?php }?>
                             </p>
                             <div class="d-flex align-items-start">
@@ -672,7 +672,7 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
                         ?>
                         <div class="inbox-item <?=($collaborator['estado'] == 1 ? 'selectCollaborator':'');?>" <?=($collaborator['estado'] == 1 ? 'style="cursor:pointer;"':'');?> data-codigo_personal="<?=$collaborator['codigo_personal'];?>">
                             <div class="d-flex align-items-start">
-                                <img src="<?=$ruta?><?=$collaborator['imagen_personal'];?>" class="me-2 rounded-circle" height="36" alt="Perfil">
+                                <img src="<?=$ruta;?><?=$collaborator['imagen_personal'];?>" class="me-2 rounded-circle" height="36" alt="Perfil">
                                 <div class="w-100">
                                     <h5 class="mt-0 mt-1 mb-0 font-size-14">
                                         <?=$collaborator['nombre_compl'];?>
