@@ -98,7 +98,7 @@
                                             <?=$descripcionEK;?>
                                         </p>
     
-                                        <ul class="sortable-list tasklist list-unstyled" id="<?=$nombreEK;?>" ondrop="drop(this)" data-estado_tablero="<?=$codigoEK;?>">
+                                        <ul class="sortable-list tasklist list-unstyled border" id="<?=$nombreEK;?>" ondrop="drop(this)" data-estado_tablero="<?=$codigoEK;?>">
                                         <?php
                                         $sqlAct="SELECT a.codigo, a.nombre, a.cod_estadokanban as estado, a.observaciones, DATE_FORMAT(a.fecha_limite,'%b %d, %Y')as fecha_limite, a.cod_prioridad, ap.nombre as nombre_prioridad, ap.color 
                                         from actividades a
