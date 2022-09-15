@@ -1,6 +1,6 @@
 <?php
 require_once '../conexion.php';
-session_reset();
+session_start();
 
 $dbh = new Conexion();
 /**

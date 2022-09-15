@@ -99,7 +99,7 @@
     
                                         <ul class="sortable-list tasklist list-unstyled" id="<?=$nombreEK;?>">
                                         <?php
-                                        $sqlAct="SELECT a.codigo, a.nombre, a.observaciones, DATE_FORMAT(a.fecha_limite,'%b %d, %Y')as fecha_limite, a.cod_prioridad, ap.nombre as nombre_prioridad, ap.color 
+                                        $sqlAct="SELECT a.codigo, a.nombre, a.cod_estadokanban as estado, a.observaciones, DATE_FORMAT(a.fecha_limite,'%b %d, %Y')as fecha_limite, a.cod_prioridad, ap.nombre as nombre_prioridad, ap.color 
                                         from actividades a
                                         LEFT JOIN actividades_prioridades ap ON ap.codigo = a.cod_prioridad
                                         LEFT JOIN actividades_colaboradores aco ON aco.cod_actividad = a.codigo
@@ -111,6 +111,7 @@
                                         while ($rowAct = $stmtAct->fetch(PDO::FETCH_ASSOC)) {
                                             $codigoActividad=$rowAct['codigo'];
                                             $nombreActividad=$rowAct['nombre'];
+                                            $estadoActividad=$rowAct['estado']+1;
                                             $obsActividad=$rowAct['observaciones'];
                                             $fechaLimiteActividad=$rowAct['fecha_limite'];
                                             $codPrioridadActividad=$rowAct['cod_prioridad'];
@@ -134,8 +135,19 @@
                                             $rows_coll = $stmtColl->fetchAll();
                                         ?>
                                             <li id="task<?=$codigoActividad;?>">
-                                                <span class="badge bg-soft-<?=$colorActividad;?> text-<?=$colorActividad;?> float-end"><?=$nombrePrioridadActividad;?></span>
+                                                <span class="badge bg-soft-<?=$colorActividad;?> text-<?=$colorActividad;?> float-end"><?=$nombrePrioridadActividad;?></span>                                                
                                                 <h5 class="mt-0"><a href="javascript: void(0);" class="text-dark" onclick="javascript:showModallistTaskDetail(<?=$codigoActividad?>)"><?=$nombreActividad?></a></h5>
+                                                <?php if(($estadoActividad - 1)< 4){ ?>
+                                                <div class="form-check float-end">
+                                                    <span class="badge bg-success text-white float-end update_state_k" 
+                                                        style="cursor:pointer;" 
+                                                        title="Pasar a nueva etapa"
+                                                        data-estado="<?=$estadoActividad;?>"
+                                                        data-cod_actividad="<?=$codigoActividad;?>">
+                                                        <i class="fe-arrow-right text-white"></i>
+                                                    </span>
+                                                </div>
+                                                <?php } ?>
                                                 <p><?=$obsActividad;?></p>
                                                 <div class="clearfix"></div>
                                                 <div class="row">
@@ -496,5 +508,44 @@
         <script src="assets2/js/app.min.js"></script>
         <!-- Script - Lista de Actividades -->
         <script src="assets/js/functionActivity.js"></script>
+        <script>
+            // Modificación de Estado KANBAN
+            $('body').on('click', '.update_state_k', function(){
+                let code_activity = $(this).data('cod_actividad');
+                let estado        = $(this).data('estado');
+
+                let formData = new FormData();
+                formData.append('type', 7);         // Tipo 7 : Actualización de Datos
+                formData.append('data', estado);
+                formData.append('select_data', 5);
+                formData.append('code_activity', code_activity);
+                
+                $.ajax({
+                    url:"actividades/methods.php",
+                    type:"POST",
+                    contentType: false,
+                    processData: false,
+                    data: formData,
+                    success:function(response){
+                        let resp = JSON.parse(response);
+                        $('#modalNewSubActivity').modal('hide');
+                        swal({
+                            title: 'Exitoso!',
+                            text: "Se actualizo el estado correctamente!",
+                            type: 'success',
+                            showCancelButton: false,
+                            confirmButtonClass: 'btn btn-primary',
+                            confirmButtonText: 'Aceptar',
+                            buttonsStyling: false
+                        }).then((result) => {
+                            if (result.value) {
+                                location.reload();
+                            }
+                        });
+                    }
+                    
+                });
+            });
+        </script>
     </body>
 </html>
