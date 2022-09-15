@@ -41,6 +41,7 @@
 
         <!-- Style input type FILE -->
 		<link href="assets/css/customStyle.css" rel="stylesheet" type="text/css" />
+
     </head>
 
     <!-- body start -->
@@ -97,7 +98,7 @@
                                             <?=$descripcionEK;?>
                                         </p>
     
-                                        <ul class="sortable-list tasklist list-unstyled" id="<?=$nombreEK;?>">
+                                        <ul class="sortable-list tasklist list-unstyled" id="<?=$nombreEK;?>" ondrop="drop(this)" data-estado_tablero="<?=$codigoEK;?>">
                                         <?php
                                         $sqlAct="SELECT a.codigo, a.nombre, a.cod_estadokanban as estado, a.observaciones, DATE_FORMAT(a.fecha_limite,'%b %d, %Y')as fecha_limite, a.cod_prioridad, ap.nombre as nombre_prioridad, ap.color 
                                         from actividades a
@@ -134,19 +135,10 @@
                                             $stmtColl->execute();
                                             $rows_coll = $stmtColl->fetchAll();
                                         ?>
-                                            <li id="task<?=$codigoActividad;?>">
+                                            <li draggable="true" ondragstart="drag(this)" id="task<?=$codigoActividad;?>" data-cod_actividad="<?=$codigoActividad;?>" data-estado_actual="<?=$estadoActividad-1;?>">
                                                 <span class="badge bg-soft-<?=$colorActividad;?> text-<?=$colorActividad;?> float-end"><?=$nombrePrioridadActividad;?></span>                                                
                                                 <h5 class="mt-0"><a href="javascript: void(0);" class="text-dark" onclick="javascript:showModallistTaskDetail(<?=$codigoActividad?>)"><?=$nombreActividad?></a></h5>
                                                 <?php if(($estadoActividad - 1)< 4){ ?>
-                                                <div class="form-check float-end">
-                                                    <span class="badge bg-success text-white float-end update_state_k" 
-                                                        style="cursor:pointer;" 
-                                                        title="Pasar a nueva etapa"
-                                                        data-estado="<?=$estadoActividad;?>"
-                                                        data-cod_actividad="<?=$codigoActividad;?>">
-                                                        <i class="fe-arrow-right text-white"></i>
-                                                    </span>
-                                                </div>
                                                 <?php } ?>
                                                 <p><?=$obsActividad;?></p>
                                                 <div class="clearfix"></div>
@@ -546,6 +538,63 @@
                     
                 });
             });
+            
+            /**
+             * Acción de actualización de estado
+            */
+            let cod_actividad_kanban = 0;
+            let estado_actual = 0;
+            let elemento_id   = 0;
+            // En arrastre
+            function drag(item) {
+                cod_actividad_kanban = item.dataset.cod_actividad; // Codigo Actividad
+                estado_actual        = item.dataset.estado_actual; // Estado Actual
+                elemento_id          = item.id;                    // ID elemento
+            }
+            // En Caida, cambio de estado Actividad
+            function drop(item) {
+                let estado_kanban = item.dataset.estado_tablero; // Nuevo Estado de Actividad
+                let formData      = new FormData();
+                formData.append('type', 7);         // Tipo 7 : Actualización de Datos
+                formData.append('data', estado_kanban);
+                formData.append('select_data', 5);
+                formData.append('code_activity', cod_actividad_kanban);
+                if(estado_kanban < estado_actual){
+                    notificacionMsg("No se puede retroceder el estado de la Actividad!");
+                }else if(estado_kanban == 5){
+                    notificacionMsg("No se puede realizar esta acción");
+                }else if(estado_kanban > estado_actual){
+                    // Actualización de Data-Estado
+                    document.getElementById(elemento_id).dataset.estado_actual = estado_kanban;
+                    $.ajax({
+                        url:"actividades/methods.php",
+                        type:"POST",
+                        contentType: false,
+                        processData: false,
+                        data: formData,
+                        success:function(response){
+                            let resp = JSON.parse(response);
+                            responseAlert(resp.status);
+                        }
+                    });
+                }
+            }
+            /* Notificación de Mensaje de cambio de Estado */
+            function notificacionMsg(mssg){
+                swal({
+                    title: 'Oops!',
+                    text: mssg,
+                    type: 'warning',
+                    showCancelButton: false,
+                    confirmButtonClass: 'btn btn-primary',
+                    confirmButtonText: 'Aceptar',
+                    buttonsStyling: false
+                }).then((result) => {
+                    if (result.value) {
+                        location.reload();
+                    }
+                });
+            }
         </script>
     </body>
 </html>
