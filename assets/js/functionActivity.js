@@ -104,7 +104,9 @@ $('body').on('click', '.addSubActivity', function(){
 /* Abrir modal de hito */
 $('body').on('click', '.addHito', function(){
     $("#nombre_hito").val('');
-    $('#date_hito').val('');   
+    $('#date_hito').attr('min', $(this).data('start'))
+                            .attr('max', $(this).data('end'))
+                            .val('');
     $('body #modal_task_detail').modal('hide');
     $('#modalNewHito').modal('show');
 }); 
@@ -139,30 +141,38 @@ $('.save-collaborator').click(function(){
     formData.append('type', 3);         // Tipo 3 : Guardar Asignación
     formData.append('cod_personal', cod_personal);
     formData.append('code_activity', code_act);
-    $.ajax({
-        url:"actividades/methods.php",
-        type:"POST",
-        contentType: false,
-        processData: false,
-        data: formData,
-        success:function(response){
-            let resp = JSON.parse(response);
-            if(resp.status == 3){
-                Swal.fire(
-                    'Oops...',
-                    'El colaborador ya se cuentra asignado a la actividad',
-                    'warning'
-                );
-            }else{
-                responseAlert(resp.status);
+    if(cod_personal > 0){
+        $.ajax({
+            url:"actividades/methods.php",
+            type:"POST",
+            contentType: false,
+            processData: false,
+            data: formData,
+            success:function(response){
+                let resp = JSON.parse(response);
+                if(resp.status == 3){
+                    Swal.fire(
+                        'Oops...',
+                        'El colaborador ya se cuentra asignado a la actividad',
+                        'warning'
+                    );
+                }else{
+                    responseAlert(resp.status);
+                }
+                $('#modalCollaborator').modal('hide');
+                console.log(resp)
+                if(resp.status){
+                    showModallistTaskDetail(resp.code_activity);
+                }
             }
-            $('#modalCollaborator').modal('hide');
-            console.log(resp)
-            if(resp.status){
-                showModallistTaskDetail(resp.code_activity);
-            }
-        }
-    });
+        });
+    }else{
+        Swal.fire(
+            'Oops...',
+            '¡La nota debe tener al menos 5 caracteres!',
+            'warning'
+        );
+    }
 });
 /**
  * Remover registro
@@ -203,21 +213,29 @@ $('.save-budget').click(function(){
     formData.append('amount', amount);
     formData.append('dateBudget', dateBudget);
     formData.append('code_activity', code_act);
-    $.ajax({
-        url:"actividades/methods.php",
-        type:"POST",
-        contentType: false,
-        processData: false,
-        data: formData,
-        success:function(response){
-            let resp = JSON.parse(response);            
-            $('#modalBudget').modal('hide');
-            responseAlert(resp.status);
-            if(resp.status){
-                showModallistTaskDetail(resp.code_activity);
+    if(cod_account > 0 && amount != '' && dateBudget != ''){
+        $.ajax({
+            url:"actividades/methods.php",
+            type:"POST",
+            contentType: false,
+            processData: false,
+            data: formData,
+            success:function(response){
+                let resp = JSON.parse(response);            
+                $('#modalBudget').modal('hide');
+                responseAlert(resp.status);
+                if(resp.status){
+                    showModallistTaskDetail(resp.code_activity);
+                }
             }
-        }
-    });
+        });
+    }else{
+        Swal.fire(
+            'Oops...',
+            'Debe llenar los campos del formulario',
+            'warning'
+        );
+    }
 });
 /**
  * Función para enviar y guardar la sub actividad
@@ -235,22 +253,30 @@ $('.save-subActivity').click(function(){
     formData.append('sub_fecha_inicial', sub_fecha_inicial);
     formData.append('sub_prioridad', sub_prioridad);
     formData.append('code_activity', code_act);
-    $.ajax({
-        url:"actividades/methods.php",
-        type:"POST",
-        contentType: false,
-        processData: false,
-        data: formData,
-        success:function(response){
-            let resp = JSON.parse(response);
-            $('body #modal_task_detail').modal('show');
-            $('#modalNewSubActivity').modal('hide');
-            responseAlert(resp.status);
-            if(resp.status){
-                showModallistTaskDetail(resp.code_activity);
+    if(sub_nombre != '' && sub_fecha_inicial != '' && sub_fecha != '' && sub_prioridad > 0){
+        $.ajax({
+            url:"actividades/methods.php",
+            type:"POST",
+            contentType: false,
+            processData: false,
+            data: formData,
+            success:function(response){
+                let resp = JSON.parse(response);
+                $('body #modal_task_detail').modal('show');
+                $('#modalNewSubActivity').modal('hide');
+                responseAlert(resp.status);
+                if(resp.status){
+                    showModallistTaskDetail(resp.code_activity);
+                }
             }
-        }
-    });
+        });
+    }else{
+        Swal.fire(
+            'Oops...',
+            'Debe llenar los campos del formulario',
+            'warning'
+        );
+    }
 });
 /** 
  * Registrar Nuevo Hito 
@@ -264,21 +290,29 @@ $('.save-hito').click(function(){
     formData.append('nombre_hito', nombre_hito);
     formData.append('date_hito', date_hito);
     formData.append('code_activity', code_act);
-    $.ajax({
-        url:"actividades/methods.php",
-        type:"POST",
-        contentType: false,
-        processData: false,
-        data: formData,
-        success:function(response){
-            let resp = JSON.parse(response);
-            $('#modalNewHito').modal('hide');
-            responseAlert(resp.status);
-            if(resp.status){
-                showModallistTaskDetail(resp.code_activity);
+    if(nombre_hito != '' && date_hito != ''){
+        $.ajax({
+            url:"actividades/methods.php",
+            type:"POST",
+            contentType: false,
+            processData: false,
+            data: formData,
+            success:function(response){
+                let resp = JSON.parse(response);
+                $('#modalNewHito').modal('hide');
+                responseAlert(resp.status);
+                if(resp.status){
+                    showModallistTaskDetail(resp.code_activity);
+                }
             }
-        }
-    });
+        });
+    }else{
+        Swal.fire(
+            'Oops...',
+            'Debe llenar los campos del formulario',
+            'warning'
+        );
+    }
 })
 /**
  * Visualización de nueva actividad
@@ -437,7 +471,7 @@ function updateData(data, code_act){
  **/
 $('body').on('click','.selectBudget', function(){
     swal({
-        title: 'Está Seguro?',
+        title: '¿Está seguro de Eliminar el presupuesto?',
         text: "No podrá revertir el borrado!",
         type: 'warning',
         showCancelButton: true,
@@ -520,30 +554,38 @@ $('.save-position').click(function(){
     formData.append('type', 11);         // Tipo 11 : Guardar Función de Cargo
     formData.append('cod_funcion_cargo', cod_funcion_cargo);
     formData.append('code_activity', code_act);
-    $.ajax({
-        url:"actividades/methods.php",
-        type:"POST",
-        contentType: false,
-        processData: false,
-        data: formData,
-        success:function(response){
-            let resp = JSON.parse(response);
-            if(resp.status == 3){
-                Swal.fire(
-                    'Oops...',
-                    'La Función de Cargo ya se cuentra asignado a la actividad',
-                    'warning'
-                );
-            }else{
-                responseAlert(resp.status);
+    if($('#cod_funcion').val() > 0){        
+        $.ajax({
+            url:"actividades/methods.php",
+            type:"POST",
+            contentType: false,
+            processData: false,
+            data: formData,
+            success:function(response){
+                let resp = JSON.parse(response);
+                if(resp.status == 3){
+                    Swal.fire(
+                        'Oops...',
+                        'La Función de Cargo ya se cuentra asignado a la actividad',
+                        'warning'
+                    );
+                }else{
+                    responseAlert(resp.status);
+                }
+                $('#modalPosition').modal('hide');
+                console.log(resp)
+                if(resp.status){
+                    showModallistTaskDetail(resp.code_activity);
+                }
             }
-            $('#modalPosition').modal('hide');
-            console.log(resp)
-            if(resp.status){
-                showModallistTaskDetail(resp.code_activity);
-            }
-        }
-    });
+        });
+    }else{
+        Swal.fire(
+            'Oops...',
+            'Debe llenar los campos del formulario',
+            'warning'
+        );
+    }
 });
 /**
  * Quitar Cargo de Función

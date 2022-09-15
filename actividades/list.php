@@ -96,7 +96,7 @@ while ($rowP = $stmtP->fetch(PDO::FETCH_ASSOC)) {
                                             <li class="breadcrumb-item active">Tasks List</li>
                                         </ol>
                                     </div-->
-                                    <h4 class="page-title">Lista de Actividades <?=$cod_personal;?>- <?=$nombreProyecto;?></h4>
+                                    <h4 class="page-title">Lista de Actividades - <?=$nombreProyecto;?></h4>
                                 </div>
                             </div>
                         </div>     
@@ -566,7 +566,7 @@ while ($rowP = $stmtP->fetch(PDO::FETCH_ASSOC)) {
                             <div class="form-group">
                                 <label class="col-form-label">Funciones:</label>
                                 <select name="cod_funcion" id="cod_funcion" class="form-control" data-style="btn btn-warning" required>
-                                    <option value="">-</option>
+                                    <option value="" selected>-</option>
                                     <?php
                                         $sqlPosition   = "SELECT af.cod_funcion as codigo, af.nombre_funcion as nombre  FROM cargos_funciones af
                                             WHERE af.cod_estado = 1

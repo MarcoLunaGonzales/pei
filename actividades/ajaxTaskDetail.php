@@ -499,7 +499,7 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
                 <!-- Hitos -->
                 <div class="card p-2 mb-1 border">
                     <div class="pb-1">
-                        <button type="button" class="btn btn-success rounded-pill btn-sm float-end addHito">
+                        <button type="button" class="btn btn-success rounded-pill btn-sm float-end addHito" data-start="<?=date('Y-m-d', strtotime($fechaInicial));?>" data-end="<?=date('Y-m-d', strtotime($fechaLimite));?>">
                             <i class="mdi mdi-plus"></i>
                         </button>
                         <h5 class="header-title mt-1 text-primary"><i class="fe-bell"></i> Hitos</h5>
