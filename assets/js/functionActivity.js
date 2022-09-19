@@ -387,6 +387,7 @@ $('.showActivity').click(function(){
             $('.component-subActivity-show ' + label).html(resp.subAcitividades.length > 0 ? resp.subAcitividades : subActivities);
             $('.component-file-show ' + label).html(resp.archivos.length > 0 ? resp.archivos : files);
             $('.component-annotation-show ' + label).html(resp.anotacion.length > 0 ? resp.anotacion : notes);
+            $('.component-tracing-show ' + label).html(resp.seguimientos);
             $('.user_manager').html(resp.data.nombre_responsable);
             $('.date_limit').html(resp.data.fecha_limite);
             $('.description_activity').html(resp.data.observaciones);

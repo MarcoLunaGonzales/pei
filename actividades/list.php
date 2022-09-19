@@ -81,7 +81,7 @@ while ($rowP = $stmtP->fetch(PDO::FETCH_ASSOC)) {
             <!-- Start Page Content here -->
             <!-- ============================================================== -->
             <div class="content-page" style="padding: 0px; margin-top: 0px;">
-                <div class="content">
+                <div class="content pb-3">
 
                     <!-- Start Content-->
                     <div class="container-fluid">
@@ -328,6 +328,9 @@ while ($rowP = $stmtP->fetch(PDO::FETCH_ASSOC)) {
                                                 <div class="inbox-widget component-annotation-show" data-simplebar style="max-height: 200px;">
                                                 </div>
 
+                                                <h5 class="mt-3 font-size-16"><i class="fe-feather text-primary"></i> Seguimiento de Actividad</h5>
+                                                <div class="inbox-widget component-tracing-show" data-simplebar style="max-height: 200px;">
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

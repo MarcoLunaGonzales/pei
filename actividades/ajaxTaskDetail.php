@@ -776,7 +776,9 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
                                     <div class="col-md-8 inbox-item-text">
                                         <p class="inbox-item-author">
                                             <i class="<?=$seguimiento['icon'];?>"></i> <?=($seguimiento['cod_estado'] == 1 ? 'Creada':'Actualizada');?></p>
-                                        <p class="mb-0 text-secondary"><?=$seguimiento['empleado'];?></p>
+                                        <p class="mb-0 text-secondary">
+                                            <b>Por:</b> <?=$seguimiento['empleado'];?>
+                                        </p>
                                     </div>
                                     <div class="col-md-4 inbox-item-date p-0 text-right">
                                         <?=$seguimiento['fecha'];?>
