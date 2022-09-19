@@ -43,6 +43,7 @@
               <li> <a href="index.php?opcion=listProjects"><i class="bx bx-right-arrow-alt"></i>Proyectos</a></li>
               <li> <a href="index.php?opcion=listTasks&cod_proyecto=0"><i class="bx bx-right-arrow-alt"></i>Actividades</a></li>
               <li> <a href="index.php?opcion=listKanbanBoard"><i class="bx bx-right-arrow-alt"></i>Pizarra Kanban</a></li>
+              <li> <a href="index.php?opcion=listCalendar"><i class="bx bx-right-arrow-alt"></i>Calendario</a></li>
             </ul>
           </li>
           <li>
