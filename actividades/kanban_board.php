@@ -58,11 +58,11 @@
                 <div class="content">
 
                     <!-- Start Content-->
-                    <div class="container-fluid">
+                    <div class="container-fluid ml-0 mr-0">
                         
                         <!-- start page title -->
                         <div class="row">
-                            <div class="col-12">
+                            <div class="col-lg-12">
                                 <div class="page-title-box">
                                     <!--div class="page-title-right">
                                         <ol class="breadcrumb m-0">
@@ -81,7 +81,14 @@
                             
                         <!--INICIANDO COLUMNA-->
                         <?php
-                        $sqlEK="SELECT ek.codigo, ek.nombre, ek.descripcion from estados_kanban ek where ek.cod_estado=1 order by 1";
+                        $array_colors = ['secondary', 'primary', 'warning', 'success', 'danger', 'info'];
+                        $count_array  = count($array_colors) - 1;
+                        $count_val    = 0;
+                        $sqlEK="SELECT ek.codigo, ek.nombre, ek.descripcion 
+                        from estados_kanban ek 
+                        where ek.cod_estado = 1
+                        and ek.codigo < 5
+                        order by 1";
                         $stmtEK= $dbh->prepare($sqlEK);
                         $stmtEK->execute();
                         while ($rowEK = $stmtEK->fetch(PDO::FETCH_ASSOC)) {
@@ -89,17 +96,20 @@
                             $nombreEK=$rowEK['nombre'];
                             $descripcionEK=$rowEK['descripcion'];
                         ?>
-                            <div class="col-lg-4">
+                            <div class="col-lg-3">
                                 <div class="card">
+                                    <div class="card-header bg-<?=$array_colors[$count_val];?>">
+                                        <h4 class="header-title text-white"><?=$nombreEK;?></h4>
+                                    </div>
                                     <div class="card-body">
-                                        
-                                        <h4 class="header-title"><?=$nombreEK;?></h4>
                                         <p class="sub-header">
                                             <?=$descripcionEK;?>
                                         </p>
     
                                         <ul class="sortable-list tasklist list-unstyled border" id="<?=$nombreEK;?>" ondrop="drop(this)" data-estado_tablero="<?=$codigoEK;?>">
                                         <?php
+                                        $count_val = ($count_val != $count_array) ? ($count_val + 1) : 0;
+                                        
                                         $sqlAct="SELECT a.codigo, a.nombre, a.cod_estadokanban as estado, a.observaciones, DATE_FORMAT(a.fecha_limite,'%b %d, %Y')as fecha_limite, a.cod_prioridad, ap.nombre as nombre_prioridad, ap.color 
                                         from actividades a
                                         LEFT JOIN actividades_prioridades ap ON ap.codigo = a.cod_prioridad
