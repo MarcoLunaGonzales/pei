@@ -216,6 +216,26 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
     AND afc.cod_estado = 1";
     $stmtFuncion = $dbh->prepare($sqlFuncion);
     $stmtFuncion->execute();
+
+    /**
+     * Seguimiento de estado de actividad
+     * @autor: Ronald Mollericona
+    **/
+    $sqlSeguimiento = "SELECT ace.codigo, 
+    DATE_FORMAT(ace.fecha,'%d-%m-%Y') as fecha, 
+    DATE_FORMAT(ace.fecha,'%H:%i') as hora,
+    ek.color,
+    ek.icon,
+    CONCAT(p.primer_nombre, ' ', p.paterno, ' ', p.materno) as empleado,
+    ek.nombre as nombre_estado
+    FROM actividades_cambios_estado ace
+    LEFT JOIN personal p ON p.codigo = ace.cod_personal
+    LEFT JOIN estados_kanban ek ON ek.codigo = ace.cod_estadoactividad
+    WHERE ace.cod_actividad = '$codigoActividad'
+    ORDER BY ace.codigo DESC";
+    $stmtSeguimiento = $dbh->prepare($sqlSeguimiento);
+    $stmtSeguimiento->execute();
+    
     
 ?>
 <div id="bodyTaskComplete">    
@@ -735,6 +755,34 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
                             </a>
                         <?php
                                 }
+                            }
+                        ?>
+                    </div>
+                </div>
+                <!-- Seguimiento de Actividad -->
+                <div class="card p-2 mb-1 border">
+                    <div class="pb-1">
+                        <h5 class="header-title mt-1 text-primary"><i class="fe-airplay"></i> Seguimiento de Actividad</h5>
+                    </div>
+
+                    <div class="inbox-widget" data-simplebar style="max-height: 220px;">
+                        <?php
+                            $rowsSeguimiento = $stmtSeguimiento->fetchAll();
+                            foreach ($rowsSeguimiento as $seguimiento){
+                        ?>
+                            <div class="inbox-item">
+                                <div class="row">
+                                    <div class="col-md-8 inbox-item-text">
+                                        <p class="inbox-item-author"><i class="<?=$seguimiento['icon'];?>"></i> <?=$seguimiento['empleado'];?></p>
+                                        <p class="mb-0 text-secondary"><?=$seguimiento['empleado'];?></p>
+                                    </div>
+                                    <div class="col-md-4 inbox-item-date p-0 text-right">
+                                        <?=$seguimiento['fecha'];?>
+                                        <span class="badge bg-<?=$seguimiento['color'];?> float-end p-1"><?=$seguimiento['nombre_estado'];?></span>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php
                             }
                         ?>
                     </div>
