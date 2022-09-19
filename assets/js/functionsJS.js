@@ -39,6 +39,7 @@ function saveNewTask(){
   var nombre, observaciones, fecha_limite, prioridad, estado_kanban, cod_componentepei;
   nombre=document.getElementById("nombre").value;
   observaciones=document.getElementById("observaciones").value;
+  fecha_inicio=document.getElementById("fecha_inicio").value;
   fecha_limite=document.getElementById("fecha_limite").value;
   prioridad=document.getElementById("prioridad").value;
   estado_kanban=document.getElementById("estado_activo").value;
@@ -46,7 +47,7 @@ function saveNewTask(){
 
   $.ajax({
     type:"POST",
-    data:"nombre="+nombre+"&observaciones="+observaciones+"&fecha_limite="+fecha_limite+"&prioridad="+prioridad+"&estado_kanban="+estado_kanban+"&componente_pei="+cod_componentepei,
+    data:"nombre="+nombre+"&observaciones="+observaciones+"&fecha_limite="+fecha_limite+"&fecha_inicio="+fecha_inicio+"&prioridad="+prioridad+"&estado_kanban="+estado_kanban+"&componente_pei="+cod_componentepei,
     url:"actividades/ajaxSaveNewTask.php",
     success:function(r){
       if(r==1){        

@@ -365,8 +365,11 @@
                     class="bx bx-wallet"></i><span>Earnings</span></a>
                 <a class="dropdown-item" href="javascript:;"><i
                     class="bx bx-cloud-download"></i><span>Downloads</span></a>
-                <div class="dropdown-divider mb-0"></div> <a class="dropdown-item" href="javascript:;"><i
-                    class="bx bx-power-off"></i><span>Logout</span></a>
+                <div class="dropdown-divider mb-0"></div> 
+                  <a class="dropdown-item" href="#" >
+                    <i class="bx bx-power-off"></i>
+                    <span>Cerrar Sesión</span>
+                  </a>
               </div>
             </li>
             <!--li class="nav-item dropdown dropdown-language">

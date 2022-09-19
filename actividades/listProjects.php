@@ -5,8 +5,9 @@ require_once 'layouts/body_empty2.php';
 $globalUnidadX=$_SESSION["globalUO"];
 $globalAreaX=$_SESSION["globalArea"];
 
-$nombreUnidadCabecera=$_SESSION["globalNameUO"];
-$nombreAreaCabecera=$_SESSION["globalNameArea"]; 
+$nombreUnidadCabecera = $_SESSION["globalNameUO"];
+$nombreAreaCabecera   = $_SESSION["globalNameArea"]; 
+$cod_personal         = $_SESSION['globalUser'];
 
 $dbh = new Conexion();
 ?>
@@ -98,11 +99,20 @@ $dbh = new Conexion();
                                 np.abreviatura, 
                                 (SELECT COUNT(*) as act_total
                                 FROM actividades a
-                                WHERE a.cod_componentepei = np.codigo) as act_total,
+                                LEFT JOIN actividades_colaboradores aco ON aco.cod_actividad = a.codigo
+                                WHERE a.cod_componentepei = np.codigo
+                                AND a.cod_padre is null
+                                AND a.cod_responsable = '$cod_personal'
+                                OR aco.cod_personal = '$cod_personal') as act_total,
+
                                 (SELECT COUNT(aa.codigo)
                                 FROM actividades a
                                 LEFT JOIN actividades_anotaciones aa ON aa.cod_actividad = a.codigo
-                                WHERE a.cod_componentepei = np.codigo) as ant_total
+                                LEFT JOIN actividades_colaboradores aco ON aco.cod_actividad = a.codigo
+                                WHERE a.cod_componentepei = np.codigo
+                                AND aa.cod_estado = 1
+                                AND a.cod_padre is null
+                                AND (a.cod_responsable = '$cod_personal' OR aco.cod_personal = '$cod_personal')) as ant_total
                             from niveles_pei np, nivelespei_unidadesareas npua 
                             where np.codigo=npua.cod_nivelpei 
                             and npua.cod_area='$globalAreaX' 

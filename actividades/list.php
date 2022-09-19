@@ -5,10 +5,11 @@ require_once 'layouts/body_empty2.php';
 
 $dbh = new Conexion();
 
-$globalUnidadX=$_SESSION["globalUO"];
-$globalAreaX=$_SESSION["globalArea"];
-$nombreUnidadCabecera=$_SESSION["globalNameUO"];
-$nombreAreaCabecera=$_SESSION["globalNameArea"]; 
+$globalUnidadX          = $_SESSION["globalUO"];
+$globalAreaX            = $_SESSION["globalArea"];
+$nombreUnidadCabecera   = $_SESSION["globalNameUO"];
+$nombreAreaCabecera     = $_SESSION["globalNameArea"];
+$cod_personal           = $_SESSION['globalUser'];
 
 $codProyecto=$_GET["cod_proyecto"];
 
@@ -16,7 +17,27 @@ $nombreProyecto="";
 if($codProyecto!=0){
     $nombreProyecto=nombreNivelPEI($codProyecto);
 }
+
+/* Obtenemos Configuración de ruta de imagenes */
+$sqlFind = "SELECT * FROM configuraciones
+WHERE id_configuracion = 2";
+$stmtFind = $dbh->prepare($sqlFind);
+$stmtFind->execute();
+while ($row = $stmtFind->fetch(PDO::FETCH_ASSOC)) {
+    $ruta  = $row['valor_configuracion'];
+}
+
+/* Datos de Personal */
+$sqlP = "SELECT cod_cargo 
+FROM personal
+WHERE codigo = $cod_personal";
+$stmtP = $dbh->prepare($sqlP);
+$stmtP->execute();
+while ($rowP = $stmtP->fetch(PDO::FETCH_ASSOC)) {
+    $codCargoP = $rowP['cod_cargo'];
+}
 ?>
+
 
 
 <!DOCTYPE html>
@@ -46,6 +67,9 @@ if($codProyecto!=0){
 		<script src="assets2/js/head.js"></script>
         <!-- Style input type FILE -->
 		<link href="assets/css/customStyle.css" rel="stylesheet" type="text/css" />
+        <!-- Sweet Alert-->
+        <link href="assets2/libs/sweetalert2/sweetalert2.min.css" rel="stylesheet" type="text/css" />
+
     </head>
 
     <!-- body start -->
@@ -72,7 +96,7 @@ if($codProyecto!=0){
                                             <li class="breadcrumb-item active">Tasks List</li>
                                         </ol>
                                     </div-->
-                                    <h4 class="page-title">Lista de Actividades  -  <?=$nombreProyecto;?></h4>
+                                    <h4 class="page-title">Lista de Actividades - <?=$nombreProyecto;?></h4>
                                 </div>
                             </div>
                         </div>     
@@ -130,10 +154,12 @@ if($codProyecto!=0){
                                                                 (SELECT COUNT(*) as notes_count FROM actividades_anotaciones an WHERE an.cod_actividad = a.codigo AND an.cod_estado = 1) as notes_count,
                                                                 (SELECT COUNT(*) as notes_count FROM actividades_anotaciones an WHERE an.cod_actividad = a.codigo AND an.cod_estado = 1) as notes_count,
                                                                 pimg.imagen as imagen_personal
-                                                                from actividades a, actividades_prioridades ap, personalimagen pimg
-                                                                where a.cod_prioridad=ap.codigo
-                                                                and a.cod_responsable = pimg.codigo
-                                                                and a.cod_padre is null";
+                                                                from actividades a
+                                                                LEFT JOIN actividades_prioridades ap ON a.cod_prioridad = ap.codigo
+                                                                LEFT JOIN personalimagen pimg ON a.cod_responsable = pimg.codigo
+                                                                LEFT JOIN actividades_colaboradores aco ON aco.cod_actividad = a.codigo
+                                                                WHERE a.cod_padre is null
+                                                                AND (a.cod_responsable = '$cod_personal' OR aco.cod_personal = '$cod_personal')";
                                                             if($codProyecto!=0){
                                                                 $sqlAct.=" and a.cod_componentepei='$codProyecto' ";
                                                             }
@@ -179,7 +205,7 @@ if($codProyecto!=0){
                                                                         <div class="col-lg-6">
                                                                             <div class="d-sm-flex justify-content-between">
                                                                                 <div id="tooltips-container">
-                                                                                    <img src="assets/imagenes_personal/<?=$imagen_personal;?>" lt="image" class="avatar-xs rounded-circle" data-bs-container="#tooltips-container" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Assigned to Arya S" />
+                                                                                    <img src="<?=$ruta?><?=$imagen_personal;?>" lt="image" class="avatar-xs rounded-circle" data-bs-container="#tooltips-container" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Assigned to Arya S" />
                                                                                 </div>
                                                                                 <div class="mt-3 mt-sm-0">
                                                                                     <ul class="list-inline font-13 text-sm-end">
@@ -382,8 +408,15 @@ if($codProyecto!=0){
                       <label class="col-sm-3 col-form-label">Descripcion</label>
                       <div class="col-sm-8">
                         <div class="form-group">
-                            <textarea class="form-control" name="observaciones" id="observaciones">
-                            </textarea>
+                            <textarea class="form-control" name="observaciones" id="observaciones"></textarea>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <label class="col-sm-3 col-form-label">Fecha Inicio</label>
+                      <div class="col-sm-8">
+                        <div class="form-group">
+                          <input class="form-control" type="date" name="fecha_inicio" id="fecha_inicio" required="true"/>
                         </div>
                       </div>
                     </div>
@@ -428,7 +461,7 @@ if($codProyecto!=0){
     <!--END MODAL-->
     <!-- Long Content Scroll Modal -->
     <div class="modal fade" id="modal_task_detail" tabindex="-1" role="dialog" aria-labelledby="scrollableModalTitle" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div id="div_task_detail">
                 </div>
@@ -450,7 +483,9 @@ if($codProyecto!=0){
                                 <label class="col-form-label">Colaborador:</label>
                                 <select name="cod_personal" id="cod_personal" class="form-control" data-style="btn btn-warning" required>
                                     <?php             
-                                        $sqlColl   = "SELECT codigo, CONCAT(primer_nombre, ' ', paterno, ' ',materno) as nombre_personal FROM personal where cod_tipopersonal = 1";
+                                        $sqlColl   = "SELECT codigo, CONCAT(primer_nombre, ' ', paterno, ' ',materno) as nombre_personal FROM personal 
+                                        WHERE cod_estadopersonal = 1
+                                        ORDER BY nombre_personal ASC";
                                         $stmtColl  = $dbh->prepare($sqlColl);
                                         $stmtColl->execute();
                                         $rows_collaborators = $stmtColl->fetchAll();
@@ -517,6 +552,83 @@ if($codProyecto!=0){
             </div>
         </div>
     </div>
+    <!-- Modal Funciones Cargos -->
+    <div class="modal fade" id="modalPosition" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-top">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title text-white">Añadir Funciones</h5>
+                    <button type="button" class="btn-close bg-white close-position" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="col-form-label">Funciones:</label>
+                                <select name="cod_funcion" id="cod_funcion" class="form-control" data-style="btn btn-warning" required>
+                                    <option value="" selected>-</option>
+                                    <?php
+                                        $sqlPosition   = "SELECT af.cod_funcion as codigo, af.nombre_funcion as nombre  FROM cargos_funciones af
+                                            WHERE af.cod_estado = 1
+                                            AND af.cod_funcion = '$codCargoP'
+                                            ORDER BY codigo DESC";
+                                        $stmtPosition  = $dbh->prepare($sqlPosition);
+                                        $stmtPosition->execute();
+                                        $rowsPositions = $stmtPosition->fetchAll();
+                                        foreach ($rowsPositions as $position){       
+                                    ?>
+                                    <option value="<?= $position['codigo']; ?>"  ><?= $position['nombre']; ?></option>
+                                    <?php
+                                        }
+                                    ?>
+                                </select>             
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary close-position" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary save-position">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div> 
+    
+    <!-- Modal Nuevo Hito -->
+    <div class="modal fade" id="modalNewHito" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-top">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title text-white">Añadir Hito</h5>
+                    <button type="button" class="btn-close bg-white close-hito" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="col-sm-12 col-form-label">Nombre</label>
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                    <input class="form-control" type="text" name="nombre_hito" id="nombre_hito" required="true" autocomplete="off"/>
+                                    </div>
+                                </div>
+                                <label class="col-sm-12 col-form-label">Fecha Hito</label>
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                    <input class="form-control" type="date" name="date_hito" id="date_hito" required="true"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary close-hito" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary save-hito">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Modal Nueva Sub Actividad -->
     <div class="modal fade" id="modalNewSubActivity" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
         <div class="modal-dialog modal-top">
@@ -533,6 +645,12 @@ if($codProyecto!=0){
                                 <div class="col-sm-12">
                                     <div class="form-group">
                                     <input class="form-control" type="text" name="sub_nombre" id="sub_nombre" required="true" autocomplete="off" onkeyup="javascript:this.value=this.value.toUpperCase();"/>
+                                    </div>
+                                </div>
+                                <label class="col-sm-12 col-form-label">Fecha Inicial</label>
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                    <input class="form-control" type="date" name="sub_fecha_inicial" id="sub_fecha_inicial" required="true"/>
                                     </div>
                                 </div>
                                 <label class="col-sm-12 col-form-label">Fecha Limite</label>
@@ -584,349 +702,6 @@ if($codProyecto!=0){
         <!-- Init js-->
         <script src="assets2/js/pages/task.init.js"></script>
         <!-- Script - Lista de Actividades -->
-        <script>
-            let label = '> .simplebar-wrapper > .simplebar-mask > .simplebar-offset > .simplebar-content-wrapper > .simplebar-content';
-            /**
-             * Función para enviar y guardar archivos a "methods.php"
-             **/
-            $('body').on('change','#src-file1-input',function(){
-                // Cambia texto de input de tioo Archivo
-                // var filename = "'" + $(this).val().replace(/^.*[\\\/]/, '') + "'";
-                // $(this).parent().css('--fn', filename);
-                let sizeByte = $(this)[0].files[0].size;
-                let sizekiloBytes = parseInt(sizeByte / 1024);
-                let sizeFile = sizekiloBytes > 1024 ? (parseInt(sizekiloBytes / 1024) + ' MB') : (sizekiloBytes + ' KB');
-                let formData = new FormData();
-                let files    = $(this)[0].files[0];
-                let code_act = $('body #codeActivity').val();
-                formData.append('type', 1);         // Tipo 1 : Guardar Archivos
-                formData.append('code_activity', code_act);
-                formData.append('file', files);
-                formData.append('size', sizeFile);
-                $.ajax({
-                    url:"actividades/methods.php",
-                    type:"POST",
-                    contentType: false,
-                    processData: false,
-                    data: formData,
-                    success:function(response){
-                        let resp = JSON.parse(response);
-                        $('body .component-file ' + label).html(resp.content);
-                        responseAlert(resp.status);
-                    }
-                });
-            });
-            /**
-             * Función para enviar y guardar Nota a "methods.php"
-             **/
-            $('body').on('click','#save-annotation',function(){
-                let annotation = $('body #annotation').val();
-                let code_act   = $('body #codeActivity').val();
-                let formData   = new FormData();
-                formData.append('type', 2);         // Tipo 2 : Guardar Notas
-                formData.append('code_activity', code_act);
-                formData.append('annotation', annotation);
-                if(annotation.length > 5){
-                    $.ajax({
-                        url:"actividades/methods.php",
-                        type:"POST",
-                        contentType: false,
-                        processData: false,
-                        data: formData,
-                        success:function(response){
-                            let resp = JSON.parse(response);
-                            $('body .component-annotation ' + label).html(resp.content);
-                            responseAlert(resp.status);
-                            $('body #annotation').val('')
-                        }
-                    });
-                }else{
-                    Swal.fire(
-                        'Oops...',
-                        '¡La nota debe tener al menos 5 caracteres!',
-                        'warning'
-                    );
-                }
-            });
-            /* Abrir modal de asignación de colaborador */
-            $('body').on('click', '.addCollaborator', function(){
-                $("#cod_personal").val($("#cod_personal option:first").val());
-                $('body #modal_task_detail').modal('hide');
-                $('#modalCollaborator').modal('show');
-            });
-            /* Cerrar modal Colaborador */
-            $('.close-collaborator').click(function(){
-                $('body #modal_task_detail').modal('show');
-                $('#modalCollaborator').modal('hide');
-            });
-            /* Abrir modal de asignación de presupuesto */
-            $('body').on('click', '.addBudget', function(){
-                $("#cod_account").val($("#cod_account option:first").val());
-                $("#amount").val('');
-                $('body #modal_task_detail').modal('hide');
-                $('#modalBudget').modal('show');
-            }); 
-            /* Cerrar modal Presupuesto */
-            $('.close-budget').click(function(){
-                $('body #modal_task_detail').modal('show');
-                $('#modalBudget').modal('hide');
-            });
-            /* Abrir modal de subactividad */
-            $('body').on('click', '.addSubActivity', function(){
-                $("#sub_nombre").val('');
-                $('#sub_fecha').val('');
-                $("#sub_prioridad").val($("#sub_prioridad option:first").val());
-                $('body #modal_task_detail').modal('hide');
-                $('#modalNewSubActivity').modal('show');
-            }); 
-            /* Cerrar modal Presupuesto */
-            $('.close-subActivity').click(function(){
-                $('body #modal_task_detail').modal('show');
-                $('#modalNewSubActivity').modal('hide');
-            });
-            /**
-             * Función para enviar y guardar la asignación del colaborador
-             **/
-            $('.save-collaborator').click(function(){
-                let cod_personal = $('#cod_personal').val();
-                let code_act     = $('body #codeActivity').val();
-                let formData     = new FormData();
-                formData.append('type', 3);         // Tipo 3 : Guardar Asignación
-                formData.append('cod_personal', cod_personal);
-                formData.append('code_activity', code_act);
-                $.ajax({
-                    url:"actividades/methods.php",
-                    type:"POST",
-                    contentType: false,
-                    processData: false,
-                    data: formData,
-                    success:function(response){
-                        let resp = JSON.parse(response);
-                        if(resp.status == 3){
-                            Swal.fire(
-                                'Oops...',
-                                'El colaborador ya se cuentra asignado a la actividad',
-                                'warning'
-                            );
-                        }else{
-                            responseAlert(resp.status);
-                        }
-                        $('body .component-collaborator ' + label).html(resp.content);
-                        $('body #modal_task_detail').modal('show');
-                        $('#modalCollaborator').modal('hide');
-                    }
-                });
-            });
-            /**
-             * Remover registro
-             **/
-            $('body').on('click', '.remove-note', function(){
-                let cod_anotacion = $(this).data('codigo');
-                let code_act   = $('body #codeActivity').val();
-                let formData     = new FormData();
-                formData.append('type', 4);         // Tipo 4 : Eliminar Nota 
-                formData.append('codigo', cod_anotacion);         // Tipo 4 : Eliminar Nota
-                formData.append('code_activity', code_act);
-                $.ajax({
-                    url:"actividades/methods.php",
-                    type:"POST",
-                    contentType: false,
-                    processData: false,
-                    data: formData,
-                    success:function(response){
-                        let resp = JSON.parse(response);
-                        responseAlert(resp.status);
-                        $('.item-note-'+cod_anotacion).remove()
-                    }
-                });
-            });
-            /**
-             * Función para enviar y guardar el presupuesto asignado a la actividad
-             **/
-            $('.save-budget').click(function(){
-                let cod_account = $('#cod_account').val();
-                let amount      = $('#amount').val();
-                let dateBudget  = $('#dateBudget').val();
-                let code_act    = $('body #codeActivity').val();
-                let formData    = new FormData();
-                formData.append('type', 5);         // Tipo 5 : Guardar Asignación
-                formData.append('cod_account', cod_account);
-                formData.append('amount', amount);
-                formData.append('dateBudget', dateBudget);
-                formData.append('code_activity', code_act);
-                $.ajax({
-                    url:"actividades/methods.php",
-                    type:"POST",
-                    contentType: false,
-                    processData: false,
-                    data: formData,
-                    success:function(response){
-                        let resp = JSON.parse(response);
-                        responseAlert(resp.status);
-                        $('body .component-budget ' + label).html(resp.content);
-                        $('body #modal_task_detail').modal('show');
-                        $('#modalBudget').modal('hide');
-                    }
-                });
-            });
-            /**
-             * Función para enviar y guardar la sub actividad
-             **/
-            $('.save-subActivity').click(function(){
-                let sub_nombre      = $('#sub_nombre').val();
-                let sub_fecha       = $('#sub_fecha').val();
-                let sub_prioridad   = $('#sub_prioridad').val();
-                let code_act = $('body #codeActivity').val();
-                let formData = new FormData();
-                formData.append('type', 6);         // Tipo 6 : Guardar Sub Actividad
-                formData.append('sub_nombre', sub_nombre);
-                formData.append('sub_fecha', sub_fecha);
-                formData.append('sub_prioridad', sub_prioridad);
-                formData.append('code_activity', code_act);
-                $.ajax({
-                    url:"actividades/methods.php",
-                    type:"POST",
-                    contentType: false,
-                    processData: false,
-                    data: formData,
-                    success:function(response){
-                        let resp = JSON.parse(response);
-                        $('body #modal_task_detail').modal('show');
-                        $('#modalNewSubActivity').modal('hide');
-                        responseAlert(resp.status);
-                        if(resp.status){
-                            showModallistTaskDetail(resp.code_activity);
-                        }
-                    }
-                });
-            });
-            /**
-             * Visualización de nueva actividad
-             **/
-            $('body').on('click', '.show-activity', function(){
-                showModallistTaskDetail($(this).data('cod_actividad'));
-            });
-
-            /**
-             * Visualización de Detalle general de Acitividad
-             **/
-            $('.showActivity').click(function(){
-                let code_act = $(this).data('cod_activity');
-                let formData = new FormData();
-                formData.append('type', 0);         // Tipo 0 : mostrar Detalle de Actividad
-                formData.append('code_activity', code_act);
-                $.ajax({
-                    url:"actividades/methods.php",
-                    type:"POST",
-                    contentType: false,
-                    processData: false,
-                    data: formData,
-                    success:function(response){
-                        let resp = JSON.parse(response);
-                        console.log(resp);
-                        let files = `<div class="card mb-1 shadow-none border">
-                                        <div class="p-2">
-                                            <div class="row align-items-center">
-                                                <div class="col-auto">
-                                                    <div class="avatar-sm">
-                                                        <span class="avatar-title badge-soft-danger text-danger rounded">
-                                                            X
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                <div class="col ps-0">
-                                                    <h5 class="mt-0 mb-0 text-muted">No hay archivos adjuntos</h5>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>`;
-                        let notes = `<div class="card shadow-none border">
-                                        <div class="p-2">
-                                            <div class="row align-items-center">
-                                                <div class="col-auto">
-                                                    <div class="avatar-sm">
-                                                        <span class="avatar-title badge-soft-danger text-danger rounded">
-                                                            <i class="fe-message-circle"></i>
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                <div class="col ps-0">
-                                                    <h5 class="mt-0 mb-0 text-muted">No hay notas registradas.</h5>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>`;
-                        let subActivities = `<div class="inbox-item">
-                                        <div class="row align-items-center">
-                                            <div class="col-auto">
-                                                <div class="avatar-sm">
-                                                    <span class="avatar-title badge-soft-danger text-danger rounded">
-                                                        <i class="fe-folder-minus"></i>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div class="col ps-0">
-                                                <h5 class="mt-0 mb-0 text-muted">No se encontró subactividades...</h5>
-                                            </div>
-                                        </div>
-                                    </div> `;
-                        let badget = `<div class="inbox-item">
-                                        <div class="row align-items-center">
-                                            <div class="col-auto">
-                                                <div class="avatar-sm">
-                                                    <span class="avatar-title badge-soft-danger text-danger rounded">
-                                                        <i class="fe-thumbs-down"></i>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div class="col ps-0">
-                                                <h5 class="mt-0 mb-0 text-muted">Actividad sin presupuesto...</h5>
-                                            </div>
-                                        </div>
-                                    </div> `;
-                        let collaborator = `<div class="inbox-item">
-                                        <div class="row align-items-center">
-                                            <div class="col-auto">
-                                                <div class="avatar-sm">
-                                                    <span class="avatar-title badge-soft-danger text-danger rounded">
-                                                        <i class="fe-user-x"></i>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div class="col ps-0">
-                                                <h5 class="mt-0 mb-0 text-muted">Actividad sin colaboradores...</h5>
-                                            </div>
-                                        </div>
-                                    </div>`;
-                        $('.component-subActivity-show ' + label).html(resp.subAcitividades.length > 0 ? resp.subAcitividades : subActivities);
-                        $('.component-file-show ' + label).html(resp.archivos.length > 0 ? resp.archivos : files);
-                        $('.component-annotation-show ' + label).html(resp.anotacion.length > 0 ? resp.anotacion : notes);
-                        $('.user_manager').html(resp.data.nombre_responsable);
-                        $('.date_limit').html(resp.data.fecha_limite);
-                        $('.description_activity').html(resp.data.observaciones);
-                        $('.initial-activity').hide();
-                        $('.detail-activity').show();
-                    }
-                });
-            });
-            /**
-             * Mensaje de alerta despues de recibir respuesta del BACKEND
-             **/
-            function responseAlert(status){
-                if(status){
-                    Swal.fire(
-                        'Correcto!',
-                        'El proceso se completo correctamente',
-                        'success'
-                    );
-                }else{
-                    Swal.fire(
-                        'Oops...',
-                        '¡Algo salió mal!',
-                        'error'
-                    );
-                }
-            }
-        </script>
+        <script src="assets/js/functionActivity.js"></script>
     </body>
 </html>
