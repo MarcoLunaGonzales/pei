@@ -183,13 +183,19 @@ $dbh = new Conexion();
 
                 let calendar = new FullCalendar.Calendar(calendarEl, {
                     initialView: 'dayGridMonth',
-                    initialDate: '2020-10-07',
+                    locale:'es',
                     headerToolbar: {
                         left: 'prev,next today',
                         center: 'title',
-                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                        right: 'dayGridMonth,timeGridWeek'
                     },
-                    events: "calendario/ajaxActivity.php"
+                    buttonText:{
+                        timeGridWeek:'Semana',
+                        dayGridMonth:'Mes',
+                        today:'Hoy',
+                    },
+                    editable: false,
+                    events:  'calendario/ajaxActivity.php',
                 });
 
                 calendar.render();
