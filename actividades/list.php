@@ -56,6 +56,7 @@ while ($rowP = $stmtP->fetch(PDO::FETCH_ASSOC)) {
         <!-- Plugins css -->
         <link href="assets2/libs/quill/quill.core.css" rel="stylesheet" type="text/css" />
         <link href="assets2/libs/quill/quill.bubble.css" rel="stylesheet" type="text/css" />
+
         <link href="assets2/libs/select2/css/select2.min.css" rel="stylesheet" type="text/css" />
 
 		<!-- Bootstrap css -->
@@ -485,7 +486,7 @@ while ($rowP = $stmtP->fetch(PDO::FETCH_ASSOC)) {
                         <div class="col-md-12">
                             <div class="form-group">
                                 <label class="col-form-label">Colaborador:</label>
-                                <select name="cod_personal" data-toggle="select2" data-width="100%" id="cod_personal" class="form-control" data-style="btn btn-warning" required>
+                                <select name="cod_personal" data-toggle="select2" id="cod_personal" class="form-control" data-style="btn btn-warning" required>
                                     <?php             
                                         $sqlColl   = "SELECT codigo, CONCAT(primer_nombre, ' ', paterno, ' ',materno) as nombre_personal FROM personal 
                                         WHERE cod_estadopersonal = 1

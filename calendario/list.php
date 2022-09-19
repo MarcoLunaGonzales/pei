@@ -69,18 +69,8 @@ $dbh = new Conexion();
                             <div class="card">
                                 <div class="card-body">
                                     <div class="row">
-                                        <div class="col-lg-3">
-                                            <button class="btn btn-lg font-16 btn-primary w-100" id="btn-new-event"><i class="mdi mdi-plus-circle-outline"></i> Create New Event</button>
-                                            
-                                            <div id="external-events">
-                                                <div class="external-event bg-success" data-class="bg-success">
-                                                    <i class="mdi mdi-checkbox-blank-circle me-2 vertical-middle"></i>New Theme Release
-                                                </div>
-                                            </div>
 
-                                        </div> <!-- end col-->
-
-                                        <div class="col-lg-9">
+                                        <div class="col-lg-12">
                                             <div id="calendar"></div>
                                         </div> <!-- end col -->
 

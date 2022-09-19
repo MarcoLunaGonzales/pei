@@ -160,7 +160,6 @@ $('.save-collaborator').click(function(){
                     responseAlert(resp.status);
                 }
                 $('#modalCollaborator').modal('hide');
-                console.log(resp)
                 if(resp.status){
                     showModallistTaskDetail(resp.code_activity);
                 }
@@ -337,7 +336,6 @@ $('.showActivity').click(function(){
         data: formData,
         success:function(response){
             let resp = JSON.parse(response);
-            console.log(resp);
             let files = `<div class="card mb-1 shadow-none border">
                             <div class="p-2">
                                 <div class="row align-items-center">
@@ -574,7 +572,6 @@ $('.save-position').click(function(){
                     responseAlert(resp.status);
                 }
                 $('#modalPosition').modal('hide');
-                console.log(resp)
                 if(resp.status){
                     showModallistTaskDetail(resp.code_activity);
                 }
