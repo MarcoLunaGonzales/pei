@@ -111,6 +111,10 @@
 		if ($_GET['opcion']=='listTasks') {
 			$cod_proyecto=$_GET['cod_proyecto'];
 			require_once('actividades/list.php');
+		}	
+		// Calendario
+		if ($_GET['opcion']=='listCalendar') {
+			require_once('calendario/list.php');
 		}		
 		
 
