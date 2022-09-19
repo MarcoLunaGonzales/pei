@@ -15,6 +15,7 @@ $cod_personal = $_SESSION['globalUser'];
 $fecha_inicio = $_GET['start'];
 $fecha_final  = $_GET['end'];
 
+// Consulta de Actividades asignadas
 $sqlAct="SELECT a.nombre as title, a.observaciones as description, DATE_FORMAT(a.fecha_limite,'%Y-%m-%d') as start
     from actividades a
     LEFT JOIN actividades_prioridades ap ON a.cod_prioridad = ap.codigo
