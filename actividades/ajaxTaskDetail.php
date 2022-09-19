@@ -227,7 +227,8 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
     ek.color,
     ek.icon,
     CONCAT(p.primer_nombre, ' ', p.paterno, ' ', p.materno) as empleado,
-    ek.nombre as nombre_estado
+    ek.nombre as nombre_estado,
+    ek.codigo as cod_estado
     FROM actividades_cambios_estado ace
     LEFT JOIN personal p ON p.codigo = ace.cod_personal
     LEFT JOIN estados_kanban ek ON ek.codigo = ace.cod_estadoactividad
@@ -773,7 +774,8 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
                             <div class="inbox-item">
                                 <div class="row">
                                     <div class="col-md-8 inbox-item-text">
-                                        <p class="inbox-item-author"><i class="<?=$seguimiento['icon'];?>"></i> <?=$seguimiento['empleado'];?></p>
+                                        <p class="inbox-item-author">
+                                            <i class="<?=$seguimiento['icon'];?>"></i> <?=($seguimiento['cod_estado'] == 1 ? 'Creada':'Actualizada');?></p>
                                         <p class="mb-0 text-secondary"><?=$seguimiento['empleado'];?></p>
                                     </div>
                                     <div class="col-md-4 inbox-item-date p-0 text-right">
