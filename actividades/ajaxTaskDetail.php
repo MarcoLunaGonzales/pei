@@ -96,6 +96,18 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
 
     $stmtActividad= $dbh->prepare($sqlActividad);
     $stmtActividad->execute();
+    
+    $nombreActividad="";
+    $codigoActividad=0;
+    $obs="";
+    $fechaInicial="";
+    $fechaLimite="";
+    $nombre_responsable="";
+    $estado_kanban=0;
+    $cod_estado=0;
+    $imagen_personal="";
+    $nombreProyecto="";
+
     while ($rowActividad    = $stmtActividad->fetch(PDO::FETCH_ASSOC)) {
         $codigoActividad    = $rowActividad['codigo'];
         $obs                = $rowActividad['obs'];
