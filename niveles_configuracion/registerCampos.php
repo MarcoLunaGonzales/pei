@@ -102,7 +102,9 @@ $stmt->bindColumn('ordenguardado', $ordenGuardado);
                 </div>
               </div>
         				<div class="card-footer fixed-bottom">
-                    <button class="<?=$buttonVerde;?>" type="submit" onClick="return validarFormCamposNiveles(this.form)"><i class='bx bxs-save mr-1'></i>Guardar</button>
+                    <!--button class="<?=$buttonVerde;?>" type="submit" onClick="return validarFormCamposNiveles(this.form)"><i class='bx bxs-save mr-1'></i>Guardar</button-->
+                    <button class="<?=$buttonVerde;?>" type="submit"><i class='bx bxs-save mr-1'></i>Guardar</button>
+
                     <a href="<?=$urlList2;?>" class="<?=$buttonCancel;?>"><i class='bx bx-undo mr-1'></i>Cancelar</a>
                 </div>
 			     </form>
