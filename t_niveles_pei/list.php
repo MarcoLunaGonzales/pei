@@ -73,9 +73,9 @@ $stmt->bindColumn('cod_padre', $codPadre);
                             <a href='index.php?opcion=ListNivelDetallePEI&codigo_nivel_conf=<?=$codigo;?>&codigo_pei_padre=0' rel="tooltip" class="<?=$buttonDetailMin;?>">
                               <i class="bx bx-list-ol"></i>
                             </a>
-                            <a href='index.php?opcion=registerNivelPEI&codigo=<?=$codigo;?>' rel="tooltip" class="<?=$buttonEdit;?>">
+                            <!--a href='index.php?opcion=registerNivelPEI&codigo=<?=$codigo;?>' rel="tooltip" class="<?=$buttonEdit;?>">
                               <i class="bx bx-list-plus"></i>
-                            </a>
+                            </a-->
                             <?php
                             }
                             ?>
