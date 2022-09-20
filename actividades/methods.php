@@ -24,17 +24,20 @@ if($_POST['type'] == 0){
     $stmtActividad= $dbh->prepare($sqlActividad);
     $stmtActividad->execute();
     
-    $subAcitividades= listaSubActividades($code_activity, $dbh);
-    $archivos      = listaArchivos($code_activity, $dbh);
-    $anotacion     = listaAnotaciones($code_activity, $cod_personal, $dbh);
-    $presupuestos  = listaPresupuesto($code_activity, $dbh);
-    $colaboradores = listaColaboradores($code_activity, $dbh);
+    $subAcitividades = listaSubActividades($code_activity, $dbh);
+    $archivos        = listaArchivos($code_activity, $dbh);
+    $anotacion       = listaAnotaciones($code_activity, $cod_personal, $dbh);
+    $presupuestos    = listaPresupuesto($code_activity, $dbh);
+    $colaboradores   = listaColaboradores($code_activity, $dbh);
+    $seguimientos    = listaSeguimiento($code_activity, $dbh);
+    
     echo json_encode(array(
         'subAcitividades' => $subAcitividades,
         'archivos'      => $archivos,
         'anotacion'     => $anotacion,
         'presupuestos'  => $presupuestos,
         'colaboradores' => $colaboradores,
+        'seguimientos'  => $seguimientos,
         'data'          => $stmtActividad->fetch(PDO::FETCH_ASSOC)
     ));
 
@@ -595,6 +598,46 @@ function listaSubActividades($code_activity, $dbh){
             <div class="row">
                 <div class="col-md-13 inbox-item-text">
                     <p class="inbox-item-author show-activity" data-cod_actividad="'.$sub_activity['codigo'].'" style="cursor:pointer;"><i class="fe-file text-danger"></i> '.$sub_activity['nombre'].'</p>
+                </div>
+            </div>
+        </div>
+        ';
+    }
+    return $content;
+}
+/* Función Lista de Seguimiento */
+function listaSeguimiento($code_activity, $dbh){
+    $sqlSeguimiento = "SELECT ace.codigo, 
+    DATE_FORMAT(ace.fecha,'%d-%m-%Y') as fecha, 
+    DATE_FORMAT(ace.fecha,'%H:%i') as hora,
+    ek.color,
+    ek.icon,
+    CONCAT(p.primer_nombre, ' ', p.paterno, ' ', p.materno) as empleado,
+    ek.nombre as nombre_estado,
+    ek.codigo as cod_estado
+    FROM actividades_cambios_estado ace
+    LEFT JOIN personal p ON p.codigo = ace.cod_personal
+    LEFT JOIN estados_kanban ek ON ek.codigo = ace.cod_estadoactividad
+    WHERE ace.cod_actividad = '$code_activity'
+    ORDER BY ace.codigo DESC";
+    $stmtSeguimiento = $dbh->prepare($sqlSeguimiento);
+    $stmtSeguimiento->execute();
+
+    $content = '';
+    $rowsSeguimiento = $stmtSeguimiento->fetchAll();
+    foreach ($rowsSeguimiento as $seguimiento){
+        $content .= '
+        <div class="inbox-item">
+            <div class="row">
+                <div class="col-md-8 inbox-item-text">
+                    <p class="inbox-item-author">
+                        <i class="'.$seguimiento['icon'].'"></i> '.($seguimiento['cod_estado'] == 1 ? 'Creada':'Actualizada').'</p>
+                    <p class="mb-0 text-secondary">
+                        <b>Por:</b> '.$seguimiento['empleado'].'</p>
+                </div>
+                <div class="col-md-4 inbox-item-date p-0 text-right">
+                    '.$seguimiento['fecha'].'
+                    <span class="badge bg-'.$seguimiento['color'].' float-end p-1">'.$seguimiento['nombre_estado'].'</span>
                 </div>
             </div>
         </div>
