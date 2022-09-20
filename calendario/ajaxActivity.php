@@ -51,7 +51,15 @@ $stmtHitos = $dbh->prepare($sqlHitos);
 $stmtHitos->execute();
 $rowsHitos = $stmtHitos->fetchAll(PDO::FETCH_ASSOC);
 
+// Eventos Personales
+$sqlEventos ="	SELECT e.detalle as title, e.detalle as description, DATE_FORMAT(e.fecha_inicio,'%Y-%m-%d %H:%i:%s') as start, DATE_FORMAT(e.fecha_fin,'%Y-%m-%d %H:%i:%s') as end, ('bg-warning') className
+    from eventos e
+    WHERE e.cod_personal = '$cod_personal'";
+$stmtEventos = $dbh->prepare($sqlEventos);
+$stmtEventos->execute();
+$rowsEventos = $stmtEventos->fetchAll(PDO::FETCH_ASSOC);
+
 // Merge arrays
-$array_data = array_merge($rowsActivityStart, $rowsActivityEnd, $rowsHitos);
+$array_data = array_merge($rowsActivityStart, $rowsActivityEnd, $rowsHitos, $rowsEventos);
 echo json_encode($array_data);
 ?>

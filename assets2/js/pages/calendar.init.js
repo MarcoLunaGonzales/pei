@@ -78,9 +78,9 @@ var t = [
 a = this; 
 a.$calendarObj = new FullCalendar.Calendar(a.$calendar[0], {
     locale: 'es',
-    slotDuration: "00:15:00", 
-    slotMinTime: "08:00:00", 
-    slotMaxTime: "19:00:00", 
+    // slotDuration: "00:15:00", 
+    // slotMinTime: "08:00:00", 
+    // slotMaxTime: "19:00:00", 
     themeSystem: "bootstrap", 
     bootstrapFontAwesome: !1, 
     buttonText: { 
