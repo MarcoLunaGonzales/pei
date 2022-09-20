@@ -37,6 +37,11 @@ $dbh = new Conexion();
         <!-- Head js -->
         <script src="assets2/js/head.js"></script>
 
+        <style>
+            .external-event{
+                cursor: default;
+            }
+        </style>
     </head>
 
         <!-- body start -->
@@ -69,8 +74,28 @@ $dbh = new Conexion();
                             <div class="card">
                                 <div class="card-body">
                                     <div class="row">
-
-                                        <div class="col-lg-12">
+                                        <div class="col-lg-2">
+                                            <button class="btn btn-lg font-16 btn-primary w-100" id="new-event">
+                                                <i class="mdi mdi-plus-circle-outline"></i> Nuevo Evento</button>
+                                            
+                                            <div id="external-events">
+                                                <br>
+                                                <h5>Descripción de Eventos</h5>
+                                                <div class="external-event bg-success" data-class="bg-success">
+                                                    <i class="mdi mdi-checkbox-blank-circle me-2 vertical-middle"></i>Hitos
+                                                </div>
+                                                <div class="external-event bg-primary" data-class="bg-info">
+                                                    <i class="mdi mdi-checkbox-blank-circle me-2 vertical-middle"></i>Inicio de Actividad
+                                                </div>
+                                                <div class="external-event bg-danger" data-class="bg-danger">
+                                                    <i class="mdi mdi-checkbox-blank-circle me-2 vertical-middle"></i>Fin de Actividad
+                                                </div>
+                                                <div class="external-event bg-warning" data-class="bg-warning">
+                                                    <i class="mdi mdi-checkbox-blank-circle me-2 vertical-middle"></i>Eventos Personales
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-10">
                                             <div id="calendar"></div>
                                         </div> <!-- end col -->
 
@@ -126,6 +151,55 @@ $dbh = new Conexion();
                                     </div> <!-- end modal-content-->
                                 </div> <!-- end modal dialog-->
                             </div>
+                            <!-- Modal para Crear Evento -->
+                            <div class="modal fade" id="new-event-modal" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header py-3 px-4 border-bottom-0 d-block">
+                                            <button type="button" class="btn-close float-end" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            <h5 class="modal-title" id="modal-title">Nuevo Evento</h5>
+                                        </div>
+                                        <div class="modal-body px-4 pb-4 pt-0">
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Detalle:</label>
+                                                        <input class="form-control" placeholder="Insert Event Name"
+                                                            type="text" name="title" id="detalle"/>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Fecha:</label>
+                                                        <input class="form-control" placeholder="Insert Event Name"
+                                                            type="date" min="<?=date('Y-m-d');?>" name="title" id="fecha"/>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Hora Inicio:</label>
+                                                        <input class="form-control" placeholder="Insert Event Name"
+                                                            type="time" name="title" id="inicio"/>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Hora Fin:</label>
+                                                        <input class="form-control" placeholder="Insert Event Name"
+                                                            type="time" name="title" id="fin"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-md-12 text-end">
+                                                    <button type="submit" class="btn btn-primary" id="save-event">Guardar</button>
+                                                    <button type="button" class="btn btn-danger me-1" data-bs-dismiss="modal">Cancelar</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div> <!-- end modal-content-->
+                                </div> <!-- end modal dialog-->
+                            </div>
                             <!-- end modal-->
                         </div>
                         <!-- end col-12 -->
@@ -138,7 +212,6 @@ $dbh = new Conexion();
             <!-- ============================================================== -->
             <!-- End Page content -->
             <!-- ============================================================== -->
-
 
         </div>
         <!-- END wrapper -->
@@ -155,33 +228,66 @@ $dbh = new Conexion();
         <script src="assets2/js/pages/calendar.init.js"></script>
 
         <!-- App js -->
-        <script src="assets2/js/app.min.js"></script>
-
-        <!-- <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                let calendarEl = document.getElementById('calendar');
-
-                let calendar = new FullCalendar.Calendar(calendarEl, {
-                    initialView: 'dayGridMonth',
-                    height: 550,
-                    locale:'es',
-                    headerToolbar: {
-                        left: 'prev,next today',
-                        center: 'title',
-                        right: 'dayGridMonth,timeGridWeek'
-                    },
-                    buttonText:{
-                        timeGridWeek:'Semana',
-                        dayGridMonth:'Mes',
-                        today:'Hoy',
-                    },
-                    editable: false,
-                    events:  'calendario/ajaxActivity.php',
-                });
-
-                calendar.render();
+        <script src="assets2/js/app.min.js"></script> 
+        <script>
+            $('#new-event').click(function(){
+                $('#new-event-modal').modal('show');
             });
-        </script> -->
-        
+            
+            /**
+             * Registro de Nuevo Evento
+             **/
+            $('body').on('click', '#save-event', function(){
+                let detalle = $('#detalle').val();
+                let fecha   = $('#fecha').val();
+                let inicio  = $('#inicio').val();
+                let fin     = $('#fin').val();
+                if(detalle != '' && fecha != '' && inicio != '' && fin != ''){
+                    let formData = new FormData();
+                    formData.append('detalle', detalle);
+                    formData.append('fecha', fecha);
+                    formData.append('inicio', inicio);
+                    formData.append('fin', fin);
+                    $.ajax({
+                        url:"calendario/methods.php",
+                        type:"POST",
+                        contentType: false,
+                        processData: false,
+                        data: formData,
+                        success:function(response){
+                            let resp = JSON.parse(response);
+                            responseAlert(resp.status);
+                            // location.reload();
+                        }
+                    });
+
+                }else{
+                    Swal.fire(
+                        'Oops...',
+                        'Debe llenar los campos del formulario',
+                        'warning'
+                    );
+                }
+            });
+
+            /**
+             * Mensaje de alerta despues de recibir respuesta del BACKEND
+             **/
+            function responseAlert(status){
+                if(status){
+                    Swal.fire(
+                        'Correcto!',
+                        'El proceso se completo correctamente',
+                        'success'
+                    );
+                }else{
+                    Swal.fire(
+                        'Oops...',
+                        '¡Algo salió mal!',
+                        'error'
+                    );
+                }
+            }
+        </script>       
     </body>
 </html>
