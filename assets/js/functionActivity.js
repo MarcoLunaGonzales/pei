@@ -1,38 +1,6 @@
 
 let label = '> .simplebar-wrapper > .simplebar-mask > .simplebar-offset > .simplebar-content-wrapper > .simplebar-content';
 /**
- * Función para enviar y guardar archivos a "methods.php"
- **/
-$('body').on('change','#src-file1-input',function(){
-    // Cambia texto de input de tioo Archivo
-    // var filename = "'" + $(this).val().replace(/^.*[\\\/]/, '') + "'";
-    // $(this).parent().css('--fn', filename);
-    let sizeByte = $(this)[0].files[0].size;
-    let sizekiloBytes = parseInt(sizeByte / 1024);
-    let sizeFile = sizekiloBytes > 1024 ? (parseInt(sizekiloBytes / 1024) + ' MB') : (sizekiloBytes + ' KB');
-    let formData = new FormData();
-    let files    = $(this)[0].files[0];
-    let code_act = $('body #codeActivity').val();
-    formData.append('type', 1);         // Tipo 1 : Guardar Archivos
-    formData.append('code_activity', code_act);
-    formData.append('file', files);
-    formData.append('size', sizeFile);
-    $.ajax({
-        url:"actividades/methods.php",
-        type:"POST",
-        contentType: false,
-        processData: false,
-        data: formData,
-        success:function(response){
-            let resp = JSON.parse(response);
-            responseAlert(resp.status);
-            if(resp.status){
-                showModallistTaskDetail(resp.code_activity);
-            }
-        }
-    });
-});
-/**
  * Función para enviar y guardar Nota a "methods.php"
  **/
 $('body').on('click','#save-annotation',function(){
@@ -109,6 +77,12 @@ $('body').on('click', '.addHito', function(){
                             .val('');
     $('body #modal_task_detail').modal('hide');
     $('#modalNewHito').modal('show');
+});  
+/* Abrir modal de hito */
+$('body').on('click', '#add-file', function(){
+    $('#form-file')[0].reset();
+    $('body #modal_task_detail').modal('hide');
+    $('#modalNewFile').modal('show');
 }); 
 /* Cerrar modal Presupuesto */
 $('.close-subActivity').click(function(){
@@ -131,6 +105,12 @@ $('.close-position').click(function(){
     $('body #modal_task_detail').modal('show');
     $('#modalPosition').modal('hide');
 });
+/* Cerrar modal Archivo */
+$('.close-file').click(function(){
+    $('body #modal_task_detail').modal('show');
+    $('#modalNewFile').modal('hide');
+});
+
 /**
  * Función para enviar y guardar la asignación del colaborador
  **/
@@ -653,4 +633,78 @@ $('body').on('click','.selectFunction', function(){
             });
         }
     });
+});
+
+/**
+ * Función para enviar y guardar archivos a "methods.php"
+ **/
+ $('body').on('change','#src-file1-input',function(){
+    // Cambia texto de input de tioo Archivo
+    // var filename = "'" + $(this).val().replace(/^.*[\\\/]/, '') + "'";
+    // $(this).parent().css('--fn', filename);
+    let sizeByte = $(this)[0].files[0].size;
+    let sizekiloBytes = parseInt(sizeByte / 1024);
+    let sizeFile = sizekiloBytes > 1024 ? (parseInt(sizekiloBytes / 1024) + ' MB') : (sizekiloBytes + ' KB');
+    let formData = new FormData();
+    let files    = $(this)[0].files[0];
+    let code_act = $('body #codeActivity').val();
+    formData.append('type', 1);         // Tipo 1 : Guardar Archivos
+    formData.append('code_activity', code_act);
+    formData.append('file', files);
+    formData.append('size', sizeFile);
+    $.ajax({
+        url:"actividades/methods.php",
+        type:"POST",
+        contentType: false,
+        processData: false,
+        data: formData,
+        success:function(response){
+            let resp = JSON.parse(response);
+            responseAlert(resp.status);
+            if(resp.status){
+                showModallistTaskDetail(resp.code_activity);
+            }
+        }
+    });
+});
+
+/**
+ * Adjuntar y guardar Archivos
+*/
+$('body').on('click', '.save-file', function(){
+    if($("#detail_file").val() != '' && $("#file").val() != ''){
+        let sizeByte = $("#file")[0].files[0].size;
+        let sizekiloBytes = parseInt(sizeByte / 1024);
+        let sizeFile = sizekiloBytes > 1024 ? (parseInt(sizekiloBytes / 1024) + ' MB') : (sizekiloBytes + ' KB');
+        let formData = new FormData();
+        let files    = $("#file")[0].files[0];
+        let code_act = $('body #codeActivity').val();
+        let detail   = $('#detail_file').val();
+        formData.append('type', 1);         // Tipo 1 : Guardar Archivos
+        formData.append('code_activity', code_act);
+        formData.append('detail', detail);
+        formData.append('file', files);
+        formData.append('size', sizeFile);
+        $.ajax({
+            url:"actividades/methods.php",
+            type:"POST",
+            contentType: false,
+            processData: false,
+            data: formData,
+            success:function(response){
+                let resp = JSON.parse(response);
+                responseAlert(resp.status);
+                $('#modalNewFile').modal('hide');
+                if(resp.status){
+                    showModallistTaskDetail(resp.code_activity);
+                }
+            }
+        });
+    }else{
+        Swal.fire(
+            'Oops...',
+            '¡Debe completar el formulario!',
+            'warning'
+        );
+    }
 });

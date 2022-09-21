@@ -411,9 +411,10 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
                         <form action="#" class="comment-area-box">
                             <textarea rows="3" class="form-control border-0 resize-none" id="annotation" placeholder="Escriba una nota.."></textarea>
                             <div class="p-2 bg-light d-flex justify-content-between align-items-center">
-                                <div class="file-select" id="src-file1" >
+                                <!-- <div class="file-select" id="src-file1" >
                                     <input type="file" id="src-file1-input" name="src-file1" aria-label="Archivo">
-                                </div>
+                                </div> -->
+                                <button type="button" class="btn btn-sm btn-primary" id="add-file"><i class="mdi mdi-plus"></i> Adjuntar Archivo</button>
                                 <button type="button" class="btn btn-sm btn-success" id="save-annotation"><i class="mdi mdi-send"></i> Enviar</button>
                             </div>
                         </form>

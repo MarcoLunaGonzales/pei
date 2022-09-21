@@ -540,6 +540,21 @@ while ($rowP = $stmtP->fetch(PDO::FETCH_ASSOC)) {
                                         }   
                                     ?>
                                 </select>
+                                <label class="col-form-label">Financiamiento:</label>
+                                <select name="cod_account" id="cod_account" class="form-control" data-style="btn btn-warning" required>
+                                    <?php             
+                                        $sqlFinancing   = "SELECT pf.codigo, pf.abreviatura, pf.nombre 
+                                            FROM proyectos_financiacionexterna pf";
+                                        $stmtFinancing  = $dbh->prepare($sqlFinancing);
+                                        $stmtFinancing->execute();
+                                        $rows_financing = $stmtFinancing->fetchAll();
+                                        foreach ($rows_financing as $financing){       
+                                    ?>
+                                    <option value="<?= $financing['codigo']; ?>"  ><?= $financing['nombre']; ?></option>
+                                    <?php 
+                                        }   
+                                    ?>
+                                </select>
                                 <label class="col-form-label">Monto:</label>
                                 <input type="number" step="0.1" autocomplete="off" id="amount" class="form-control" placeholder="Ingresar presupuesto"> 
                                 <label class="col-form-label">Fecha Ejecucion:</label>
@@ -632,66 +647,45 @@ while ($rowP = $stmtP->fetch(PDO::FETCH_ASSOC)) {
             </div>
         </div>
     </div>
-    <!-- Modal Nueva Sub Actividad -->
-    <div class="modal fade" id="modalNewSubActivity" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-        <div class="modal-dialog modal-top">
-            <div class="modal-content">
-                <div class="modal-header bg-primary">
-                    <h5 class="modal-title text-white">Añadir Sub Actividad</h5>
-                    <button type="button" class="btn-close bg-white close-subActivity" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label class="col-sm-12 col-form-label">Nombre</label>
-                                <div class="col-sm-12">
+
+        <!-- Modal Nuevo Archivo -->
+        <div class="modal fade" id="modalNewFile" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog modal-top">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary">
+                        <h5 class="modal-title text-white">Añadir Archivo</h5>
+                        <button type="button" class="btn-close bg-white close-file" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form id="form-file">
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-12">
                                     <div class="form-group">
-                                    <input class="form-control" type="text" name="sub_nombre" id="sub_nombre" required="true" autocomplete="off" onkeyup="javascript:this.value=this.value.toUpperCase();"/>
+                                        <label class="col-sm-12 col-form-label">Detalle</label>
+                                        <div class="col-sm-12">
+                                            <div class="form-group">
+                                            <textarea rows="3" class="form-control" name="detail_file" id="detail_file" placeholder="Ingrese detalle de Archivo.." autocomplete="off"></textarea>
+                                            </div>
+                                        </div>
+                                        <label class="col-sm-12 col-form-label">Archivo</label>
+                                        <div class="col-sm-12">
+                                            <div class="form-group">
+                                            <input class="form-control" type="file" name="file" id="file"/>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <label class="col-sm-12 col-form-label">Fecha Inicial</label>
-                                <div class="col-sm-12">
-                                    <div class="form-group">
-                                    <input class="form-control" type="date" name="sub_fecha_inicial" id="sub_fecha_inicial" required="true"/>
-                                    </div>
-                                </div>
-                                <label class="col-sm-12 col-form-label">Fecha Limite</label>
-                                <div class="col-sm-12">
-                                    <div class="form-group">
-                                    <input class="form-control" type="date" name="sub_fecha" id="sub_fecha" required="true"/>
-                                    </div>
-                                </div>
-                                <label class="col-sm-12 col-form-label">Prioridad</label>
-                                <div class="col-sm-12">
-                                    <div class="form-group">
-                                        <select name="sub_prioridad" id="sub_prioridad" class="single-select form-control" data-style="btn btn-warning" required>
-                                            <option value="" disabled selected="selected">-</option>
-                                            <?php             
-                                                $sqlForaneo="SELECT codigo,nombre FROM actividades_prioridades where cod_estado=1";
-                                                $stmtForaneo=$dbh->prepare($sqlForaneo);
-                                                $stmtForaneo->execute();
-                                                $stmtForaneo->bindColumn('codigo', $codigoF);
-                                                $stmtForaneo->bindColumn('nombre', $nombreF);
-                                                while ($rowForaneo = $stmtForaneo->fetch(PDO::FETCH_BOUND)) {         
-                                            ?>
-                                            <option value="<?= $codigoF; ?>" ><?= $nombreF; ?></option>
-                                            <?php 
-                                                }   
-                                            ?>
-                                        </select>                     
-                                    </div>              
                             </div>
                         </div>
+                    </form>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary close-file" data-dismiss="modal">Cerrar</button>
+                        <button type="button" class="btn btn-primary save-file">Guardar</button>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary close-subActivity" data-dismiss="modal">Cerrar</button>
-                    <button type="button" class="btn btn-primary save-subActivity">Guardar</button>
                 </div>
             </div>
         </div>
-    </div>
+        
         <!-- Right bar overlay-->
         <div class="rightbar-overlay"></div>
         <!-- Vendor js -->

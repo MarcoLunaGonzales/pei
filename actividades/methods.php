@@ -48,6 +48,7 @@ if($_POST['type'] == 0){
  **/
 }else if($_POST['type'] == 1){
     $date          = date('Y-m-d');
+    $detail        = $_POST['detail'];
     // Preparación de archivo
     $folder        = 'file_activity';
     $dir           = dirname(__DIR__, 1) . "/" . $folder . "/";
@@ -59,8 +60,8 @@ if($_POST['type'] == 0){
     $file_ext      = new SplFileInfo($name);
     $extension     = $file_ext->getExtension();
     if (move_uploaded_file($_FILES["file"] ["tmp_name"], $name)) {
-        $sqlInsert = "INSERT INTO actividades_archivos (cod_actividad, cod_personal, fecha, ruta, filesize, extension, cod_estado)
-        	            VALUES ('$code_activity','$cod_personal','$date','$file_name', '$size','$extension','1')";
+        $sqlInsert = "INSERT INTO actividades_archivos (cod_actividad, cod_personal, detalle, fecha, ruta, filesize, extension, cod_estado)
+        	            VALUES ('$code_activity','$cod_personal', '$detail', '$date','$file_name', '$size','$extension','1')";
         $stmt      = $dbh->prepare($sqlInsert);
         $stmt->execute();
         
