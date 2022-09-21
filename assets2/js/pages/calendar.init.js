@@ -3,6 +3,7 @@
     this.$modal = l("#event-modal"), 
     this.$calendar = l("#calendar"), 
     this.$formEvent = l("#form-event"), 
+    this.$newFormEvent = l("#new-form-event"), // Nuevo evento
     // this.$btnNewEvent = l("#btn-new-event"), 
     this.$btnDeleteEvent = l("#btn-delete-event"), 
     this.$btnSaveEvent = l("#btn-save-event"), 
@@ -11,7 +12,8 @@
     this.$selectedEvent = null, 
     this.$newEventData = null 
 } 
-e.prototype.onEventClick = function (e) { 
+// Obtiene Detalle de Actividad Registrada
+e.prototype.onEventClick = function (e) {
     this.$formEvent[0].reset(), 
     this.$formEvent.removeClass("was-validated"), 
     this.$newEventData = null, 
@@ -22,15 +24,23 @@ e.prototype.onEventClick = function (e) {
     l("#event-title").val(this.$selectedEvent.title), 
     l("#event-category").val(this.$selectedEvent.classNames[0]) 
 }, 
+// Click crea nuevo evento en Calendario
 e.prototype.onSelect = function (e) { 
-    this.$formEvent[0].reset(), 
-    this.$formEvent.removeClass("was-validated"), 
-    this.$selectedEvent = null, 
-    this.$newEventData = e, 
-    this.$btnDeleteEvent.hide(), 
-    this.$modalTitle.text("Add New Event"), 
-    this.$modal.show(), 
-    this.$calendarObj.unselect() 
+    this.$selectedEvent = e;
+    let date = moment(this.$selectedEvent.dateStr).format('YYYY-MM-DD');
+    let time = moment(this.$selectedEvent.dateStr).format('HH:mm');
+    $('#fecha').val(date);
+    $('#inicio').val(time);
+    $('#new-event-modal').modal('show');
+    
+    // this.$formEvent[0].reset(), 
+    // this.$formEvent.removeClass("was-validated"), 
+    // this.$selectedEvent = null, 
+    // this.$newEventData = e, 
+    // this.$btnDeleteEvent.hide(), 
+    // this.$modalTitle.text("Add New Event"), 
+    // this.$modal.show(), 
+    // this.$calendarObj.unselect() 
 }, 
 e.prototype.init = function () { 
     this.$modal = new bootstrap.Modal(
@@ -114,15 +124,54 @@ a.$calendarObj = new FullCalendar.Calendar(a.$calendar[0], {
     } 
 }), 
 a.$calendarObj.render(), 
+
 // a.$btnNewEvent.on("click", function (e) { 
 //     a.onSelect({ 
 //         date: new Date, 
 //         allDay: !0 
 //     }) 
 // }), 
+
+// Nuevo Evento Añadito al Calendario
+a.$newFormEvent.on("submit", function (e) { 
+    e.preventDefault(); 
+    a.$newFormEvent[0]; 
+    var t;
+    t = { 
+        title: $("#detalle").val(), 
+        start: $("#fecha").val() + ' ' + $("#inicio").val(), 
+        end: $("#fecha").val() + ' ' + $("#fin").val(),
+        className: 'bg-warning' 
+    }, 
+    
+    a.$calendarObj.addEvent(t)
+}), 
 a.$formEvent.on("submit", function (e) { 
     e.preventDefault(); 
     var t, n = a.$formEvent[0]; 
     n.checkValidity() ? (a.$selectedEvent ? (a.$selectedEvent.setProp("title", l("#event-title").val()), 
-    a.$selectedEvent.setProp("classNames", [l("#event-category").val()])) : (t = { title: l("#event-title").val(), start: a.$newEventData.date, allDay: a.$newEventData.allDay, className: l("#event-category").val() }, a.$calendarObj.addEvent(t)), 
-    a.$modal.hide()) : (e.stopPropagation(), n.classList.add("was-validated")) }), l(a.$btnDeleteEvent.on("click", function (e) { a.$selectedEvent && (a.$selectedEvent.remove(), a.$selectedEvent = null, a.$modal.hide()) })) }, l.CalendarApp = new e, l.CalendarApp.Constructor = e }(window.jQuery), function () { "use strict"; window.jQuery.CalendarApp.init() }();
+    a.$selectedEvent.setProp(
+        "classNames", [
+            l("#event-category").val()
+        ]
+    )) : (
+        t = { 
+            title: l("#event-title").val(), 
+            start: a.$newEventData.date, 
+            allDay: a.$newEventData.allDay, 
+            className: l("#event-category").val() 
+        }, 
+        a.$calendarObj.addEvent(t)
+    ), 
+    a.$modal.hide()) : (e.stopPropagation(), n.classList.add("was-validated")) 
+}), 
+l(a.$btnDeleteEvent.on("click", function (e) { 
+    a.$selectedEvent && (a.$selectedEvent.remove(), a.$selectedEvent = null, a.$modal.hide()) 
+})) 
+}, 
+l.CalendarApp = new e, 
+l.CalendarApp.Constructor = e 
+}(window.jQuery), function () { 
+    "use strict"; 
+    window.jQuery.CalendarApp.init() 
+}();

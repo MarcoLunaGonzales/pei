@@ -160,42 +160,43 @@ $dbh = new Conexion();
                                             <h5 class="modal-title" id="modal-title">Nuevo Evento</h5>
                                         </div>
                                         <div class="modal-body px-4 pb-4 pt-0">
-                                            <div class="row">
-                                                <div class="col-12">
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Detalle:</label>
-                                                        <input class="form-control" placeholder="Insert Event Name"
-                                                            type="text" name="title" id="detalle"/>
+                                            <form id="new-form-event">
+                                                <div class="row">
+                                                    <div class="col-12">
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Detalle:</label>
+                                                            <input class="form-control" placeholder="Insert Event Name"
+                                                                type="text" name="title" id="detalle"/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Fecha:</label>
+                                                            <input class="form-control" placeholder="Insert Event Name"
+                                                                type="date" min="<?=date('Y-m-d');?>" name="title" id="fecha"/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Hora Inicio:</label>
+                                                            <input class="form-control" placeholder="Insert Event Name" type="time" name="title" id="inicio"/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Hora Fin:</label>
+                                                            <input class="form-control" placeholder="Insert Event Name"
+                                                                type="time" name="title" id="fin"/>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div class="col-12">
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Fecha:</label>
-                                                        <input class="form-control" placeholder="Insert Event Name"
-                                                            type="date" min="<?=date('Y-m-d');?>" name="title" id="fecha"/>
+                                                <div class="row mt-2">
+                                                    <div class="col-md-12 text-end">
+                                                        <button type="submit" class="btn btn-primary" id="save-event">Guardar</button>
+                                                        <button type="button" class="btn btn-danger me-1" data-bs-dismiss="modal">Cancelar</button>
                                                     </div>
                                                 </div>
-                                                <div class="col-6">
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Hora Inicio:</label>
-                                                        <input class="form-control" placeholder="Insert Event Name"
-                                                            type="time" name="title" id="inicio"/>
-                                                    </div>
-                                                </div>
-                                                <div class="col-6">
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Hora Fin:</label>
-                                                        <input class="form-control" placeholder="Insert Event Name"
-                                                            type="time" name="title" id="fin"/>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="row mt-2">
-                                                <div class="col-md-12 text-end">
-                                                    <button type="submit" class="btn btn-primary" id="save-event">Guardar</button>
-                                                    <button type="button" class="btn btn-danger me-1" data-bs-dismiss="modal">Cancelar</button>
-                                                </div>
-                                            </div>
+                                            </form>
                                         </div>
                                     </div> <!-- end modal-content-->
                                 </div> <!-- end modal dialog-->
