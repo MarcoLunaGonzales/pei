@@ -171,6 +171,7 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
     LEFT JOIN plan_cuentas p ON p.codigo = ap.cod_cuenta
     LEFT JOIN estados_actividades_presupuesto ac ON ac.codigo = ap.cod_estado_presupuesto
     WHERE ap.cod_actividad = '$codigoActividad'
+    AND ap.cod_estado = 1
     AND ap.cod_estado_presupuesto > 0
     ORDER BY ap.codigo DESC";
     $stmtAccount = $dbh->prepare($sqlAccount);
@@ -256,7 +257,7 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
                                 <!-- Información -->
                                 <div class="w-100 data_select" style="cursor:pointer;" data-select="1" data-inp="name_up">
                                     <h5 class="mt-1 font-size-14">
-                                        <i class='fe-book-open font-16 text-primary'></i> <?=$nombreActividad;?>
+                                        <i class='fe-award font-16 text-danger'></i> <?=$nombreActividad;?>
                                     </h5>
                                 </div>
                                 <!-- Actualzación -->
@@ -269,7 +270,7 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
                                 <div class="d-flex align-items-start">
                                     <div class="w-100">
                                         <h5 class="mt-1 font-size-14">
-                                            <i class='fe-file font-16 text-danger'></i> <?=$nombreProyecto;?>
+                                            <i class='fe-file font-16 text-warning'></i> <?=$nombreProyecto;?>
                                         </h5>
                                     </div>
                                 </div>
@@ -311,7 +312,7 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
                                 <!-- Información -->
                                 <div class="w-100 data_select" style="cursor:pointer;" data-select="3" data-inp="date_start_up">
                                     <h5 class="mt-1 font-size-14">
-                                        <i class='fe-calendar font-16 text-success'></i> <?=$fechaInicial;?>
+                                        <i class="fe-check-square font-16 text-primary"></i> <?=$fechaInicial;?>
                                     </h5>
                                 </div>
                                 <!-- Actualzación -->

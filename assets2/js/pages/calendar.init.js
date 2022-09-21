@@ -14,15 +14,19 @@
 } 
 // Obtiene Detalle de Actividad Registrada
 e.prototype.onEventClick = function (e) {
-    this.$formEvent[0].reset(), 
-    this.$formEvent.removeClass("was-validated"), 
-    this.$newEventData = null, 
-    this.$btnDeleteEvent.show(), 
-    this.$modalTitle.text("Edit Event"), 
-    this.$modal.show(), 
-    this.$selectedEvent = e.event, 
-    l("#event-title").val(this.$selectedEvent.title), 
-    l("#event-category").val(this.$selectedEvent.classNames[0]) 
+    this.$selectedEvent = e.event;
+    if(this.$selectedEvent.extendedProps.type == 1){
+        showModallistTaskDetail(this.$selectedEvent.extendedProps['code']);
+    }
+    // this.$formEvent[0].reset(), 
+    // this.$formEvent.removeClass("was-validated"), 
+    // this.$newEventData = null, 
+    // this.$btnDeleteEvent.show(), 
+    // this.$modalTitle.text("Edit Event"), 
+    // this.$modal.show(), 
+    // this.$selectedEvent = e.event, 
+    // l("#event-title").val(this.$selectedEvent.title), 
+    // l("#event-category").val(this.$selectedEvent.classNames[0])
 }, 
 // Click crea nuevo evento en Calendario
 e.prototype.onSelect = function (e) { 

@@ -433,13 +433,43 @@ $('body').on('keypress', '.data_update', function(e){
 // Actualización Evento Click SELECT
 $('body').on('change', '.data_update', function(){
     let code_act = $('body #codeActivity').val();
-    updateData($(this).val(), code_act);
+    swal({
+        title: '¿Está seguro?',
+        text: "No podrá revertir la acción!",
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonClass: 'btn btn-success',
+        cancelButtonClass: 'btn btn-danger',
+        confirmButtonText: 'Si, Actualizar!',
+        cancelButtonText: 'No, Cancelar!',
+        buttonsStyling: false
+    }).then((result) => {
+        if (result.value) {
+            updateData($(this).val(), code_act);
+        }else{
+            showModallistTaskDetail(code_act);
+        }
+    });
 });
 // Actualización Evento Click - Cambio de estado PARADO
 $('body').on('click', '.data_update_state', function(){
     let code_act = $('body #codeActivity').val();
     select_data  = $(this).data('select');
-    updateData($(this).data('state'), code_act);
+    swal({
+        title: '¿Está seguro?',
+        text: "No podrá revertir la acción!",
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonClass: 'btn btn-success',
+        cancelButtonClass: 'btn btn-danger',
+        confirmButtonText: 'Si, Actualizar!',
+        cancelButtonText: 'No, Cancelar!',
+        buttonsStyling: false
+    }).then((result) => {
+        if (result.value) {
+            updateData($(this).data('state'), code_act);
+        }
+    });
 });
 // Actualzación de DATOS de Actividad
 function updateData(data, code_act){

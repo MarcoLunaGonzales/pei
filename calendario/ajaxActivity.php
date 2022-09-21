@@ -16,7 +16,7 @@ $fecha_inicio = $_GET['start'];
 $fecha_final  = $_GET['end'];
 
 // Consulta de Actividades Fechas de Inicio
-$sqlActStart="	SELECT a.nombre as title, a.observaciones as description, DATE_FORMAT(aces.fecha,'%Y-%m-%d') as start, ('bg-primary') className
+$sqlActStart="	SELECT 1 as type, a.codigo as code, a.nombre as title, a.observaciones as description, DATE_FORMAT(aces.fecha,'%Y-%m-%d') as start, ('bg-primary') className
     from actividades a
     LEFT JOIN actividades_prioridades ap ON a.cod_prioridad = ap.codigo
     LEFT JOIN actividades_colaboradores aco ON aco.cod_actividad = a.codigo
@@ -29,7 +29,7 @@ $stmtActivityStart->execute();
 $rowsActivityStart = $stmtActivityStart->fetchAll(PDO::FETCH_ASSOC);
 
 // Consulta de Actividades Fechas Limite (Finalización)
-$sqlActEnd="	SELECT a.nombre as title, a.observaciones as description, DATE_FORMAT(a.fecha_limite,'%Y-%m-%d') as start, ('bg-danger') className
+$sqlActEnd="	SELECT 1 as type, a.codigo as code, a.nombre as title, a.observaciones as description, DATE_FORMAT(a.fecha_limite,'%Y-%m-%d') as start, ('bg-danger') className
     from actividades a
     LEFT JOIN actividades_prioridades ap ON a.cod_prioridad = ap.codigo
     LEFT JOIN actividades_colaboradores aco ON aco.cod_actividad = a.codigo
@@ -40,7 +40,7 @@ $stmtActivityEnd->execute();
 $rowsActivityEnd = $stmtActivityEnd->fetchAll(PDO::FETCH_ASSOC);
 
 // Hitos de horario
-$sqlHitos ="	SELECT ahi.nombre as title, a.observaciones as description, DATE_FORMAT(ahi.fecha_hito,'%Y-%m-%d') as start, ('bg-success') className
+$sqlHitos ="	SELECT 2 as type, ahi.nombre as title, a.observaciones as description, DATE_FORMAT(ahi.fecha_hito,'%Y-%m-%d') as start, ('bg-success') className
     from actividades a
     LEFT JOIN actividades_prioridades ap ON a.cod_prioridad = ap.codigo
     LEFT JOIN actividades_colaboradores aco ON aco.cod_actividad = a.codigo
@@ -52,7 +52,7 @@ $stmtHitos->execute();
 $rowsHitos = $stmtHitos->fetchAll(PDO::FETCH_ASSOC);
 
 // Eventos Personales
-$sqlEventos ="	SELECT e.detalle as title, e.detalle as description, DATE_FORMAT(e.fecha_inicio,'%Y-%m-%d %H:%i:%s') as start, DATE_FORMAT(e.fecha_fin,'%Y-%m-%d %H:%i:%s') as end, ('bg-warning') className
+$sqlEventos ="	SELECT 3 as tipo, e.detalle as title, e.detalle as description, DATE_FORMAT(e.fecha_inicio,'%Y-%m-%d %H:%i:%s') as start, DATE_FORMAT(e.fecha_fin,'%Y-%m-%d %H:%i:%s') as end, ('bg-warning') className
     from eventos e
     WHERE e.cod_personal = '$cod_personal'";
 $stmtEventos = $dbh->prepare($sqlEventos);

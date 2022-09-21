@@ -166,8 +166,8 @@ else if($_POST['type'] == 5){
     $amount      = $_POST['amount'];
     $date        = $_POST['dateBudget'];
     try {
-        $sqlInsert    = "INSERT INTO actividades_presupuestos (cod_actividad, cod_cuenta, fecha_ejecucion, monto, cod_estado_presupuesto)
-                        VALUES ('$code_activity','$cod_account','$date','$amount','1')";
+        $sqlInsert    = "INSERT INTO actividades_presupuestos (cod_actividad, cod_cuenta, fecha_ejecucion, monto, cod_estado_presupuesto, cod_estado)
+                        VALUES ('$code_activity','$cod_account','$date','$amount','1', '1')";
         $stmt         = $dbh->prepare($sqlInsert);
         $stmt->execute();        
         /* Se obtiene el ultimo registro */
@@ -330,8 +330,7 @@ else if($_POST['type'] == 8){
     $cod_presupuesto = $_POST['codigo'];
     try {
         // Eliminar Presupuesto
-        $sqlDel = "DELETE FROM actividades_presupuestos
-                WHERE codigo = $cod_presupuesto";
+        $sqlDel = "UPDATE actividades_presupuestos SET cod_estado = 2 WHERE codigo = $cod_presupuesto";
         $stmtDel = $dbh->prepare($sqlDel);
         $stmtDel->execute();
         echo json_encode(array(
