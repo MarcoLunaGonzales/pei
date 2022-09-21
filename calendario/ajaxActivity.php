@@ -52,7 +52,7 @@ $stmtHitos->execute();
 $rowsHitos = $stmtHitos->fetchAll(PDO::FETCH_ASSOC);
 
 // Eventos Personales
-$sqlEventos ="	SELECT 3 as tipo, e.detalle as title, e.detalle as description, DATE_FORMAT(e.fecha_inicio,'%Y-%m-%d %H:%i:%s') as start, DATE_FORMAT(e.fecha_fin,'%Y-%m-%d %H:%i:%s') as end, ('bg-warning') className
+$sqlEventos ="	SELECT 3 as type, e.detalle as title, e.observacion as description, DATE_FORMAT(e.fecha_inicio,'%Y-%m-%d %H:%i:%s') as start, DATE_FORMAT(e.fecha_fin,'%Y-%m-%d %H:%i:%s') as end, ('bg-warning') className
     from eventos e
     WHERE e.cod_personal = '$cod_personal'";
 $stmtEventos = $dbh->prepare($sqlEventos);

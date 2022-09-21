@@ -114,7 +114,7 @@ while ($rowP = $stmtP->fetch(PDO::FETCH_ASSOC)) {
                                                     <i class="mdi mdi-checkbox-blank-circle me-2 vertical-middle"></i>Fin de Actividad
                                                 </div>
                                                 <div class="external-event bg-warning" data-class="bg-warning">
-                                                    <i class="mdi mdi-checkbox-blank-circle me-2 vertical-middle"></i>Eventos Personales
+                                                    <i class="mdi mdi-checkbox-blank-circle me-2 vertical-middle"></i>Otro Eventos
                                                 </div>
                                             </div>
                                         </div>
@@ -194,6 +194,12 @@ while ($rowP = $stmtP->fetch(PDO::FETCH_ASSOC)) {
                                                     </div>
                                                     <div class="col-12">
                                                         <div class="mb-3">
+                                                            <label class="form-label">Observación:</label>
+                                                            <textarea rows="3" class="form-control" name="observacion" id="observacion" placeholder="Ingrese observación de evento.." autocomplete="off"></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <div class="mb-3">
                                                             <label class="form-label">Fecha:</label>
                                                             <input class="form-control" placeholder="Insert Event Name"
                                                                 type="date" min="<?=date('Y-m-d');?>" name="title" id="fecha"/>
@@ -217,6 +223,43 @@ while ($rowP = $stmtP->fetch(PDO::FETCH_ASSOC)) {
                                                     <div class="col-md-12 text-end">
                                                         <button type="submit" class="btn btn-primary" id="save-event">Guardar</button>
                                                         <button type="button" class="btn btn-danger me-1" data-bs-dismiss="modal">Cancelar</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div> <!-- end modal-content-->
+                                </div> <!-- end modal dialog-->
+                            </div>
+                            <!-- Modal Detalle de Evento -->
+                            <div class="modal fade" id="detail-event-modal" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header py-3 px-4 border-bottom-0 d-block">
+                                            <button type="button" class="btn-close float-end" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            <h5 class="modal-title" id="modal-title">Detalle de Evento</h5>
+                                        </div>
+                                        <div class="modal-body px-4 pb-4 pt-0">
+                                            <form id="new-form-event">
+                                                <div class="row">
+                                                    <div class="col-12">
+                                                        <div class="d-flex align-items-start">
+                                                            <div class="w-100">
+                                                                <h5 class="mt-1 font-size-14">
+                                                                    <i class='fe-award font-16 text-primary'></i> Detalle:
+                                                                </h5>
+                                                            </div>
+                                                        </div>
+                                                        <p class="mt-2 mb-1 text-muted text-detail"></p>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <div class="d-flex align-items-start">
+                                                            <div class="w-100">
+                                                                <h5 class="mt-1 font-size-14">
+                                                                    <i class='fe-feather font-16 text-success'></i> Observación:
+                                                                </h5>
+                                                            </div>
+                                                        </div>
+                                                        <p class="mt-2 mb-1 text-muted text-observation"></p>
                                                     </div>
                                                 </div>
                                             </form>
@@ -279,12 +322,14 @@ while ($rowP = $stmtP->fetch(PDO::FETCH_ASSOC)) {
              * Registro de Nuevo Evento
              **/
             $('body').on('click', '#save-event', function(){
+                let observacion = $('#observacion').val();
                 let detalle = $('#detalle').val();
                 let fecha   = $('#fecha').val();
                 let inicio  = $('#inicio').val();
                 let fin     = $('#fin').val();
                 if(detalle != '' && fecha != '' && inicio != '' && fin != ''){
                     let formData = new FormData();
+                    formData.append('observacion', observacion);
                     formData.append('detalle', detalle);
                     formData.append('fecha', fecha);
                     formData.append('inicio', inicio);
@@ -298,7 +343,8 @@ while ($rowP = $stmtP->fetch(PDO::FETCH_ASSOC)) {
                         success:function(response){
                             let resp = JSON.parse(response);
                             responseAlert(resp.status);
-                            // location.reload();
+                            $('#new-form-event')[0].reset();
+                            $('#new-event-modal').modal('hide');
                         }
                     });
 

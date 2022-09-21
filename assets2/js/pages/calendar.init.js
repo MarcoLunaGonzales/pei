@@ -17,6 +17,10 @@ e.prototype.onEventClick = function (e) {
     this.$selectedEvent = e.event;
     if(this.$selectedEvent.extendedProps.type == 1){
         showModallistTaskDetail(this.$selectedEvent.extendedProps['code']);
+    }else if(this.$selectedEvent.extendedProps.type == 3){
+        $('.text-detail').html(this.$selectedEvent.title);
+        $('.text-observation').html(this.$selectedEvent.extendedProps['description']);
+        $('#detail-event-modal').modal('show');
     }
     // this.$formEvent[0].reset(), 
     // this.$formEvent.removeClass("was-validated"), 
