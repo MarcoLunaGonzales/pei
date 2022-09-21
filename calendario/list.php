@@ -21,6 +21,16 @@ $stmtFind->execute();
 while ($row = $stmtFind->fetch(PDO::FETCH_ASSOC)) {
     $ruta  = $row['valor_configuracion'];
 }
+
+/* Datos de Personal */
+$sqlP = "SELECT cod_cargo 
+FROM personal
+WHERE codigo = $cod_personal";
+$stmtP = $dbh->prepare($sqlP);
+$stmtP->execute();
+while ($rowP = $stmtP->fetch(PDO::FETCH_ASSOC)) {
+    $codCargoP = $rowP['cod_cargo'];
+}
 ?>
 
 <!DOCTYPE html>
@@ -224,6 +234,45 @@ while ($row = $stmtFind->fetch(PDO::FETCH_ASSOC)) {
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Modal Nuevo Archivo -->
+                            <div class="modal fade" id="modalNewFile" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+                                <div class="modal-dialog modal-top">
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-primary">
+                                            <h5 class="modal-title text-white">Añadir Archivo</h5>
+                                            <button type="button" class="btn-close bg-white close-file" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <form id="form-file">
+                                            <div class="modal-body">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label class="col-sm-12 col-form-label">Detalle</label>
+                                                            <div class="col-sm-12">
+                                                                <div class="form-group">
+                                                                <textarea rows="3" class="form-control" name="detail_file" id="detail_file" placeholder="Ingrese detalle de Archivo.." autocomplete="off"></textarea>
+                                                                </div>
+                                                            </div>
+                                                            <label class="col-sm-12 col-form-label">Archivo</label>
+                                                            <div class="col-sm-12">
+                                                                <div class="form-group">
+                                                                <input class="form-control" type="file" name="file" id="file"/>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary close-file" data-dismiss="modal">Cerrar</button>
+                                            <button type="button" class="btn btn-primary save-file">Guardar</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Modal Colaborador -->
                             <div class="modal fade" id="modalCollaborator" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
                                 <div class="modal-dialog modal-top">
@@ -293,6 +342,21 @@ while ($row = $stmtFind->fetch(PDO::FETCH_ASSOC)) {
                                                                 }   
                                                             ?>
                                                         </select>
+                                                        <label class="col-form-label">Financiamiento:</label>
+                                                        <select name="cod_account" id="cod_account" class="form-control" data-style="btn btn-warning" required>
+                                                            <?php             
+                                                                $sqlFinancing   = "SELECT pf.codigo, pf.abreviatura, pf.nombre 
+                                                                    FROM proyectos_financiacionexterna pf";
+                                                                $stmtFinancing  = $dbh->prepare($sqlFinancing);
+                                                                $stmtFinancing->execute();
+                                                                $rows_financing = $stmtFinancing->fetchAll();
+                                                                foreach ($rows_financing as $financing){       
+                                                            ?>
+                                                            <option value="<?= $financing['codigo']; ?>"  ><?= $financing['nombre']; ?></option>
+                                                            <?php 
+                                                                }   
+                                                            ?>
+                                                        </select>
                                                         <label class="col-form-label">Monto:</label>
                                                         <input type="number" step="0.1" autocomplete="off" id="amount" class="form-control" placeholder="Ingresar presupuesto"> 
                                                         <label class="col-form-label">Fecha Ejecucion:</label>
@@ -322,7 +386,7 @@ while ($row = $stmtFind->fetch(PDO::FETCH_ASSOC)) {
                                                     <div class="form-group">
                                                         <label class="col-form-label">Funciones:</label>
                                                         <select name="cod_funcion" id="cod_funcion" class="form-control" data-style="btn btn-warning" required>
-                                                            <option value="">-</option>
+                                                            <option value="" selected>-</option>
                                                             <?php
                                                                 $sqlPosition   = "SELECT af.cod_funcion as codigo, af.nombre_funcion as nombre  FROM cargos_funciones af
                                                                     WHERE af.cod_estado = 1
