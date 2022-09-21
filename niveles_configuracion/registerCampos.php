@@ -75,9 +75,9 @@ $stmt->bindColumn('ordenguardado', $ordenGuardado);
                           ?>
                           <tr>
                             <td align="center">
-                              <div class="class="custom-control custom-checkbox mb-3">
-                                  <input  class="custom-control-input" type="checkbox" id="campo<?=$index?>" name="campo<?=$index;?>" value="<?=$codigoCampo;?>"  <?=($bandera>0)?"checked":"";?>  >
-                                  <label class="custom-control-label" for="campo<?=$index?>"><?php= $nombreCampo;?></label>
+                              <div class="custom-control custom-checkbox mb-3">
+                                  <input  class="custom-control-input" onclick="check(this.value, this.checked)" type="checkbox" id="campo<?=$index?>" name="campo<?=$index;?>" value="<?=$codigoCampo;?>"  <?=($bandera>0)?"checked":"";?>  >
+                                  <label class="custom-control-label" for="campo<?=$index?>"><?= $nombreCampo;?></label>
                               </div>
                             </td>
                             <td><?=$codigoCampo;?></td>
@@ -85,7 +85,7 @@ $stmt->bindColumn('ordenguardado', $ordenGuardado);
                             <td>
                             <div class="col-sm-7">
                               <div class="form-group">
-                                <input class="form-control" type="number"   name="orden<?=$index;?>" id="orden<?=$index;?>" value="<?=$ordenGuardado;?>" />
+                                <input class="form-control campo<?=$codigoCampo;?>" type="number"   name="orden<?=$index;?>" id="orden<?=$index;?>" value="<?=$ordenGuardado;?>" />
                               </div>
                             </div>
                             </td>
@@ -103,7 +103,7 @@ $stmt->bindColumn('ordenguardado', $ordenGuardado);
               </div>
         				<div class="card-footer fixed-bottom">
                     <!--button class="<?=$buttonVerde;?>" type="submit" onClick="return validarFormCamposNiveles(this.form)"><i class='bx bxs-save mr-1'></i>Guardar</button-->
-                    <button class="<?=$buttonVerde;?>" type="submit"><i class='bx bxs-save mr-1'></i>Guardar</button>
+                    <button class="<?=$buttonVerde;?>" type="button" onclick="enviarForm()"><i class='bx bxs-save mr-1'></i>Guardar</button>
 
                     <a href="<?=$urlList2;?>" class="<?=$buttonCancel;?>"><i class='bx bx-undo mr-1'></i>Cancelar</a>
                 </div>
@@ -113,6 +113,35 @@ $stmt->bindColumn('ordenguardado', $ordenGuardado);
         </div>
     </div>
 <script>numFilasA=<?=$nc?>;</script> 
-
+<script>
+  let array_select = [];
+  // Verificación de Checks realizados
+  function check(data, checked) {
+    let position = array_select.indexOf(data);
+    if(checked){
+      if(position > -1){
+        array_select.splice(array_select.indexOf(data), 1);
+      }else{
+        array_select.push(data);
+      }
+    }
+    
+  }
+  // En caso de tener todos los campos completados se envia formulario
+  function enviarForm(){
+    let validate = true;
+    array_select.forEach(element => {
+      let values = document.getElementsByClassName("campo" + element)[0].value;
+      if(values == ''){
+        validate = false;
+      }
+    });
+    if(validate){
+      document.getElementById("lp").submit();
+    }else{
+      alert('Llenar campos')
+    }
+  }
+</script>
 
 

@@ -85,6 +85,11 @@
 			$codigo_pei_padre=$_GET['codigo_pei_padre'];			
 			require_once('t_niveles_pei/register.php');
 		}
+		if ($_GET['opcion']=='actualizarNivelPEI') {
+			$codigo_nivel_conf=$_GET['codigo_nivel_conf'];
+			$codigo_pei_padre=$_GET['codigo_pei_padre'];			
+			require_once('t_niveles_pei/actualizar.php');
+		}
 		if ($_GET['opcion']=='configuracionPropiedadesNiveles') {
 			$codigo_nivel_conf=$_GET['codigo_nivel_conf'];
 			$codigo_pei_padre=$_GET['codigo_pei_padre'];			

@@ -23,6 +23,7 @@
   <link rel="stylesheet" href="../assets/css/app.css" />
   <link rel="stylesheet" href="../assets/css/dark-header.css" />
   <link rel="stylesheet" href="../assets/css/dark-theme.css" />
+
 </head>
 
 <body>
@@ -38,6 +39,9 @@
   <script src="../assets/plugins/simplebar/js/simplebar.min.js"></script>
   <script src="../assets/plugins/metismenu/js/metisMenu.min.js"></script>
   <script src="../assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js"></script>
+
+  
+	<script src="../assets/plugins/select2/js/select2.min.js"></script>
   <!-- App JS -->
   <!--script src="../assets/js/app.js"></script-->
 </body>

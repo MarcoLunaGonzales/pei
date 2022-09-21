@@ -57,8 +57,6 @@ while ($rowP = $stmtP->fetch(PDO::FETCH_ASSOC)) {
         <link href="assets2/libs/quill/quill.core.css" rel="stylesheet" type="text/css" />
         <link href="assets2/libs/quill/quill.bubble.css" rel="stylesheet" type="text/css" />
 
-        <link href="assets2/libs/select2/css/select2.min.css" rel="stylesheet" type="text/css" />
-
 		<!-- Bootstrap css -->
 		<link href="assets2/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
 		<!-- App css -->
@@ -316,7 +314,7 @@ while ($rowP = $stmtP->fetch(PDO::FETCH_ASSOC)) {
                                                     </div>
                                                 </div>
 
-                                                <h5 class="mt-3 font-size-16"><i class="fe-paperclip text-success"></i> Sub-Actividades</h5>
+                                                <h5 class="mt-3 font-size-16"><i class="fe-paperclip text-warning"></i> Sub-Actividades</h5>
                                                 <div class="inbox-widget component-subActivity-show" data-simplebar style="max-height: 200px;">
                                                 </div>
 
@@ -325,11 +323,11 @@ while ($rowP = $stmtP->fetch(PDO::FETCH_ASSOC)) {
                                                 <div class="inbox-widget component-file-show" data-simplebar style="max-height: 200px;">
                                                 </div>
 
-                                                <h5 class="mt-3 font-size-16"><i class="fe-feather text-primary"></i> Comentarios de la Actividad</h5>
+                                                <h5 class="mt-3 font-size-16"><i class="fe-feather text-success"></i> Comentarios de la Actividad</h5>
                                                 <div class="inbox-widget component-annotation-show" data-simplebar style="max-height: 200px;">
                                                 </div>
 
-                                                <h5 class="mt-3 font-size-16"><i class="fe-feather text-primary"></i> Seguimiento de Actividad</h5>
+                                                <h5 class="mt-3 font-size-16"><i class="fe-navigation text-primary"></i> Seguimiento de Actividad</h5>
                                                 <div class="inbox-widget component-tracing-show" data-simplebar style="max-height: 200px;">
                                                 </div>
                                             </div>
@@ -437,7 +435,7 @@ while ($rowP = $stmtP->fetch(PDO::FETCH_ASSOC)) {
                       <label class="col-sm-3 col-form-label">Prioridad</label>
                       <div class="col-sm-8">
                         <div class="form-group">
-                            <select name="prioridad" id="prioridad" class="single-select form-control" data-style="btn btn-warning" required>
+                            <select name="prioridad" id="prioridad" class="form-control" data-style="btn btn-warning" required>
                                 <option value="" disabled selected="selected">-</option>
                                 <?php             
                                     $sqlForaneo="SELECT codigo,nombre FROM actividades_prioridades where cod_estado=1";
@@ -486,7 +484,7 @@ while ($rowP = $stmtP->fetch(PDO::FETCH_ASSOC)) {
                         <div class="col-md-12">
                             <div class="form-group">
                                 <label class="col-form-label">Colaborador:</label>
-                                <select name="cod_personal" data-toggle="select2" id="cod_personal" class="form-control" data-style="btn btn-warning" required>
+                                <select name="cod_personal" id="cod_personal" class="form-control single-select" data-style="btn btn-warning" required>
                                     <?php             
                                         $sqlColl   = "SELECT codigo, CONCAT(primer_nombre, ' ', paterno, ' ',materno) as nombre_personal FROM personal 
                                         WHERE cod_estadopersonal = 1
@@ -699,7 +697,6 @@ while ($rowP = $stmtP->fetch(PDO::FETCH_ASSOC)) {
         <!-- Vendor js -->
         <script src="assets2/js/vendor.min.js"></script>
         
-        <script src="assets2/libs/select2/js/select2.min.js"></script>
         <!-- Dragula js -->
         <script src="assets2/libs/dragula/dragula.min.js"></script>
         <!-- Dragula init js-->

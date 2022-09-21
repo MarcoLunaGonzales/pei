@@ -102,9 +102,6 @@
                                         <h4 class="header-title text-white"><?=$nombreEK;?></h4>
                                     </div>
                                     <div class="card-body">
-                                        <p class="sub-header">
-                                            <?=$descripcionEK;?>
-                                        </p>
     
                                         <ul class="sortable-list tasklist list-unstyled border" id="<?=$nombreEK;?>" ondrop="drop(this)" data-estado_tablero="<?=$codigoEK;?>">
                                         <?php
