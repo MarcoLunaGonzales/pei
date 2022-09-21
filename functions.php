@@ -72,4 +72,10 @@ function configurarCampoFormularioPersonalizado($stringForm,$codigoCampo){
    return($stringNuevoForm);
 }
 
+function configurarCampoFormulario($stringForm, $codigoCampo, $text = ''){
+   $stringNuevoForm  = str_replace("XXXXX", "campopersonalizado|$codigoCampo", $stringForm);
+   $stringFinal      = str_replace("XX", "$text", $stringNuevoForm);
+   return($stringFinal);
+}
+
 ?>

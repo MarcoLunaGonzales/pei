@@ -1,96 +1,63 @@
 <?php
 
-require_once 'conexion.php';
-require_once 'styles.php';
+require_once '../layouts/body_empty.php';
+require_once '../conexion.php';
+require_once '../functionsGeneralJS.php';
 require_once 'configModule.php';
-require_once 'functionsGeneralJS.php';
-require_once 'functionsNames.php';
-
 
 $dbh = new Conexion();
+try {
+    
+    $cod_nivel_padre = $_POST["codigo_nivel_padre"];  
+    
+    $nombre                 = $_POST["nombre"];
+    $abreviatura            = $_POST["abreviatura"];
+    $habilitarActividades   = $_POST["habilitar_actividades"];
 
-$codigoNivelConf=$_GET['codigo_nivel_conf'];
-$codigoPEIPadre=$_GET['codigo_pei_padre'];
+    if($habilitarActividades=="on"){
+        $habilitarActividades=1;
+    }else{
+        $habilitarActividades=0;
+    }  
 
+    // Actualización de NIVELES_PEI
+    $sqlUpd="UPDATE niveles_pei 
+            SET nombre = '$nombre', 
+            abreviatura = '$abreviatura', 
+            bandera_actividades = '$habilitarActividades' 
+            WHERE codigo = '$cod_nivel_padre'";
+    $stmtUpd = $dbh->prepare($sqlUpd);
+    $flagSuccess=$stmtUpd->execute();
+    // ACTUALIZACIÓN DE NIVELES_PEI_ADICIONALES
+    $sqlDel="DELETE from niveles_pei_adicionales WHERE cod_nivelpei = '$cod_nivel_padre'";
+    $stmt = $dbh->prepare($sqlDel);
+    $flagSuccess=$stmt->execute();
 
-$nombreNivel=nombreNivelConfiguracion($codigoNivelConf);
+    foreach($_POST as $nombre_campo => $valor){ 
+        $asignacion = "\$" . $nombre_campo . "='" . $valor . "';";
 
+        $cadenaBuscar='campopersonalizado';
+        $posicion = strpos($nombre_campo, $cadenaBuscar);
+
+        if ($posicion === false) {
+        }else{
+            list($campoInsert, $campoIndex)=explode("|",$nombre_campo);
+
+            $sqlInsertAdicional="";
+            $sqlInsertAdicional="INSERT INTO niveles_pei_adicionales (cod_nivelpei, cod_campodisponible, valor)  values ('$cod_nivel_padre', '$campoIndex', '$valor')";	    	
+            $stmtInsertAdicional = $dbh->prepare($sqlInsertAdicional);	
+            $flagSuccess2=$stmtInsertAdicional->execute();
+
+            if($flagSuccess2==false){
+                $flagSuccessDetail=false;
+            }
+        }
+    }
+
+    showAlertSuccessError($flagSuccess,$urlList);
+    
+    } catch(PDOException $ex){
+        //manejar error
+        echo "Un error ocurrio".$ex->getMessage();
+    }
 ?>
-<form id="form1" class="form-horizontal" action="<?=$urlSave;?>" method="post">
-
-<input type="hidden" name="codigo_nivel_conf" id="codigo_nivel_conf" value="<?= $codigoNivelConf; ?>"   > 
-<input type="hidden" name="codigo_nivel_padre" id="codigo_nivel_padre" value="<?= $codigoPEIPadre; ?>"   > 
-
-<div class="content">
-	<div class="container-fluid">
-
-		<div class="col-md-12">
-		  
-			<div class="card">
-			  <div class="card-header <?=$colorCard;?> card-header-text">
-				<div class="card-text">
-				  <h4 class="card-title">Registrar <?=$nombreNivel;?></h4>
-				</div>
-			  </div>
-			  <div class="card-body ">
-					<div class="row">
-					  <label class="col-sm-2 col-form-label">Nombre</label>
-					  <div class="col-sm-7">
-						<div class="form-group">
-						  <input class="form-control" type="text" name="nombre" id="nombre" required="true" onkeyup="javascript:this.value=this.value.toUpperCase();"/>
-						</div>
-					  </div>
-					</div>
-					<div class="row">
-					  <label class="col-sm-2 col-form-label">Abreviatura</label>
-					  <div class="col-sm-7">
-						<div class="form-group">
-						  <input class="form-control" type="text" name="abreviatura" id="abreviatura" required="true" onkeyup="javascript:this.value=this.value.toUpperCase();"/>
-						</div>
-					  </div>
-					</div>
-
-				 <!--AQUI SE VIENEN LOS CAMPOS DINAMICOS-->
-				 	<?php 
-				 	$sqlCamposDinamicos="SELECT c.codigo, c.nombre, c.abreviatura, tc.string_formulario from nivelesconf_camposdisponibles ncc, campos_disponibles c, tipos_campo tc where ncc.cod_campodisponible=c.codigo and c.cod_tipocampo=tc.codigo and ncc.cod_nivelconfiguracion='$codigoNivelConf' ";
-				 	$stmtCamposDinamicos = $dbh->prepare($sqlCamposDinamicos);
-					$stmtCamposDinamicos->execute();
-					while ($rowCamposDinamicos = $stmtCamposDinamicos->fetch(PDO::FETCH_ASSOC)) {
-						$codigoCampo=$rowCamposDinamicos['codigo'];
-						$nombreCampo=$rowCamposDinamicos['nombre'];
-						$abreviaturaCampo=$rowCamposDinamicos['abreviatura'];
-						$stringForm=$rowCamposDinamicos['string_formulario'];
-						$stringForm=configurarCampoFormularioPersonalizado($stringForm,$codigoCampo);
-				 	?>
-				 	<div class="row">
-					  <label class="col-sm-2 col-form-label"><?=$nombreCampo;?></label>
-					  <div class="col-sm-7">
-						<?= $stringForm; ?>
-					  </div>
-					</div>
-					<?php
-					}
-					?>
-				 <!--FIN CAMPOS DINAMICOS-->
-
-				 	<div class="row">
-					  	<label class="col-sm-2 col-form-label">Habilitar Componente para Enlazar Tareas</label>
-					  	<div class="col-sm-7">
-					  		<div class="custom-control custom-switch">
-							<input type="checkbox" class="custom-control-input" id="habilitar_actividades" name="habilitar_actividades">
-							<label class="custom-control-label" for="habilitar_actividades">Habilitar</label>
-							</div>
-						</div>
-					</div>
-
-			  </div>
-			</div>
-		</div>
-	</div>
-	<div class="card-footer ml-auto mr-auto">
-				<button type="submit" class="<?=$buttonVerde;?>"><i class='bx bxs-save mr-1'></i>Guardar</button>
-				<a href="<?=$urlList3;?>&codigo_nivel_conf=<?=$codigoNivelConf;?>&codigo_pei_padre=<?=$codigoPEIPadre;?>" class="<?=$buttonCancel;?>"><i class='bx bx-undo mr-1'></i>Cancelar</a>
-  	</div>
-</div>
-
-</form>

@@ -27,6 +27,9 @@ $urlSaveDelete="";
 $urlSaveConfPropiedad="t_niveles_pei/saveConfProp.php";
 
 
+$urlSaveUpdate="t_niveles_pei/actualizar.php";
+
+
 
 $urlDetail="index.php?opcion=NivelesRegisterFields";
 $urlSaveDetail="niveles_configuracion/saveDetailCamposNiveles.php";

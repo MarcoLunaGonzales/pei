@@ -82,7 +82,7 @@ $stmt->bindColumn('bandera_actividades', $banderaActividades);
                             <a href='index.php?opcion=ListNivelDetallePEI&codigo_nivel_conf=<?=$codigoNivelHijo;?>&codigo_pei_padre=<?=$codigo;?>' rel="tooltip" class="<?=$buttonDetailMin;?>">
                               <i class="bx bx-list-ol"></i>
                             </a>
-                            <a href='index.php?opcion=actualizarNivelPEI&codigo_nivel_conf=<?=$codigoNivelConf;?>&codigo_pei_padre=<?=$codigoPEIPadre;?>' rel="tooltip" class="btn btn-primary">
+                            <a href='index.php?opcion=editarNivelPEI&codigo_nivel_conf=<?=$codigoNivelConf;?>&codigo_pei_padre=<?=$codigo;?>' rel="tooltip" class="btn btn-primary">
                               <i class="bx bx-pencil"></i>
                             </a>
                             <?php
