@@ -184,11 +184,13 @@ $('body').on('click', '.remove-note', function(){
 $('.save-budget').click(function(){
     let cod_account = $('#cod_account').val();
     let amount      = $('#amount').val();
+    let financier   = $('#financier').val();
     let dateBudget  = $('#dateBudget').val();
     let code_act    = $('body #codeActivity').val();
     let formData    = new FormData();
     formData.append('type', 5);         // Tipo 5 : Guardar Asignación
     formData.append('cod_account', cod_account);
+    formData.append('financier', financier);
     formData.append('amount', amount);
     formData.append('dateBudget', dateBudget);
     formData.append('code_activity', code_act);

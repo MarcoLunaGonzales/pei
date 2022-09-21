@@ -166,9 +166,10 @@ else if($_POST['type'] == 5){
     $cod_account = $_POST['cod_account'];
     $amount      = $_POST['amount'];
     $date        = $_POST['dateBudget'];
+    $financier   = $_POST['financier'];
     try {
-        $sqlInsert    = "INSERT INTO actividades_presupuestos (cod_actividad, cod_cuenta, fecha_ejecucion, monto, cod_estado_presupuesto, cod_estado)
-                        VALUES ('$code_activity','$cod_account','$date','$amount','1', '1')";
+        $sqlInsert    = "INSERT INTO actividades_presupuestos (cod_actividad, cod_cuenta, fecha_ejecucion, monto, cod_estado_presupuesto, cod_estado, cod_financiador)
+                        VALUES ('$code_activity','$cod_account','$date','$amount','1', '1', '$financier')";
         $stmt         = $dbh->prepare($sqlInsert);
         $stmt->execute();        
         /* Se obtiene el ultimo registro */
