@@ -1,4 +1,3 @@
-
 let label = '> .simplebar-wrapper > .simplebar-mask > .simplebar-offset > .simplebar-content-wrapper > .simplebar-content';
 /**
  * Función para enviar y guardar Nota a "methods.php"

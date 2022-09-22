@@ -118,7 +118,7 @@ while ($rowP = $stmtP->fetch(PDO::FETCH_ASSOC)) {
                                                     <button type="button" class="btn btn-primary" onclick="showModalNewTask(1)">
                                                             <i class='bx bx-plus mr-1'></i>Nueva Actividad</button>
                                                     </div>
-                                                    <div class="col-sm-9">
+                                                    <!-- <div class="col-sm-9">
                                                         <div class="float-sm-end mt-3 mt-sm-0">
                                                             
                                                             <div class="d-inline-block mb-3 mb-sm-0 me-sm-2">
@@ -142,7 +142,7 @@ while ($rowP = $stmtP->fetch(PDO::FETCH_ASSOC)) {
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    </div>
+                                                    </div> -->
                                                 </div>
 
                                                 <div class="row mt-4" data-plugin="dragula" data-containers='["task-list-one", "task-list-two", "task-list-three"]'>
@@ -380,7 +380,7 @@ while ($rowP = $stmtP->fetch(PDO::FETCH_ASSOC)) {
                       <label class="col-sm-3 col-form-label">Proyecto / Componente PEI</label>
                       <div class="col-sm-8">
                         <div class="form-group">
-                            <select name="componente_pei" id="componente_pei" class="form-control single-select" data-style="btn btn-warning" required>
+                            <select name="componente_pei" id="componente_pei" class="form-control" data-style="btn btn-warning" required>
                                 <option value="" disabled selected="selected">-</option>
                                 <?php             
                                     $sqlProj="SELECT np.codigo, np.nombre, np.abreviatura from niveles_pei np, nivelespei_unidadesareas npua where np.codigo=npua.cod_nivelpei and npua.cod_area='$globalAreaX' and npua.cod_unidadorganizacional='$globalUnidadX'";
