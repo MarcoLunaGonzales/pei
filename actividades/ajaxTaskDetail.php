@@ -128,7 +128,7 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
      * Lista de Archivos de Actividad
      * @autor: Ronald Mollericona
     **/
-    $sqlActividadFiles="SELECT codigo, fecha, ruta, filesize, extension from actividades_archivos where cod_actividad = '$codigoActividad' ORDER BY codigo DESC";
+    $sqlActividadFiles="SELECT codigo, detalle, fecha, ruta, filesize, extension from actividades_archivos where cod_actividad = '$codigoActividad' ORDER BY codigo DESC";
     $stmtActividadFiles= $dbh->prepare($sqlActividadFiles);
     $stmtActividadFiles->execute();
 
@@ -460,7 +460,7 @@ while ($rowVerf = $stmtVerf->fetch(PDO::FETCH_ASSOC)) {
                                             </div>
                                         </div>
                                         <div class="col ps-0">
-                                            <a href="file_activity/<?=$file['ruta'];?>" download="pei_<?=$file['ruta']?>" class="text-muted fw-bold"><?=$file['ruta'];?></a>
+                                            <a href="file_activity/<?=$file['ruta'];?>" download="pei_<?=$file['ruta']?>" class="text-muted fw-bold"><?=$file['detalle'];?></a>
                                             <p class="mb-0 font-12"><?=$file['filesize'];?></p>
                                         </div>
                                         <div class="col-auto">
